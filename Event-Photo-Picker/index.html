@@ -1,0 +1,3019 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>活動照片挑選器｜Event Photo Selector</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --bg2:#11182f;
+      --card:#121a33cc;
+      --card2:#172041cc;
+      --line:#2a3763;
+      --text:#edf2ff;
+      --muted:#9fb0d4;
+      --soft:#c8d4ff;
+      --accent:#7c8cff;
+      --accent2:#62e0ff;
+      --good:#38d39f;
+      --warn:#ffca67;
+      --bad:#ff7d88;
+      --shadow: 0 18px 45px rgba(0,0,0,.28);
+      --radius: 24px;
+      --radius2: 18px;
+      --radius3: 14px;
+      --glow: 0 0 0 1px rgba(124,140,255,.18), 0 12px 30px rgba(124,140,255,.14);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(124,140,255,.18), transparent 25%),
+        radial-gradient(circle at 85% 20%, rgba(98,224,255,.15), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(56,211,159,.12), transparent 28%),
+        linear-gradient(180deg, #080d1a 0%, #0a1021 40%, #09101d 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      overflow-x: hidden;
+    }
+    a { color: inherit; }
+    button, input, select { font: inherit; }
+    .app {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero, .panel, .card {
+      background: linear-gradient(180deg, rgba(18,26,51,.86), rgba(14,20,39,.76));
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(157, 177, 255, .12);
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      border-radius: 30px;
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:auto -10% -35% auto;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(98,224,255,.18), transparent 63%);
+      pointer-events:none;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.45fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+      position: relative;
+      z-index: 1;
+    }
+
+
+    .title{
+
+      color:var(--yellow);
+      text-shadow:0 4px 18px rgba(0,0,0,.22);
+    }
+
+
+    .title-wrap{
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+      justify-content:center;
+      min-height: 168px;
+    }
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(124,140,255,.14);
+      border: 1px solid rgba(124,140,255,.25);
+      color: #dce3ff;
+      font-size: 13px;
+      letter-spacing:.02em;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(30px, 4vw, 50px);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    } 
+    .subtitle{
+      margin:0;
+      max-width: 65ch;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .hero-chip-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #e8eeff;
+      font-size: 13px;
+    }
+    .hero-side{
+      display:grid;
+      gap: 14px;
+      align-content:stretch;
+    }
+    .mini-stat{
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      border-radius: 24px;
+      padding: 18px 18px 16px;
+      min-height: 85px;
+      background: linear-gradient(180deg, rgba(124,140,255,.14), rgba(98,224,255,.07));
+      border: 1px solid rgba(124,140,255,.18);
+    }
+    .mini-stat b{
+      font-size: 26px;
+      letter-spacing:-.03em;
+    }
+    .mini-stat span{
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns: 390px minmax(0, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+      align-items:start;
+    }
+    .panel{
+      border-radius: 28px;
+      padding: 18px;
+    }
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: -.02em;
+    }
+    .section-title p{
+      margin:0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .stack{
+      display:grid;
+      gap: 14px;
+    }
+    .field{
+      display:grid;
+      gap: 8px;
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .field label{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 8px;
+      font-size: 13px;
+      color:#e9efff;
+    }
+    .help{
+      color: var(--muted);
+      font-size: 12px;
+      line-height:1.5;
+    }
+    .input-row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .btn{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      border-radius: 16px;
+      padding: 12px 14px;
+      color: #fff;
+      background: linear-gradient(180deg, rgba(124,140,255,1), rgba(90,108,255,1));
+      box-shadow: 0 10px 22px rgba(78,95,230,.2);
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      justify-content:center;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+    .btn.secondary{
+      background: rgba(255,255,255,.06);
+      box-shadow:none;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .btn.good{ background: linear-gradient(180deg, rgba(56,211,159,1), rgba(42,186,136,1)); }
+    .btn.warn{ background: linear-gradient(180deg, rgba(255,202,103,1), rgba(255,171,58,1)); color:#1d1d1d; }
+    .btn.ghost{
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow:none;
+    }
+    .btn.small{
+      padding: 9px 12px;
+      border-radius: 13px;
+      font-size: 13px;
+    }
+    .input, select, .range{
+      width:100%;
+    }
+    input[type="range"]{
+      accent-color: var(--accent);
+    }
+    .toggle-row{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .switch{
+      position:relative;
+      width: 52px;
+      height: 30px;
+      flex: 0 0 auto;
+    }
+    .switch input{ display:none; }
+    .slider{
+      position:absolute;
+      inset:0;
+      background: rgba(255,255,255,.12);
+      border-radius: 999px;
+      transition: .2s ease;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .slider::after{
+      content:"";
+      position:absolute;
+      width: 22px;
+      height: 22px;
+      top: 3px;
+      left: 4px;
+      border-radius: 50%;
+      background: #fff;
+      transition: .2s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,.2);
+    }
+    .switch input:checked + .slider{
+      background: linear-gradient(180deg, rgba(124,140,255,1), rgba(98,224,255,.8));
+    }
+    .switch input:checked + .slider::after{
+      transform: translateX(22px);
+    }
+    .progress-wrap{
+      display:grid;
+      gap: 10px;
+    }
+    .progress-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      color:#dce4ff;
+      font-size: 13px;
+    }
+    .progress-bar{
+      position:relative;
+      height: 14px;
+      border-radius: 999px;
+      overflow:hidden;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .progress-bar > span{
+      position:absolute;
+      inset:0 auto 0 0;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), rgba(56,211,159,1));
+      transition: width .25s ease;
+    }
+    .meta-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    .metric{
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      min-height: 86px;
+    }
+    .metric .k{ color: var(--muted); font-size: 12px; }
+    .metric .v{ font-size: 26px; font-weight: 700; margin-top: 8px; letter-spacing:-.03em; }
+    .metric .s{ font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .workspace{
+      display:grid;
+      gap: 16px;
+    }
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .toolbar .left,
+    .toolbar .right{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      align-items:center;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #dfe7ff;
+      font-size: 12px;
+    }
+    .notice{
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(56,211,159,.11), rgba(56,211,159,.05));
+      border: 1px solid rgba(56,211,159,.18);
+      color: #dcffef;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .notice.warn{
+      background: linear-gradient(180deg, rgba(255,202,103,.12), rgba(255,202,103,.06));
+      border-color: rgba(255,202,103,.2);
+      color: #fff1cf;
+    }
+    .groups{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+    .card{
+      border-radius: 24px;
+      padding: 16px;
+      overflow:hidden;
+      position:relative;
+      animation: rise .35s ease both;
+    }
+    @keyframes rise{
+      from{ transform: translateY(8px); opacity:0; }
+      to{ transform: translateY(0); opacity:1; }
+    }
+    .group-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .group-title{
+      display:grid;
+      gap: 4px;
+    }
+    .group-title h3{
+      margin:0;
+      font-size: 16px;
+      letter-spacing:-.02em;
+    }
+    .group-title small{
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .tag-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      font-size: 12px;
+      color: #e7edff;
+    }
+    .tag.good{ background: rgba(56,211,159,.14); border-color: rgba(56,211,159,.24); }
+    .tag.warn{ background: rgba(255,202,103,.14); border-color: rgba(255,202,103,.24); color: #fff3d4; }
+    .tag.bad{ background: rgba(255,125,136,.14); border-color: rgba(255,125,136,.24); color: #ffe0e3; }
+    .thumb-main{
+      display:grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 14px;
+      align-items:start;
+    }
+    .thumb{
+      position:relative;
+      width: 120px;
+      aspect-ratio: 1;
+      border-radius: 18px;
+      overflow:hidden;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      flex: 0 0 auto;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .thumb:hover{ transform: translateY(-2px); box-shadow: var(--glow); }
+    .thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .thumb .overlay{
+      position:absolute;
+      inset:auto 0 0 0;
+      padding: 7px 8px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.75));
+      color:#fff;
+      font-size: 11px;
+    }
+    .thumb-badge{
+      position:absolute;
+      top: 8px;
+      left: 8px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.16);
+      font-size: 11px;
+    }
+    .thumb-badge.keep{ background: rgba(56,211,159,.18); border-color: rgba(56,211,159,.28); }
+    .thumb-badge.system{ background: rgba(124,140,255,.18); border-color: rgba(124,140,255,.28); }
+    .thumb-badge.manual{ background: rgba(255,202,103,.18); border-color: rgba(255,202,103,.3); }
+    .thumb-strip{
+      display:flex;
+      gap: 8px;
+      overflow:auto;
+      padding-bottom: 4px;
+      margin-top: 12px;
+    }
+    .mini-thumb{
+      position:relative;
+      width: 62px;
+      height: 62px;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.05);
+      flex:0 0 auto;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .mini-thumb:hover{ transform: translateY(-2px); box-shadow: var(--glow); }
+    .mini-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .mini-thumb.active{
+      outline: 2px solid rgba(98,224,255,.95);
+      outline-offset: 2px;
+    }
+    .details{
+      display:grid;
+      gap: 8px;
+      min-width: 0;
+    }
+    .details-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+    }
+    .detail{
+      padding: 10px 11px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      min-width: 0;
+    }
+    .detail .k{
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+    .detail .v{
+      margin-top: 6px;
+      font-size: 13px;
+      color: #fff;
+      word-break: break-word;
+    }
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .empty{
+      grid-column: 1 / -1;
+      padding: 32px;
+      text-align:center;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+      border: 1px dashed rgba(255,255,255,.12);
+      color: var(--muted);
+      display:grid;
+      justify-items:center;
+      gap: 10px;
+      min-height: 280px;
+      align-content:center;
+    }
+    .empty .icon{
+      width: 74px;
+      height: 74px;
+      border-radius: 24px;
+      display:grid;
+      place-items:center;
+      background: linear-gradient(180deg, rgba(124,140,255,.18), rgba(98,224,255,.08));
+      border: 1px solid rgba(124,140,255,.18);
+      color:#edf2ff;
+      font-size: 30px;
+    }
+    .footer{
+      margin: 22px 0 4px;
+      padding: 18px;
+      border-radius: 20px;
+      text-align:center;
+      color: #d8e1ff;
+      font-size: 13px;
+      line-height: 1.8;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .small-muted{ color: var(--muted); font-size: 12px; }
+    .preview{
+      position: sticky;
+      top: 18px;
+    }
+    .preview-box{
+      display:grid;
+      gap: 12px;
+    }
+    .preview-hero{
+      border-radius: 24px;
+      overflow:hidden;
+      aspect-ratio: 4 / 3;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.09);
+      display:grid;
+      place-items:center;
+      position: relative;
+    }
+    .preview-hero img{
+      width:100%; height:100%; object-fit:contain; display:block; background: #0a0f1c;
+    }
+    .preview-meta{
+      display:grid;
+      gap: 8px;
+    }
+    .preview-row{
+      display:flex;
+      justify-content:space-between;
+      gap: 14px;
+      font-size: 13px;
+      color:#e9efff;
+      border-bottom: 1px dashed rgba(255,255,255,.08);
+      padding-bottom: 8px;
+    }
+    .preview-row span{ color: var(--muted); }
+    .floating{
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 50;
+      display:grid;
+      gap: 10px;
+      width: min(360px, calc(100vw - 40px));
+      pointer-events:none;
+    }
+    .toast{
+      pointer-events:auto;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(10,16,31,.9);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: var(--shadow);
+      color: #edf2ff;
+      display:none;
+      gap: 8px;
+      align-items:flex-start;
+      animation: toastIn .28s ease;
+    }
+    @keyframes toastIn{
+      from{ transform: translateY(10px); opacity:0; }
+      to{ transform: translateY(0); opacity:1; }
+    }
+    .toast.show{ display:flex; }
+    .spinner{
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.22);
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden{ display:none !important; }
+    .divider{
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.09), transparent);
+      margin: 8px 0;
+    }
+    .mode{
+      display:grid;
+      gap: 6px;
+      grid-template-columns: 1fr;
+    }
+    .range-row{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .range-row output{
+      min-width: 42px;
+      text-align:right;
+      color: #fff;
+      font-weight:600;
+    }
+    .filehint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .dragArea{
+      border:2px dashed rgba(98,224,255,.45);
+      background:linear-gradient(135deg, rgba(98,224,255,.12), rgba(124,140,255,.08));
+      border-radius:26px;
+      padding:20px;
+      display:grid;
+      gap:10px;
+      justify-items:center;
+      text-align:center;
+      cursor:copy;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      margin-top:14px;
+    }
+    .dragArea:hover{
+      border-color:rgba(250,204,21,.55);
+      box-shadow:0 14px 34px rgba(98,224,255,.10);
+    }
+    .dragArea.drag{
+      border-color:#facc15;
+      background:rgba(250,204,21,.14);
+      box-shadow:0 0 0 1px rgba(250,204,21,.24), 0 18px 40px rgba(250,204,21,.12);
+      transform:translateY(-1px);
+    }
+    .dragArea.success{
+      border-color:rgba(56,211,159,.82);
+      background:linear-gradient(135deg, rgba(56,211,159,.18), rgba(34,211,238,.14));
+      box-shadow:0 0 0 1px rgba(56,211,159,.22), 0 18px 42px rgba(56,211,159,.16);
+    }
+    .dragArea.error{
+      border-color:rgba(255,125,136,.82);
+      background:linear-gradient(135deg, rgba(255,125,136,.18), rgba(255,202,103,.10));
+      box-shadow:0 0 0 1px rgba(255,125,136,.22), 0 18px 42px rgba(255,125,136,.14);
+    }
+    .dragArea.success .dragIcon{
+      background:linear-gradient(135deg, #34d399, #22d3ee);
+      color:#05202d;
+    }
+    .dragArea.error .dragIcon{
+      background:linear-gradient(135deg, #fb7185, #facc15);
+      color:#241114;
+    }
+    .dragStatus{
+      width:100%;
+      max-width:760px;
+      padding:12px 14px;
+      border-radius:18px;
+      background:rgba(8,15,28,.52);
+      border:1px solid rgba(255,255,255,.10);
+      color:#eef6ff;
+      font-size:13px;
+      line-height:1.7;
+      font-weight:800;
+      text-align:left;
+    }
+    .dragStatus.ok{
+      background:rgba(56,211,159,.14);
+      border-color:rgba(56,211,159,.30);
+      color:#dcffef;
+    }
+    .dragStatus.warn{
+      background:rgba(255,125,136,.14);
+      border-color:rgba(255,125,136,.30);
+      color:#ffe0e4;
+    }
+    .dragIcon{
+      width:72px;
+      height:72px;
+      border-radius:24px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, #22d3ee, #6366f1);
+      color:#08111f;
+      box-shadow:0 16px 32px rgba(34,211,238,.16);
+      font-size:28px;
+    }
+    .dragTitle{
+      font-size:20px;
+      font-weight:900;
+      color:#fff;
+      line-height:1.3;
+    }
+    .dragText{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      max-width:720px;
+    }
+    .dragMeta{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:8px;
+      margin-top:4px;
+    }
+
+    @media (max-width: 1180px){
+      .layout{ grid-template-columns: 1fr; }
+      .preview{ position: static; }
+      .hero-grid{ grid-template-columns: 1fr; }
+      .groups{ grid-template-columns: 1fr; }
+      .thumb-main{ grid-template-columns: 1fr; }
+      .thumb{ width: 100%; aspect-ratio: 16 / 10; }
+      .meta-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 720px){
+      .app{ padding: 16px; }
+      .hero, .panel{ border-radius: 22px; }
+      .meta-grid{ grid-template-columns: 1fr; }
+      .details-grid{ grid-template-columns: 1fr; }
+      .toolbar, .toolbar .left, .toolbar .right{ justify-content:flex-start; }
+      .mini-stat b{ font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="title-wrap">
+          <div class="eyebrow">✨ 免費活動照片挑選器｜Event Photo Selector</div>
+          <h1><span style="color:#ffff00">免費活動照片挑選器</span></h1>
+          <p class="subtitle">
+            這是一個專為一般大眾設計的單頁網頁應用程式：選取資料夾後，可自動找出類似照片、每組只留一張最佳照片，並將結果安全輸出到其他資料夾。全程本機處理，操作簡單、畫面清楚、流程安全。
+          </p>
+
+
+          <div class="subtitle" style="color:#6699ff; line-height:1.9; margin-top:6px;">
+● 全部本機處理，不上傳雲端，使用者照片不會離開電腦<br>
+● 不影響原檔，不會刪除照片，預設輸出：原資料夾內新增的Output資料夾<br>
+● 優先移除模糊的照片，比較類似照片，挑選出合適的照片<br>
+● 支援常見格式：JPG、PNG、HEIC、WEBP、GIF，批次轉換成JPG<br>
+● 支援批次縮小圖片：可開啟"長"和"寬"均限制在1980像素以內<br>
+● 批次壓縮比例：可選95%、90%、75%、70%(預設)
+</div>
+
+
+          <div class="hero-chip-row">
+            <div class="chip">🔒 全部本機處理</div>
+            <div class="chip">🧭 一鍵分群挑選</div>
+            <div class="chip">🖼️ JPG / PNG / HEIC / WEBP / GIF</div>
+            <div class="chip">⚡ 批次轉 JPG / 縮小 / 壓縮</div>
+          </div>
+        </div>
+        <div class="hero-side">
+          <div class="mini-stat">
+            <span>目前狀態</span>
+            <b id="heroStatus">等待匯入照片</b>
+          </div>
+          <div class="mini-stat">
+            <span>安全模式</span>
+            <b>預設不刪原檔</b>
+          </div>
+          <div class="mini-stat">
+            <span>頁面模式</span>
+            <b>單頁獨立執行</b>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="panel">
+        <div class="section-title">
+          <div>
+            <h2>操作控制區</h2>
+            <p>每個設定都附上白話說明，讓一般使用者能直接上手。</p>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="field">
+            <label>來源資料夾 <span class="small-muted">選取要分析的照片資料夾</span></label>
+            <div class="input-row">
+              <button class="btn" id="pickSourceBtn">
+                <span>📁</span><span>選擇來源資料夾</span>
+              </button>
+              <input id="sourceFolderInput" class="hidden" type="file" webkitdirectory multiple />
+            </div>
+            <div class="help" id="sourceHint">尚未選擇。可先選擇是否包含子資料夾，預設關閉。</div>
+          </div>
+
+          <div class="field">
+            <div class="toggle-row">
+              <div class="mode">
+                <label>包含子資料夾 <span class="small-muted">預設關閉</span></label>
+                <div class="help">開啟後會連同來源資料夾內的子資料夾一起掃描；關閉時只掃描最上層照片。</div>
+              </div>
+              <label class="switch">
+                <input id="sourceRecursiveToggle" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="dragArea" id="dragDropZone" tabindex="0" role="button" aria-label="拖曳圖片或資料夾到這裡">
+            <div class="dragIcon">🖼️</div>
+            <div class="dragTitle">
+
+            <span style="color:#ffff00"><h3>拖曳圖片或資料夾到這裡</h3></span>
+            <span style="color:#ffff00"><h4>（拖入後請稍等，讀取需數秒）</h4></span>
+
+</div>
+            <div class="dragText">支援單張、多張圖片，以及整個資料夾。放開後會自動匯入來源資料夾，並立即檢核是否成功讀取。</div>
+            <div class="dragMeta">
+              <span class="pill">📷 圖片檔</span>
+              <span class="pill">📁 資料夾</span>
+              <span class="pill">🔍 自動複查</span>
+              <span class="pill">⚠️ 不會上傳雲端</span>
+            </div>
+            <div class="dragStatus" id="dragStatus">尚未匯入，拖曳圖片或資料夾後會在這裡顯示成功狀態。</div>
+          </div>
+
+          <div class="field">
+            <label>來源寫入權限 <span class="small-muted">預設直接在原資料夾內建立 Output 資料夾</span></label>
+            <div class="input-row">
+              <button class="btn secondary" id="pickOutputBtn">
+                <span>🔐</span><span>確認來源資料夾權限</span>
+              </button>
+              <span class="badge" id="outputStatus">待授權</span>
+            </div>
+            <div class="help" style="color:#ffff00">匯出時會優先寫入原資料夾內新增的 Output 資料夾。若瀏覽器或 Google 協作平台內嵌限制無法直接寫入，系統會先清楚提示，再改用最後的 zip 備援下載。</div>
+            <div class="help"><BR>若目前沒有可寫入權限，請先按「確認來源資料夾權限」重新選擇同一個來源資料夾並允許存取；若你是從 Google 協作平台內嵌開啟，建議按「開啟獨立模式」後再進行匯出，成功率最高。</div>
+          </div>
+
+          <div class="field">
+            <div class="toggle-row">
+              <div class="mode">
+                <label>相似度門檻 <span class="small-muted">越低(輸出少)、越高(輸出多)</span></label>
+                <div class="range-row">
+                  <input id="similarity" class="range" type="range" min="70" max="98" value="85" />
+                  <output id="similarityValue">85%</output>
+                </div>
+                <div class="help">建議先用 85% (預設)，75% (輸出少)、95% (輸出多)。
+
+<span style="color:#ffff00">
+<br>● 數值越低「相似」判定越寬，更多合併，輸出越少。
+<br>● 數值越高「相似」判定越嚴，更少合併，輸出越多。
+</span>
+
+</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="toggle-row">
+              <div class="mode">
+                <label>批次轉 JPG <span class="small-muted">將輸出統一為 JPG</span></label>
+                <div class="help">適合想要統一格式、分享或節省空間時使用。</div>
+              </div>
+              <label class="switch">
+                <input id="convertJpg" type="checkbox" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="toggle-row">
+              <div class="mode">
+                <label>批次縮小圖片 <span class="small-muted">長寬限制在 1980 像素內</span></label>
+                <div class="help">保留清晰度同時降低檔案大小，適合大量活動照。</div>
+              </div>
+              <label class="switch">
+                <input id="resizeToggle" type="checkbox" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>壓縮比例 <span class="small-muted">預設 70%</span></label>
+            <select id="quality">
+              <option value="0.95">95%</option>
+              <option value="0.9">90%</option>
+              <option value="0.75">75%</option>
+              <option value="0.7" selected>70%</option>
+            </select>
+            <div class="help">數值越低，檔案越小；若是一般活動照片，70% 通常足夠平衡品質與容量。<br></div>
+            <div class="help" style="color:#ffff00">一般照片留存建議選擇90%，網路上傳照片建議選擇70%。</span></div>
+          </div>
+
+
+
+          <div class="field">
+            <label>分析進度</label>
+            <div class="progress-wrap">
+              <div class="progress-head">
+                <span id="progressText">尚未開始</span>
+                <span id="progressPct">0%</span>
+              </div>
+              <div class="progress-bar"><span id="progressBar"></span></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="input-row">
+              <button class="btn good" id="analyzeBtn">
+                <span>⚙️</span><span>開始分析</span>
+              </button>
+              <button class="btn warn" id="exportBtn" disabled>
+                <span>⬇️</span><span>匯出篩選照片</span>
+              </button>
+              <button class="btn secondary" id="openStandaloneBtn" type="button">
+                <span>⧉</span><span>開啟獨立模式</span>
+              </button>
+              <button class="btn" id="resetBtn" type="button">
+                <span>↺</span><span>清空重置</span>
+              </button>
+            </div>
+            <div class="help" style="color:#ffff00">請先「開始分析」，分析完後，再「匯出篩選照片」。</div>
+            <div class="help">分析後可逐組檢查，系統會先檢查模糊照片，再進行保留判斷與輸出。</div>
+            <div class="help">預設輸出：原資料夾內新增的Output資料夾。
+
+<span style="color:#ffff00">
+<BR><BR>
+注意：Google協作平台內嵌，因為權限限制，<BR>
+　　　預設會輸出壓縮檔(壓縮需時，請稍等)
+
+<BR><BR>
+注意：「開啟獨立模式」，能另開完整新視窗，<BR>
+　　　預設輸出為原資料夾內的Output資料夾
+</span>
+
+
+</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <h2>狀態與摘要</h2>
+              <p>先確認目前匯入與分析結果，讓整個流程一目了然。</p>
+            </div>
+            <div class="badge" id="privacyBadge">🔒 本機處理中</div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="metric">
+              <div class="k">總照片數</div>
+              <div class="v" id="totalCount">0</div>
+              <div class="s">已匯入的圖片數量</div>
+            </div>
+            <div class="metric">
+              <div class="k">相似群組</div>
+              <div class="v" id="groupCount">0</div>
+              <div class="s">自動分群結果</div>
+            </div>
+            <div class="metric">
+              <div class="k">保留照片</div>
+              <div class="v" id="keepCount">0</div>
+              <div class="s">每組保留或手動指定的照片</div>
+            </div>
+            <div class="metric">
+              <div class="k">排除照片</div>
+              <div class="v" id="rejectCount">0</div>
+              <div class="s">將被移至隔離資料夾</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel preview">
+          <div class="section-title">
+            <div>
+              <h2>照片預覽</h2>
+              <p>點選縮圖後，可快速檢查與改選。</p>
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-hero" id="previewHero">
+              <div class="empty" style="margin:0; min-height:0; width:100%;">
+                <div class="icon">🖼️</div>
+                <div>尚未選擇任何照片</div>
+                <div class="small-muted">匯入後可在這裡快速檢視原圖與資訊。</div>
+              </div>
+            </div>
+            <div class="preview-meta" id="previewMeta"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="toolbar">
+            <div class="left">
+              <div class="badge" id="scanBadge">尚未掃描</div>
+              <div class="badge" id="sourceBadge">來源：未選擇</div>
+            </div>
+            <div class="right">
+              <div class="badge">🧠 類似照片以本機演算法分群</div>
+              <div class="badge">🧾 可輸出 CSV / JSON 報告</div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div id="noticeBox" class="notice">
+            先選擇來源資料夾，再按下「開始分析」。系統會先檢查模糊照片，再自動掃描照片、找出相似群組，並建議每組保留一張最佳照片。
+          </div>
+
+        </section>
+
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <h2>分群結果</h2>
+              <p>每一組都可人工覆核，並能直接改選保留照片。</p>
+            </div>
+          </div>
+          <div class="groups" id="groups"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <h2>處理摘要</h2>
+              <p>完成匯出後，可在此檢視結果、報表與操作狀態。</p>
+            </div>
+          </div>
+          <div class="meta-grid">
+            <div class="metric">
+              <div class="k">匯出狀態</div>
+              <div class="v" id="exportState">尚未匯出</div>
+              <div class="s">保留照與隔離照將寫入指定資料夾</div>
+            </div>
+            <div class="metric">
+              <div class="k">復原狀態</div>
+              <div class="v" id="restoreState">可復原</div>
+              <div class="s">保留操作紀錄，方便回頭檢查</div>
+            </div>
+            <div class="metric">
+              <div class="k">報告輸出</div>
+              <div class="v" id="reportState">未產生</div>
+              <div class="s">可輸出 CSV / JSON / TXT 摘要</div>
+            </div>
+            <div class="metric">
+              <div class="k">本機隱私</div>
+              <div class="v">100%</div>
+              <div class="s">照片不會離開你的電腦</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="footer">
+          全部本機處理，不上傳雲端。使用者照片不會離開電腦<br>
+          <br>
+          彭榮生 製作
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="floating">
+    <div class="toast" id="toast"><div class="spinner"></div><div id="toastText">處理中…</div></div>
+  </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  const state = {
+    sourceFiles: [],
+    images: [],
+    includeSubfolders: false,
+    groups: [],
+    sourceName: '未選擇',
+    sourceDirHandle: null,
+    outputDirHandle: null,
+    sourceLoaded: false,
+    analyzing: false,
+    exporting: false,
+    selectedPreview: null,
+    logs: [],
+    stats: {
+      total: 0,
+      groups: 0,
+      keep: 0,
+      reject: 0
+    }
+  };
+
+  const els = {
+    sourceFolderInput: $('sourceFolderInput'),
+    dragDropZone: $('dragDropZone'),
+    sourceRecursiveToggle: $('sourceRecursiveToggle'),
+    pickSourceBtn: $('pickSourceBtn'),
+    pickOutputBtn: $('pickOutputBtn'),
+    sourceHint: $('sourceHint'),
+    outputStatus: $('outputStatus'),
+    similarity: $('similarity'),
+    similarityValue: $('similarityValue'),
+    convertJpg: $('convertJpg'),
+    resizeToggle: $('resizeToggle'),
+    quality: $('quality'),
+    quarantineToggle: $('quarantineToggle'),
+    analyzeBtn: $('analyzeBtn'),
+    exportBtn: $('exportBtn'),
+    openStandaloneBtn: $('openStandaloneBtn'),
+    resetBtn: $('resetBtn'),
+    progressBar: $('progressBar'),
+    progressText: $('progressText'),
+    progressPct: $('progressPct'),
+    totalCount: $('totalCount'),
+    groupCount: $('groupCount'),
+    keepCount: $('keepCount'),
+    rejectCount: $('rejectCount'),
+    groups: $('groups'),
+    previewHero: $('previewHero'),
+    previewMeta: $('previewMeta'),
+    noticeBox: $('noticeBox'),
+    scanBadge: $('scanBadge'),
+    sourceBadge: $('sourceBadge'),
+    exportState: $('exportState'),
+    restoreState: $('restoreState'),
+    reportState: $('reportState'),
+    heroStatus: $('heroStatus'),
+    privacyBadge: $('privacyBadge'),
+    toast: $('toast'),
+    toastText: $('toastText')
+  };
+
+  function iconSvg(name, size=18) {
+    const icons = {
+      folder: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>`,
+      spark: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3l-2.5 6.2L4 12l6.5 2.8L13 21l2.5-6.2L22 12l-6.5-2.8L13 3z"/></svg>`,
+      check: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+      eye: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`,
+      download: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>`,
+      reset: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>`,
+      warn: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`
+    };
+    return icons[name] || icons.spark;
+  }
+
+  function setToast(msg, kind='info', ttl=2200) {
+    els.toast.className = 'toast show';
+    els.toast.querySelector('.spinner').style.display = kind === 'loading' ? 'block' : 'none';
+    els.toastText.textContent = msg;
+    clearTimeout(setToast._t);
+    setToast._t = setTimeout(() => {
+      els.toast.className = 'toast';
+    }, ttl);
+  }
+
+  function setProgress(pct, text) {
+    const value = Math.max(0, Math.min(100, pct));
+    els.progressBar.style.width = value + '%';
+    els.progressPct.textContent = Math.round(value) + '%';
+    els.progressText.textContent = text || (value + '%');
+  }
+
+  function updateStats() {
+    els.totalCount.textContent = state.stats.total;
+    els.groupCount.textContent = state.stats.groups;
+    els.keepCount.textContent = state.stats.keep;
+    els.rejectCount.textContent = state.stats.reject;
+    els.exportBtn.disabled = !state.images.length || state.analyzing || state.exporting;
+    const exportLabel = !state.images.length
+      ? '匯出篩選照片'
+      : (state.groups.length ? '匯出不同的照片' : '匯出全部照片');
+    const exportLabelEl = els.exportBtn?.querySelector('span:last-child');
+    if (exportLabelEl) exportLabelEl.textContent = exportLabel;
+    els.heroStatus.textContent = state.analyzing ? '分析中' : (state.stats.total ? '已完成匯入' : '等待匯入照片');
+    els.sourceBadge.textContent = '來源：' + state.sourceName;
+    els.scanBadge.textContent = state.stats.total ? `已掃描 ${state.stats.total} 張` : '尚未掃描';
+    els.privacyBadge.textContent = state.exporting ? '本機匯出中' : '🔒 本機處理中';
+    els.exportState.textContent = state.exporting ? '匯出中' : (state.stats.keep ? '可匯出' : '尚未匯出');
+    els.restoreState.textContent = state.logs.length ? '已保留記錄' : '可復原';
+    els.reportState.textContent = state.groups.length ? '可產生' : '未產生';
+  }
+
+  function humanSize(bytes) {
+    if (!Number.isFinite(bytes)) return '-';
+    const units = ['B','KB','MB','GB'];
+    let i = 0, n = bytes;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return `${n.toFixed(i ? 1 : 0)} ${units[i]}`;
+  }
+
+  function fileExt(name='') {
+    return (name.split('.').pop() || '').toLowerCase();
+  }
+
+  function isSupportedFile(file) {
+    const ext = fileExt(file.name);
+    const supported = ['jpg','jpeg','png','heic','webp','gif'];
+    if (supported.includes(ext)) return true;
+    return /image\/(jpeg|png|gif|webp|heic|heif)/i.test(file.type);
+  }
+
+  function inferCommonRootName(files) {
+    const roots = new Set();
+    for (const file of files || []) {
+      const rel = String(file?.webkitRelativePath || file?.displayPath || file?.path || file?.name || '');
+      if (!rel) continue;
+      const first = rel.split('/').filter(Boolean)[0];
+      if (first) roots.add(first);
+      if (roots.size > 1) return '';
+    }
+    return roots.size === 1 ? [...roots][0] : '';
+  }
+
+  function attachDropMeta(file, meta = {}) {
+    if (!file) return file;
+    const entries = [
+      ['webkitRelativePath', meta.relativePath],
+      ['displayPath', meta.displayPath],
+      ['rootHandle', meta.rootHandle],
+      ['rootName', meta.rootName]
+    ];
+    try {
+      for (const [key, value] of entries) {
+        if (value === undefined || value === null || value === '') continue;
+        if (key === 'webkitRelativePath' && file.webkitRelativePath) continue;
+        Object.defineProperty(file, key, { value, configurable: true });
+      }
+    } catch (_) {}
+    return file;
+  }
+
+  async function readFilesFromDirectoryHandle(dirHandle, prefix = '', includeSubfolders = false) {
+    const out = [];
+    for await (const [name, handle] of dirHandle.entries()) {
+      const rel = prefix ? `${prefix}/${name}` : name;
+      if (handle.kind === 'file') {
+        const file = await handle.getFile();
+        if (isSupportedFile(file)) {
+          Object.defineProperty(file, 'webkitRelativePath', {
+            value: rel,
+            configurable: true
+          });
+          out.push(file);
+        }
+      } else if (handle.kind === 'directory' && includeSubfolders) {
+        const nested = await readFilesFromDirectoryHandle(handle, rel, includeSubfolders);
+        out.push(...nested);
+      }
+    }
+    return out;
+  }
+
+  async function traverseEntry(entry, path = '', rootHandle = null) {
+    if (entry.isFile) {
+      return await new Promise(resolve => {
+        entry.file(file => {
+          resolve([{
+            file,
+            relativePath: path ? `${path}/${file.name}` : file.name,
+            displayPath: path ? `${path}/${file.name}` : file.name,
+            rootHandle,
+            rootName: rootHandle ? rootHandle.name : ''
+          }]);
+        });
+      });
+    }
+    if (entry.isDirectory) {
+      const reader = entry.createReader();
+      const all = [];
+      while (true) {
+        const batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+        if (!batch.length) break;
+        all.push(...batch);
+      }
+      const nextPath = path ? `${path}/${entry.name}` : entry.name;
+      const nested = await Promise.all(all.map(child => traverseEntry(child, nextPath, rootHandle)));
+      return nested.flat();
+    }
+    return [];
+  }
+
+  async function traverseHandle(handle, rootHandle = null, relPath = '') {
+    const root = rootHandle || handle;
+    const list = [];
+    if (handle.kind === 'file') {
+      const file = await handle.getFile();
+      list.push({
+        file,
+        relativePath: relPath ? `${relPath}/${file.name}` : file.name,
+        displayPath: relPath ? `${root.name}/${relPath}/${file.name}` : `${root.name}/${file.name}`,
+        rootHandle: root,
+        rootName: root.name
+      });
+      return list;
+    }
+    for await (const child of handle.values()) {
+      const nextPath = relPath ? `${relPath}/${handle.name}` : handle.name;
+      const sub = await traverseHandle(child, root, nextPath);
+      list.push(...sub);
+    }
+    return list;
+  }
+
+
+  async function getDroppedFiles(dt) {
+    const out = [];
+    const seen = new Set();
+    let sourceHandle = null;
+    let sourceName = '';
+
+    const addFile = (file, meta = {}) => {
+      if (!file || !isSupportedFile(file)) return;
+      const rel = meta.relativePath || file.webkitRelativePath || file.name || '';
+      const key = `${rel}|${file.size}|${file.lastModified || 0}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      attachDropMeta(file, {
+        relativePath: rel,
+        displayPath: meta.displayPath || rel,
+        rootHandle: meta.rootHandle || null,
+        rootName: meta.rootName || ''
+      });
+      out.push(file);
+      if (!sourceHandle && meta.rootHandle) {
+        sourceHandle = meta.rootHandle;
+        sourceName = meta.rootName || meta.rootHandle.name || sourceName;
+      }
+    };
+
+    const addBatch = (files, meta = {}) => {
+      for (const file of Array.from(files || [])) {
+        addFile(file, {
+          relativePath: file.webkitRelativePath || file.name,
+          displayPath: file.webkitRelativePath || file.name,
+          ...meta
+        });
+      }
+    };
+
+    // 先完整讀取 dt.files，避免某些拖曳情境只處理到第一個 item。
+    addBatch(dt?.files);
+
+    if (dt?.items && dt.items.length) {
+      const batches = await Promise.all(Array.from(dt.items).map(async (item) => {
+        if (!item || item.kind !== 'file') return [];
+
+        if (typeof item.getAsFileSystemHandle === 'function') {
+          try {
+            const handle = await item.getAsFileSystemHandle();
+            if (handle?.kind === 'directory') {
+              sourceHandle = sourceHandle || handle;
+              sourceName = sourceName || handle.name || '';
+              return await traverseHandle(handle, handle, '');
+            }
+            if (handle?.kind === 'file') {
+              const file = await handle.getFile();
+              return [{
+                file,
+                relativePath: file.name,
+                displayPath: file.name,
+                rootHandle: null,
+                rootName: ''
+              }];
+            }
+          } catch (_) {}
+        }
+
+        if (typeof item.webkitGetAsEntry === 'function') {
+          try {
+            const entry = item.webkitGetAsEntry();
+            if (entry) {
+              if (entry.isDirectory) {
+                sourceName = sourceName || entry.name || '';
+              }
+              return await traverseEntry(entry, '', null);
+            }
+          } catch (_) {}
+        }
+
+        const file = typeof item.getAsFile === 'function' ? item.getAsFile() : null;
+        return file ? [{
+          file,
+          relativePath: file.webkitRelativePath || file.name,
+          displayPath: file.webkitRelativePath || file.name,
+          rootHandle: null,
+          rootName: ''
+        }] : [];
+      }));
+
+      for (const batch of batches) {
+        for (const entry of batch || []) {
+          addFile(entry.file, {
+            relativePath: entry.relativePath || entry.displayPath || entry.file?.name,
+            displayPath: entry.displayPath || entry.relativePath || entry.file?.name,
+            rootHandle: entry.rootHandle || null,
+            rootName: entry.rootName || sourceName || ''
+          });
+        }
+      }
+    }
+
+    if (!sourceHandle) {
+      sourceName = sourceName || inferCommonRootName(out) || '';
+    }
+
+    return { files: out, sourceHandle, sourceName };
+  }
+
+  async function loadSelectedFolder(files, sourceHandle = null, includeSubfolders = false) {
+
+    const allFiles = Array.from(files || []).filter(isSupportedFile);
+    state.includeSubfolders = !!includeSubfolders;
+
+    const inferredHandle = sourceHandle || allFiles.find(file => file?.rootHandle)?.rootHandle || null;
+    const inferredRootName =
+      (inferredHandle?.name || '') ||
+      allFiles.find(file => file?.rootName)?.rootName ||
+      inferCommonRootName(allFiles) ||
+      (allFiles.length ? '已選擇來源' : '未選擇');
+
+    state.sourceFiles = state.includeSubfolders
+      ? allFiles
+      : allFiles.filter(file => {
+          const rel = file.webkitRelativePath || file.displayPath || file.name || '';
+          return rel.split('/').length <= 2;
+        });
+
+    state.sourceDirHandle = inferredHandle || null;
+    state.sourceName = inferredRootName;
+
+    els.sourceHint.textContent = state.sourceFiles.length
+      ? `已匯入 ${state.sourceFiles.length} 張圖片，按下「開始分析」即可分群。${state.includeSubfolders ? '目前包含子資料夾。' : '目前不包含子資料夾。'}`
+      : '此資料夾沒有可辨識的圖片檔。';
+
+    if (state.sourceFiles.length) {
+      if (state.sourceDirHandle) {
+        setDragFeedback('success', `✅ 已成功匯入 ${state.sourceFiles.length} 張圖片。`, `來源資料夾已辨識：${state.sourceName}。現在可以確認權限並直接在原資料夾內建立 Output 資料夾。`);
+      } else {
+        setDragFeedback('error', `⚠️ 已匯入 ${state.sourceFiles.length} 張圖片，但瀏覽器未提供來源資料夾句柄。`, `這代表目前只有圖片本身，無法直接判定原資料夾並建立 Output。請按「確認來源資料夾權限」重新選擇同一個來源資料夾。`);
+      }
+    } else {
+      setDragFeedback('error', '⚠️ 沒有找到可匯入的圖片。', '請拖曳圖片或資料夾，或改用「選擇來源資料夾」。');
+    }
+
+    els.sourceFolderInput.value = '';
+    updateStats();
+  }
+
+  function resetAll(quiet=false) {
+    state.sourceFiles = [];
+    state.images = [];
+    state.groups = [];
+    state.sourceName = '未選擇';
+    state.sourceDirHandle = null;
+    state.includeSubfolders = false;
+    state.outputDirHandle = null;
+    state.sourceLoaded = false;
+    state.analyzing = false;
+    state.exporting = false;
+    state.selectedPreview = null;
+    state.logs = [];
+    state.stats = { total: 0, groups: 0, keep: 0, reject: 0 };
+    els.groups.innerHTML = '';
+    if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
+    els.previewHero.innerHTML = `
+      <div class="empty" style="margin:0; min-height:0; width:100%;">
+        <div class="icon">🖼️</div>
+        <div>尚未選擇任何照片</div>
+        <div class="small-muted">匯入後可在這裡快速檢視原圖與資訊。</div>
+      </div>`;
+    els.previewMeta.innerHTML = '';
+    els.noticeBox.className = isEmbeddedContext() ? 'notice warn' : 'notice';
+    els.noticeBox.textContent = isEmbeddedContext()
+      ? '目前是在 Google 協作平台內嵌環境中執行。請先按「開啟獨立模式」，再於新視窗完成來源資料夾授權與匯出。'
+      : '先選擇來源資料夾，再按下「開始分析」。系統會自動掃描照片、找出相似群組，並建議每組保留一張最佳照片。';
+    els.outputStatus.textContent = isEmbeddedContext() ? '嵌入限制' : '待授權';
+    els.outputStatus.style.opacity = 1;
+    if (els.dragDropZone) {
+      els.dragDropZone.classList.remove('success', 'error');
+    }
+    const dragStatus = els.dragDropZone?.querySelector('#dragStatus');
+    if (dragStatus) {
+      dragStatus.className = 'dragStatus';
+      dragStatus.textContent = '尚未匯入，拖曳圖片或資料夾後會在這裡顯示成功狀態。';
+    }
+    els.exportBtn.disabled = true;
+    const exportLabelEl = els.exportBtn?.querySelector('span:last-child');
+    if (exportLabelEl) exportLabelEl.textContent = '匯出篩選照片';
+    setProgress(0, '尚未開始');
+    updateStats();
+    if (!quiet) setToast('已重置。', 'info', 1400);
+  }
+
+  function popcountBigInt(x) {
+    let count = 0;
+    while (x) {
+      x &= x - 1n;
+      count++;
+    }
+    return count;
+  }
+
+  function hammingDistance(a, b) {
+    return popcountBigInt(a ^ b);
+  }
+
+  function clampPercent(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(100, value));
+  }
+
+  function similarityFromDistance(distance, maxDistance) {
+    if (!Number.isFinite(distance) || !Number.isFinite(maxDistance) || maxDistance <= 0) return 0;
+    return clampPercent(100 * (1 - Math.max(0, Math.min(maxDistance, distance)) / maxDistance));
+  }
+
+  function compareImagesForGrouping(a, b) {
+    const am = a.metrics || {};
+    const bm = b.metrics || {};
+
+    const diffDistance = Number(hammingDistance(am.diffHash || 0n, bm.diffHash || 0n));
+    const aDistance = Number(hammingDistance(am.aHash || 0n, bm.aHash || 0n));
+    const diffSim = similarityFromDistance(diffDistance, 64);
+    const aSim = similarityFromDistance(aDistance, 64);
+
+    const colorDist = Math.hypot(
+      (am.avgColor?.r || 0) - (bm.avgColor?.r || 0),
+      (am.avgColor?.g || 0) - (bm.avgColor?.g || 0),
+      (am.avgColor?.b || 0) - (bm.avgColor?.b || 0)
+    );
+    const colorSim = clampPercent(100 * (1 - Math.min(1, colorDist / (255 * Math.sqrt(3)))));
+
+    const aspectA = Math.max(0.1, am.aspect || 1);
+    const aspectB = Math.max(0.1, bm.aspect || 1);
+    const aspectDist = Math.abs(Math.log(aspectA / aspectB));
+    const aspectSim = clampPercent(100 * (1 - Math.min(1, aspectDist / Math.log(4))));
+
+    const blurDiff = Math.abs((am.blurRisk ?? 100) - (bm.blurRisk ?? 100));
+    const blurSim = clampPercent(100 * (1 - Math.min(1, blurDiff / 50)));
+
+    const exposureDiff = Math.abs((am.exposureBalance ?? 0) - (bm.exposureBalance ?? 0));
+    const exposureSim = clampPercent(100 * (1 - Math.min(1, exposureDiff / 0.45)));
+
+    const score = Math.round(
+      diffSim * 0.40 +
+      aSim * 0.18 +
+      colorSim * 0.18 +
+      aspectSim * 0.10 +
+      blurSim * 0.08 +
+      exposureSim * 0.06
+    );
+
+    const supportScores = [diffSim, aSim, colorSim, aspectSim, blurSim, exposureSim];
+    return {
+      score,
+      diffSim,
+      aSim,
+      colorSim,
+      aspectSim,
+      blurSim,
+      exposureSim,
+      supportScores,
+    };
+  }
+
+  function isStrongGroupMatch(a, b, threshold) {
+    const sim = compareImagesForGrouping(a, b);
+    const requiredSupport = threshold >= 92 ? 3 : 2;
+    const supportHits = sim.supportScores.filter(v => v >= Math.max(58, threshold - 10)).length;
+    return sim.score >= threshold && supportHits >= requiredSupport;
+  }
+
+  async function fileToImage(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url;
+      await img.decode();
+      return { img, url };
+    } catch (err) {
+      URL.revokeObjectURL(url);
+      throw err;
+    }
+  }
+
+  function makeCanvas(w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    return c;
+  }
+
+  function gray(v) {
+    return 0.299 * v[0] + 0.587 * v[1] + 0.114 * v[2];
+  }
+
+  function clamp01(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(1, value));
+  }
+
+  function normalizeRange(value, low, high) {
+    if (!Number.isFinite(value)) return 0;
+    if (high <= low) return 0;
+    if (value <= low) return 0;
+    if (value >= high) return 1;
+    return (value - low) / (high - low);
+  }
+
+  function scoreBlurProfile(grayVals, width, height, contrast) {
+    const total = width * height;
+    const idx = (x, y) => y * width + x;
+
+    let lapSum = 0;
+    let lapSumSq = 0;
+    let gradSum = 0;
+    let gradSqSum = 0;
+    let edgeCount = 0;
+    let count = 0;
+
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        const center = grayVals[idx(x, y)];
+        const lap = (
+          -grayVals[idx(x - 1, y - 1)] - grayVals[idx(x, y - 1)] - grayVals[idx(x + 1, y - 1)] -
+          grayVals[idx(x - 1, y)] + 8 * center - grayVals[idx(x + 1, y)] -
+          grayVals[idx(x - 1, y + 1)] - grayVals[idx(x, y + 1)] - grayVals[idx(x + 1, y + 1)]
+        );
+
+        const gx =
+          -grayVals[idx(x - 1, y - 1)] - 2 * grayVals[idx(x - 1, y)] - grayVals[idx(x - 1, y + 1)] +
+           grayVals[idx(x + 1, y - 1)] + 2 * grayVals[idx(x + 1, y)] + grayVals[idx(x + 1, y + 1)];
+
+        const gy =
+          -grayVals[idx(x - 1, y - 1)] - 2 * grayVals[idx(x, y - 1)] - grayVals[idx(x + 1, y - 1)] +
+           grayVals[idx(x - 1, y + 1)] + 2 * grayVals[idx(x, y + 1)] + grayVals[idx(x + 1, y + 1)];
+
+        const mag = Math.hypot(gx, gy);
+
+        lapSum += lap;
+        lapSumSq += lap * lap;
+        gradSum += mag;
+        gradSqSum += mag * mag;
+        if (mag > 40) edgeCount++;
+        count++;
+      }
+    }
+
+    const lapMean = lapSum / Math.max(1, count);
+    const lapVar = Math.max(0, (lapSumSq / Math.max(1, count)) - (lapMean * lapMean));
+    const gradMean = gradSum / Math.max(1, count);
+    const edgeDensity = edgeCount / Math.max(1, count);
+
+    const tileCols = 4;
+    const tileRows = 4;
+    let tileVarSum = 0;
+    let tileCount = 0;
+    for (let ty = 0; ty < tileRows; ty++) {
+      for (let tx = 0; tx < tileCols; tx++) {
+        const xStart = Math.floor((tx / tileCols) * width);
+        const xEnd = Math.max(xStart + 1, Math.floor(((tx + 1) / tileCols) * width));
+        const yStart = Math.floor((ty / tileRows) * height);
+        const yEnd = Math.max(yStart + 1, Math.floor(((ty + 1) / tileRows) * height));
+
+        let tSum = 0;
+        let tSumSq = 0;
+        let tCount = 0;
+        for (let y = yStart; y < yEnd; y++) {
+          for (let x = xStart; x < xEnd; x++) {
+            const g = grayVals[idx(x, y)];
+            tSum += g;
+            tSumSq += g * g;
+            tCount++;
+          }
+        }
+        if (tCount) {
+          const tMean = tSum / tCount;
+          const tVar = Math.max(0, (tSumSq / tCount) - (tMean * tMean));
+          tileVarSum += tVar;
+          tileCount++;
+        }
+      }
+    }
+    const localVariance = tileCount ? tileVarSum / tileCount : 0;
+
+    const hist = new Array(32).fill(0);
+    for (let i = 0; i < total; i++) {
+      const bin = Math.min(31, Math.max(0, Math.floor((grayVals[i] / 256) * 32)));
+      hist[bin]++;
+    }
+    let entropy = 0;
+    for (const c of hist) {
+      if (c > 0) {
+        const p = c / total;
+        entropy -= p * Math.log2(p);
+      }
+    }
+    const entropyNorm = entropy / Math.log2(hist.length);
+
+    const lapScore = normalizeRange(lapVar, 120, 1400);
+    const gradScore = normalizeRange(gradMean, 10, 78);
+    const edgeScore = normalizeRange(edgeDensity, 0.02, 0.18);
+    const localScore = normalizeRange(localVariance, 28, 820);
+    const entropyScore = clamp01(entropyNorm);
+    const contrastScore = normalizeRange(contrast || 0, 16, 56);
+
+    const clarityScore = Math.round(100 * (
+      lapScore * 0.34 +
+      gradScore * 0.28 +
+      edgeScore * 0.18 +
+      localScore * 0.12 +
+      entropyScore * 0.08
+    ) * (0.78 + contrastScore * 0.22));
+
+    const blurRisk = Math.max(0, Math.min(100, Math.round(100 - clarityScore)));
+
+    return {
+      lapVar,
+      gradMean,
+      edgeDensity,
+      localVariance,
+      entropy: entropyNorm,
+      clarityScore: Math.max(0, Math.min(100, clarityScore)),
+      blurRisk,
+      blurLabel: blurRisk <= 35 ? '清晰' : blurRisk <= 55 ? '邊界' : '模糊'
+    };
+  }
+
+  function measureImageMetrics(img) {
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    const size = Math.max(1, w * h);
+
+    const sampleW = 48;
+    const sampleH = 48;
+    const canvas = makeCanvas(sampleW, sampleH);
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, sampleW, sampleH);
+    const data = ctx.getImageData(0, 0, sampleW, sampleH).data;
+
+    const grayVals = [];
+    let mean = 0;
+    let sumR = 0;
+    let sumG = 0;
+    let sumB = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const y = 0.299 * r + 0.587 * g + 0.114 * b;
+      grayVals.push(y);
+      mean += y;
+      sumR += r;
+      sumG += g;
+      sumB += b;
+    }
+    mean /= grayVals.length;
+
+    let variance = 0;
+    for (const g of grayVals) variance += (g - mean) ** 2;
+    variance /= grayVals.length;
+    const contrast = Math.sqrt(variance);
+
+    const blur = scoreBlurProfile(grayVals, sampleW, sampleH, contrast);
+    const sharpness = blur.clarityScore;
+
+    let diffHash = 0n;
+    let bit = 0n;
+    const dhW = 9, dhH = 8;
+    const dhCanvas = makeCanvas(dhW, dhH);
+    const dhCtx = dhCanvas.getContext('2d', { willReadFrequently: true });
+    dhCtx.drawImage(img, 0, 0, dhW, dhH);
+    const dh = dhCtx.getImageData(0, 0, dhW, dhH).data;
+    for (let y = 0; y < dhH; y++) {
+      for (let x = 0; x < dhW - 1; x++) {
+        const i1 = (y * dhW + x) * 4;
+        const i2 = (y * dhW + x + 1) * 4;
+        const g1 = gray([dh[i1], dh[i1+1], dh[i1+2]]);
+        const g2 = gray([dh[i2], dh[i2+1], dh[i2+2]]);
+        if (g1 > g2) diffHash |= (1n << bit);
+        bit++;
+      }
+    }
+
+    let aHash = 0n;
+    let aBit = 0n;
+    const ahW = 8, ahH = 8;
+    const ahCanvas = makeCanvas(ahW, ahH);
+    const ahCtx = ahCanvas.getContext('2d', { willReadFrequently: true });
+    ahCtx.drawImage(img, 0, 0, ahW, ahH);
+    const ah = ahCtx.getImageData(0, 0, ahW, ahH).data;
+    const ahGray = [];
+    let ahMean = 0;
+    for (let i = 0; i < ah.length; i += 4) {
+      const y = gray([ah[i], ah[i + 1], ah[i + 2]]);
+      ahGray.push(y);
+      ahMean += y;
+    }
+    ahMean /= ahGray.length || 1;
+    for (const y of ahGray) {
+      if (y >= ahMean) aHash |= (1n << aBit);
+      aBit++;
+    }
+
+    const aspect = w / h;
+    const exposureBalance = 1 - Math.min(1, Math.abs(mean - 128) / 128);
+    const fileSize = size; // placeholder; per-image file size applied elsewhere
+    return {
+      width: w,
+      height: h,
+      area: size,
+      mean,
+      avgColor: {
+        r: sumR / grayVals.length,
+        g: sumG / grayVals.length,
+        b: sumB / grayVals.length,
+      },
+      contrast,
+      sharpness,
+      focusScore: blur.clarityScore,
+      blurRisk: blur.blurRisk,
+      blurLabel: blur.blurLabel,
+      blurProfile: blur,
+      exposureBalance,
+      aspect,
+      diffHash,
+      aHash,
+      fileSize,
+    };
+  }
+
+  async function processFiles(files) {
+    const list = Array.from(files).filter(isSupportedFile);
+    const images = [];
+    for (let i = 0; i < list.length; i++) {
+      const file = list[i];
+      try {
+        const { img, url } = await fileToImage(file);
+        const metrics = measureImageMetrics(img);
+        images.push({
+          id: crypto.randomUUID(),
+          file,
+          url,
+          name: file.name,
+          path: file.webkitRelativePath || file.name,
+          type: file.type || `image/${fileExt(file.name)}`,
+          size: file.size,
+          createdAt: file.lastModified ? new Date(file.lastModified) : null,
+          metrics,
+          groupId: null,
+          keep: false,
+          manual: false,
+          score: 0,
+          isSystemKeep: false,
+          exportName: null
+        });
+        setProgress(((i + 1) / list.length) * 60, `分析圖片中… ${i + 1} / ${list.length}`);
+        if (i % 8 === 0) await new Promise(r => requestAnimationFrame(r));
+      } catch (err) {
+        console.warn('無法讀取圖片', file.name, err);
+      }
+    }
+    return images;
+  }
+
+  function scoreImageInGroup(img, group) {
+    const m = img.metrics;
+    const maxArea = group.maxArea || m.area;
+    const maxFocus = Math.max(45, group.maxFocusScore || 45);
+    const areaScore = Math.min(1, m.area / Math.max(1, maxArea));
+    const focusScore = Math.min(1, (m.focusScore || m.sharpness || 0) / maxFocus);
+    const contrastScore = Math.min(1, m.contrast / Math.max(45, group.maxContrast || 45));
+    const exposureScore = m.exposureBalance;
+    const sizeScore = Math.min(1, img.size / Math.max(1, group.maxFileSize || img.size));
+    const blurPenalty = Math.min(42, (m.blurRisk || 0) * 0.82);
+
+    const quality = (
+      focusScore * 0.52 +
+      exposureScore * 0.16 +
+      contrastScore * 0.14 +
+      areaScore * 0.10 +
+      sizeScore * 0.08
+    );
+
+    return Math.max(0, Math.round(quality * 100 - blurPenalty));
+  }
+
+  function compareKeepPriority(a, b) {
+    const blurA = a.metrics.blurRisk ?? 100;
+    const blurB = b.metrics.blurRisk ?? 100;
+    const clearA = blurA <= 35;
+    const clearB = blurB <= 35;
+    if (clearA !== clearB) return clearA ? -1 : 1;
+
+    const borderA = blurA <= 55;
+    const borderB = blurB <= 55;
+    if (borderA !== borderB) return borderA ? -1 : 1;
+
+    if (blurA !== blurB) return blurA - blurB;
+    if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+    if ((b.metrics.focusScore || 0) !== (a.metrics.focusScore || 0)) return (b.metrics.focusScore || 0) - (a.metrics.focusScore || 0);
+    if (b.metrics.contrast !== a.metrics.contrast) return b.metrics.contrast - a.metrics.contrast;
+    if (b.metrics.area !== a.metrics.area) return b.metrics.area - a.metrics.area;
+    return b.size - a.size;
+  }
+
+  function validateBlurSelection(group, candidate) {
+    const samples = group.samples;
+    const blurSorted = [...samples].sort((a, b) => (a.metrics.blurRisk ?? 100) - (b.metrics.blurRisk ?? 100) || compareKeepPriority(a, b));
+    const bestBlur = blurSorted[0];
+    const clearCandidates = samples.filter(img => (img.metrics.blurRisk ?? 100) <= 35);
+    const borderCandidates = samples.filter(img => (img.metrics.blurRisk ?? 100) <= 55);
+
+    if (clearCandidates.length && (candidate.metrics.blurRisk ?? 100) > 35) {
+      return clearCandidates.sort(compareKeepPriority)[0];
+    }
+
+    if (!clearCandidates.length && borderCandidates.length && (candidate.metrics.blurRisk ?? 100) > 55) {
+      return borderCandidates.sort(compareKeepPriority)[0];
+    }
+
+    if ((candidate.metrics.blurRisk ?? 100) - (bestBlur.metrics.blurRisk ?? 100) >= 10) {
+      return bestBlur;
+    }
+
+    return candidate;
+  }
+
+  function groupImages(images, similarityPct) {
+    const threshold = Math.max(70, Math.min(98, Number(similarityPct) || 85));
+    const groups = [];
+
+    for (const img of images) {
+      let bestGroup = null;
+      let bestScore = -1;
+
+      for (const group of groups) {
+        const samplesToCheck = [
+          group.representative,
+          group.samples[Math.floor(group.samples.length / 2)],
+          group.samples[group.samples.length - 1]
+        ].filter(Boolean);
+
+        const sims = samplesToCheck.map(candidate => compareImagesForGrouping(img, candidate));
+        const strongMatches = sims.filter(sim => sim.score >= threshold && sim.supportScores.filter(v => v >= Math.max(58, threshold - 10)).length >= (threshold >= 92 ? 3 : 2));
+        const avgScore = sims.reduce((acc, sim) => acc + sim.score, 0) / Math.max(1, sims.length);
+
+        if (strongMatches.length >= Math.min(2, samplesToCheck.length) && avgScore >= threshold) {
+          if (avgScore > bestScore) {
+            bestScore = avgScore;
+            bestGroup = group;
+          }
+        }
+      }
+
+      if (bestGroup) {
+        bestGroup.samples.push(img);
+        bestGroup.maxArea = Math.max(bestGroup.maxArea, img.metrics.area);
+        bestGroup.maxFocusScore = Math.max(bestGroup.maxFocusScore, img.metrics.focusScore || img.metrics.sharpness || 0);
+        bestGroup.maxContrast = Math.max(bestGroup.maxContrast, img.metrics.contrast);
+        bestGroup.maxFileSize = Math.max(bestGroup.maxFileSize, img.size);
+      } else {
+        groups.push({
+          id: crypto.randomUUID(),
+          representative: img,
+          samples: [img],
+          canceled: false,
+          maxArea: img.metrics.area,
+          maxFocusScore: img.metrics.focusScore || img.metrics.sharpness || 0,
+          maxContrast: img.metrics.contrast,
+          maxFileSize: img.size,
+          selectedId: null,
+          systemSelectedId: null
+        });
+      }
+    }
+
+    return groups.filter(g => g.samples.length > 1);
+  }
+
+  function finalizeGroups(groups) {
+    const refined = [];
+    for (const group of groups) {
+      const cohesion = group.samples.length > 1
+        ? group.samples.slice(1).reduce((acc, img) => acc + compareImagesForGrouping(group.representative, img).score, 0) / Math.max(1, group.samples.length - 1)
+        : 100;
+
+      const needsSplit = group.samples.length >= 6 && cohesion < 88;
+      if (!needsSplit) {
+        refined.push(group);
+        continue;
+      }
+
+      const splitThreshold = Math.min(98, Math.max(72, Math.round(cohesion + 4)));
+      const subGroups = groupImages(group.samples, splitThreshold);
+      if (subGroups.length > 1) {
+        refined.push(...subGroups);
+      } else {
+        refined.push(group);
+      }
+    }
+
+    groups.length = 0;
+    groups.push(...refined);
+
+    groups.forEach((group, idx) => {
+      group.samples.forEach(img => {
+        img.score = scoreImageInGroup(img, group);
+      });
+
+      group.samples.sort(compareKeepPriority);
+
+      const clearCandidates = group.samples.filter(img => (img.metrics.blurRisk ?? 100) <= 35);
+      const borderCandidates = group.samples.filter(img => (img.metrics.blurRisk ?? 100) <= 55);
+      const preferred = clearCandidates[0] || borderCandidates[0] || group.samples[0];
+      const validated = validateBlurSelection(group, preferred);
+
+      group.systemSelectedId = validated?.id || group.samples[0]?.id || null;
+      group.selectedId = group.systemSelectedId;
+
+      group.samples.forEach(img => {
+        img.groupId = group.id;
+        img.keep = img.id === group.selectedId;
+        img.isSystemKeep = img.id === group.systemSelectedId;
+      });
+
+      const blurSummary = group.samples.reduce((acc, img) => {
+        const level = img.metrics.blurLabel || '模糊';
+        acc[level] = (acc[level] || 0) + 1;
+        return acc;
+      }, {});
+
+      group.blurSummary = blurSummary;
+      group.label = `群組 ${String(idx + 1).padStart(3,'0')}`;
+      group.note = `${group.samples.length} 張相似照片 · 清晰 ${blurSummary['清晰'] || 0} / 邊界 ${blurSummary['邊界'] || 0} / 模糊 ${blurSummary['模糊'] || 0}`;
+    });
+  }
+
+  function computeStats() {
+    state.stats.total = state.images.length;
+    state.stats.groups = state.groups.length;
+    let keep = 0;
+    let reject = 0;
+    state.groups.forEach(group => {
+      if (group.canceled) {
+        keep += group.samples.length;
+        return;
+      }
+      group.samples.forEach(img => {
+        if (img.keep) keep++; else reject++;
+      });
+    });
+    if (!state.groups.length && state.images.length) {
+      keep = state.images.length;
+      reject = 0;
+    }
+    state.stats.keep = keep;
+    state.stats.reject = reject;
+  }
+
+  function renderPreview(image, group) {
+    if (!image) {
+      els.previewHero.innerHTML = `
+        <div class="empty" style="margin:0; min-height:0; width:100%;">
+          <div class="icon">🖼️</div>
+          <div>尚未選擇任何照片</div>
+          <div class="small-muted">匯入後可在這裡快速檢視原圖與資訊。</div>
+        </div>`;
+      els.previewMeta.innerHTML = '';
+      return;
+    }
+    els.previewHero.innerHTML = `<img src="${image.url}" alt="${escapeHtml(image.name)}">`;
+    els.previewMeta.innerHTML = `
+      <div class="preview-row"><span>檔名</span><b>${escapeHtml(image.name)}</b></div>
+      <div class="preview-row"><span>路徑</span><b>${escapeHtml(image.path)}</b></div>
+      <div class="preview-row"><span>解析度</span><b>${image.metrics.width} × ${image.metrics.height}</b></div>
+      <div class="preview-row"><span>檔案大小</span><b>${humanSize(image.size)}</b></div>
+      <div class="preview-row"><span>評分</span><b>${image.score || 0} 分</b></div>
+      <div class="preview-row"><span>模糊風險</span><b>${Math.round(image.metrics.blurRisk ?? 0)} / 100（${image.metrics.blurLabel || '-'}）</b></div>
+      <div class="preview-row"><span>群組</span><b>${group ? group.label : '-'}</b></div>
+    `;
+    state.selectedPreview = image.id;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  function renderGroups() {
+    els.groups.innerHTML = '';
+    if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
+    if (!state.groups.length) {
+      els.groups.innerHTML = `
+        <div class="empty">
+          <div class="icon">${iconSvg('spark', 32)}</div>
+          <div>尚未建立相似照片群組</div>
+          <div class="small-muted">匯入並分析後，這裡會顯示每一組的最佳照片與可手動修改的選項。</div>
+        </div>`;
+      return;
+    }
+
+    state.groups.forEach((group, idx) => {
+      const selected = group.samples.find(x => x.id === group.selectedId) || group.samples[0];
+      const sys = group.samples.find(x => x.id === group.systemSelectedId) || selected;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="group-top">
+          <div class="group-title">
+            <h3>${group.label}</h3>
+            <small>${group.note} · 系統建議保留 ${escapeHtml(sys.name)}</small>
+          </div>
+          <div class="tag-row">
+            <span class="tag good">${iconSvg('check', 14)} 系統建議保留</span>
+            <span class="tag">${group.samples.length} 張</span>
+            <span class="tag">${selected === sys ? '目前一致' : '已手動改選'}</span>
+          </div>
+        </div>
+
+        <div class="thumb-main">
+          <div class="thumb" data-preview="${selected.id}">
+            <img src="${selected.url}" alt="${escapeHtml(selected.name)}">
+            <div class="thumb-badge ${selected.id === sys.id ? 'system' : 'manual'}">
+              ${selected.id === sys.id ? '系統保留' : '手動保留'}
+            </div>
+            <div class="overlay">${selected.score} 分 · ${selected.metrics.width}×${selected.metrics.height} · ${selected.metrics.blurLabel || '模糊'}</div>
+          </div>
+
+          <div class="details">
+            <div class="details-grid">
+              <div class="detail"><div class="k">目前保留</div><div class="v">${escapeHtml(selected.name)}</div></div>
+              <div class="detail"><div class="k">檔案大小</div><div class="v">${humanSize(selected.size)}</div></div>
+              <div class="detail"><div class="k">拍攝時間</div><div class="v">${selected.createdAt ? selected.createdAt.toLocaleString('zh-Hant') : '未知'}</div></div>
+              <div class="detail"><div class="k">目前評分</div><div class="v">${selected.score} / 100</div></div>
+              <div class="detail"><div class="k">模糊風險</div><div class="v">${Math.round(selected.metrics.blurRisk ?? 0)} / 100</div></div>
+            </div>
+            <div class="tag-row">
+              <span class="tag ${selected.metrics.blurRisk <= 35 ? 'good' : selected.metrics.blurRisk <= 55 ? 'warn' : 'bad'}">模糊風險 ${Math.round(selected.metrics.blurRisk ?? 0)}%</span>
+              <span class="tag">清晰度 ${Math.min(100, Math.round(selected.metrics.focusScore ?? selected.metrics.sharpness)).toFixed(0)}</span>
+              <span class="tag">曝光 ${Math.round(selected.metrics.exposureBalance * 100)}%</span>
+              <span class="tag">對比 ${Math.min(100, Math.round(selected.metrics.contrast)).toFixed(0)}</span>
+            </div>
+            <div class="actions">
+              <button class="btn small good" data-action="keep">保留這張</button>
+              <button class="btn small secondary" data-action="preview">查看預覽</button>
+              <button class="btn small warn" data-action="cancel">取消群組</button>
+            </div>
+            <div class="help">查看預覽的照片，在上方「照片預覽」區域。</div>
+            <div class="help">操作說明：點選「保留這張」可改選主照片；「取消群組」代表這組都不視為重複。系統會優先保留較清晰的照片。</div>
+          </div>
+        </div>
+
+        <div class="thumb-strip">
+          ${group.samples.map((img, i) => `
+            <div class="mini-thumb ${img.id === selected.id ? 'active' : ''}" data-thumb="${img.id}">
+              <img src="${img.url}" alt="${escapeHtml(img.name)}">
+              <div class="thumb-badge ${img.id === sys.id ? 'system' : ''}" style="transform:scale(.9); top:6px; left:6px; ${img.id===selected.id ? 'box-shadow: 0 0 0 2px rgba(98,224,255,.9)' : ''}">
+                ${i+1}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      card.querySelector('.thumb').addEventListener('click', () => renderPreview(selected, group));
+      card.querySelectorAll('[data-thumb]').forEach(el => {
+        el.addEventListener('click', () => {
+          const img = group.samples.find(x => x.id === el.dataset.thumb);
+          if (img) {
+            group.selectedId = img.id;
+            group.samples.forEach(x => x.keep = (x.id === img.id));
+            group.samples.forEach(x => x.manual = (x.id === img.id && x.id !== group.systemSelectedId));
+            computeStats();
+            renderGroups();
+            renderPreview(img, group);
+            updateStats();
+            setToast('已改選保留照片。', 'info', 1400);
+          }
+        });
+      });
+      card.querySelector('[data-action="keep"]').addEventListener('click', () => {
+        group.selectedId = selected.id;
+        group.samples.forEach(x => x.keep = (x.id === selected.id));
+        group.samples.forEach(x => x.manual = (x.id === selected.id && x.id !== group.systemSelectedId));
+        computeStats();
+        renderGroups();
+        renderPreview(selected, group);
+        updateStats();
+        setToast('已設定為保留照片。', 'info', 1400);
+      });
+      card.querySelector('[data-action="preview"]').addEventListener('click', () => renderPreview(selected, group));
+      card.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+        group.canceled = !group.canceled;
+        if (group.canceled) {
+          group.samples.forEach(x => { x.keep = true; x.manual = false; });
+          group.selectedId = null;
+        } else {
+          group.selectedId = group.systemSelectedId;
+          group.samples.forEach(x => x.keep = (x.id === group.systemSelectedId));
+        }
+        computeStats();
+        renderGroups();
+        renderPreview(group.samples[0], group);
+        updateStats();
+        setToast(group.canceled ? '群組已取消，將全部保留。' : '已恢復群組分辨。', 'info', 1600);
+      });
+      els.groups.appendChild(card);
+    });
+
+    computeStats();
+    if (state.groups.length && !state.selectedPreview) {
+      renderPreview(state.groups[0].samples[0], state.groups[0]);
+    }
+  }
+
+  async function analyze() {
+    if (state.analyzing || state.exporting) return;
+    if (!state.sourceFiles.length) {
+      setToast('請先選擇來源資料夾。', 'loading', 1800);
+      return;
+    }
+
+    state.analyzing = true;
+    state.images.forEach(img => URL.revokeObjectURL(img.url));
+    state.images = [];
+    state.groups = [];
+    els.groups.innerHTML = '';
+    if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
+    els.noticeBox.className = 'notice warn';
+    els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 正在分析本機照片，請稍候。分析完成後會顯示相似群組與系統建議保留照片。`;
+    updateStats();
+    setProgress(2, '準備分析…');
+    setToast('開始分析本機照片。', 'loading', 1300);
+
+    try {
+      const images = await processFiles(state.sourceFiles);
+      state.images = images;
+      state.stats.total = images.length;
+      setProgress(68, `已分析 ${images.length} 張，開始分群…`);
+
+      const sim = Number(els.similarity.value);
+      const groups = groupImages(images, sim);
+      finalizeGroups(groups);
+      state.groups = groups;
+
+      if (!groups.length) {
+        els.noticeBox.className = 'notice';
+        els.noticeBox.innerHTML = `${iconSvg('check', 16)} 沒有找到明顯相似的照片群組。你可以調低相似度門檻再試一次，或直接匯出全部照片。`;
+      } else {
+        els.noticeBox.className = 'notice';
+        els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已完成分群：系統會以多重模糊檢查（拉普拉斯、梯度、邊緣密度、區塊細節）先排除模糊照片，再在每組中自動選出最佳照片。你可以逐組檢查、手動改選，然後再匯出。`;
+      }
+      computeStats();
+      renderGroups();
+      updateStats();
+      setProgress(100, '分析完成');
+      state.sourceLoaded = true;
+      state.analyzing = false;
+      els.exportBtn.disabled = !state.groups.length && !state.images.length;
+      els.scanBadge.textContent = `已掃描 ${state.stats.total} 張`;
+      setToast(`分析完成，共 ${state.stats.groups} 組相似照片。`, 'info', 2200);
+    } catch (err) {
+      console.error(err);
+      state.analyzing = false;
+      els.noticeBox.className = 'notice warn';
+      els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 分析時發生錯誤。請確認瀏覽器是否可讀取圖片，或嘗試換一個資料夾。`;
+      setToast('分析失敗，請稍後重試。', 'info', 2400);
+      setProgress(0, '分析失敗');
+    } finally {
+      updateStats();
+    }
+  }
+
+  function canvasToBlob(canvas, mime='image/jpeg', quality=0.7) {
+    return new Promise((resolve) => canvas.toBlob(resolve, mime, quality));
+  }
+
+  async function transformImage(file, opts) {
+    const { convertJpg, resize, quality } = opts;
+    const bitmap = await createImageBitmap(file);
+    const srcW = bitmap.width;
+    const srcH = bitmap.height;
+    const maxSide = 1980;
+    let targetW = srcW;
+    let targetH = srcH;
+    if (resize) {
+      const ratio = Math.min(1, maxSide / Math.max(srcW, srcH));
+      targetW = Math.round(srcW * ratio);
+      targetH = Math.round(srcH * ratio);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, targetW, targetH);
+    bitmap.close?.();
+
+    let mime = file.type || 'image/jpeg';
+    if (convertJpg) {
+      mime = 'image/jpeg';
+    }
+
+    const blob = convertJpg || resize ? await canvasToBlob(canvas, mime, quality) : file.slice(0, file.size, file.type || mime);
+    const fileName = convertJpg ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : file.name;
+    return { blob, fileName };
+  }
+
+  async function ensureSourceWritePermission(handle, prompt = false) {
+    if (!handle) return false;
+    try {
+      if (typeof handle.queryPermission === 'function') {
+        const q = await handle.queryPermission({ mode: 'readwrite' });
+        if (q === 'granted') return true;
+        if (q === 'denied') return false;
+      }
+      if (prompt && typeof handle.requestPermission === 'function') {
+        const r = await handle.requestPermission({ mode: 'readwrite' });
+        return r === 'granted';
+      }
+    } catch (err) {
+      console.warn('permission check failed', err);
+    }
+    return false;
+  }
+
+  async function ensureWritableSourceHandle() {
+    const embedded = isEmbeddedContext();
+
+    if (state.sourceDirHandle) {
+      const granted = await ensureSourceWritePermission(state.sourceDirHandle, true);
+      if (granted) {
+        state.outputDirHandle = null;
+        els.outputStatus.textContent = 'Output / 已授權';
+        return state.sourceDirHandle;
+      }
+    }
+
+    if ('showDirectoryPicker' in window) {
+      try {
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前尚未取得可直接寫入的來源資料夾權限。請重新選擇來源資料夾並允許存取，系統會直接在原資料夾內建立 Output 資料夾。${embedded ? '<br><strong>目前是在 Google 協作平台內嵌環境中執行，若權限視窗沒有正常跳出，請改按「開啟獨立模式」。</strong>' : ''}`;
+        setToast('請重新選擇來源資料夾並允許權限。', 'info', 2200);
+
+        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        state.sourceDirHandle = handle;
+        state.outputDirHandle = null;
+
+        const granted = await ensureSourceWritePermission(handle, true);
+        if (granted) {
+          els.outputStatus.textContent = 'Output / 已授權';
+          els.noticeBox.className = 'notice';
+          els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已確認來源資料夾可寫入。匯出時會直接在原資料夾內建立 Output 資料夾。`;
+          return handle;
+        }
+
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 已開啟資料夾，但尚未取得寫入權限。請再次確認瀏覽器權限是否允許，或重新選擇來源資料夾。`;
+        setToast('尚未取得寫入權限。', 'info', 1800);
+        return null;
+      } catch (err) {
+        if (err?.name === 'AbortError') {
+          setToast('已取消來源資料夾選擇。', 'info', 1200);
+        } else {
+          console.error(err);
+          els.noticeBox.className = 'notice warn';
+          els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 無法直接取得來源資料夾寫入權限。${embedded ? '這通常是 Google 協作平台內嵌限制造成的。請按「開啟獨立模式」在新視窗完成授權。' : '請確認瀏覽器是否允許資料夾存取。'}`;
+          setToast('無法確認來源資料夾權限。', 'info', 1800);
+        }
+        return null;
+      }
+    }
+
+    els.noticeBox.className = 'notice warn';
+    els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前瀏覽器不支援直接寫入資料夾。${embedded ? '若你是在 Google 協作平台內嵌模式中使用，請按「開啟獨立模式」後再匯出。' : '請改用支援 File System Access API 的瀏覽器。'}`;
+    return null;
+  }
+
+  async function writeFileInDir(dirHandle, pathParts, blob) {
+    let dir = dirHandle;
+    for (let i = 0; i < pathParts.length - 1; i++) {
+      dir = await dir.getDirectoryHandle(pathParts[i], { create: true });
+    }
+    const fileHandle = await dir.getFileHandle(pathParts[pathParts.length - 1], { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+  }
+
+  function buildReport() {
+    const rows = [];
+    rows.push(['群組', '檔名', '保留', '系統建議', '分數', '模糊風險', '清晰度', '解析度', '檔案大小', '路徑']);
+    state.groups.forEach((g) => {
+      g.samples.forEach(img => {
+        rows.push([
+          g.label,
+          img.name,
+          img.keep ? '是' : '否',
+          img.id === g.systemSelectedId ? '是' : '否',
+          String(img.score),
+          String(Math.round(img.metrics.blurRisk ?? 0)),
+          String(Math.round(img.metrics.focusScore ?? img.metrics.sharpness ?? 0)),
+          `${img.metrics.width}x${img.metrics.height}`,
+          String(img.size),
+          img.path
+        ]);
+      });
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
+    const json = JSON.stringify({
+      product: 'Event Photo Selector',
+      generatedAt: new Date().toISOString(),
+      total: state.stats.total,
+      groups: state.stats.groups,
+      keep: state.stats.keep,
+      reject: state.stats.reject,
+      groupsData: state.groups.map(g => ({
+        label: g.label,
+        canceled: g.canceled,
+        selectedId: g.selectedId,
+        systemSelectedId: g.systemSelectedId,
+        blurSummary: g.blurSummary,
+        items: g.samples.map(img => ({
+          name: img.name,
+          path: img.path,
+          keep: img.keep,
+          score: img.score,
+          blurRisk: img.metrics.blurRisk,
+          blurLabel: img.metrics.blurLabel,
+          focusScore: img.metrics.focusScore,
+          width: img.metrics.width,
+          height: img.metrics.height,
+          size: img.size
+        }))
+      }))
+    }, null, 2);
+    return { csv, json };
+  }
+
+  async function exportResults() {
+    if (state.exporting || !state.images.length) return;
+    state.exporting = true;
+    updateStats();
+    setProgress(0, '準備匯出…');
+    setToast('開始匯出不同的照片。', 'loading', 1200);
+
+    const opts = {
+      convertJpg: els.convertJpg.checked,
+      resize: els.resizeToggle.checked,
+      quality: Number(els.quality.value)
+    };
+
+    const exportItems = [];
+    const seen = new Set();
+    const addItem = (img) => {
+      if (!img || seen.has(img.id)) return;
+      seen.add(img.id);
+      exportItems.push(img);
+    };
+
+    try {
+      if (!state.groups.length) {
+        state.images.forEach(addItem);
+      } else {
+        const groupedIds = new Set();
+        state.groups.forEach(group => {
+          group.samples.forEach(img => groupedIds.add(img.id));
+          if (group.canceled) {
+            group.samples.forEach(addItem);
+            return;
+          }
+          const keep = group.samples.find(img => img.id === group.selectedId)
+            || group.samples.find(img => img.id === group.systemSelectedId)
+            || group.samples[0];
+          addItem(keep);
+        });
+        state.images.forEach(img => {
+          if (!groupedIds.has(img.id)) addItem(img);
+        });
+      }
+
+      const totalToWrite = exportItems.length;
+      if (!totalToWrite) {
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前沒有可匯出的「不同的照片」。請重新分析，或調整相似度門檻後再試一次。`;
+        setToast('沒有可匯出的照片。', 'info', 1800);
+        return;
+      }
+
+      const baseDir = await ensureWritableSourceHandle();
+      if (baseDir) {
+        const outputRoot = await baseDir.getDirectoryHandle('Output', { create: true });
+
+        let written = 0;
+        for (const img of exportItems) {
+          const { blob, fileName } = await transformImage(img.file, opts);
+          await writeFileInDir(outputRoot, [fileName], blob);
+          written++;
+          setProgress((written / Math.max(1, totalToWrite)) * 100, `匯出不同的照片… ${written} / ${totalToWrite}`);
+          await new Promise(r => setTimeout(r, 0));
+        }
+
+        state.logs.push({ at: new Date(), action: 'export', detail: '完成匯出不同的照片' });
+        els.exportState.textContent = '已匯出';
+        els.reportState.textContent = '已產生';
+        els.noticeBox.className = 'notice';
+        els.noticeBox.innerHTML = `${iconSvg('check', 16)} 匯出完成。所有「不同的照片」已集中輸出到原資料夾內的 Output 資料夾。`;
+        setProgress(100, '匯出完成');
+        setToast('匯出完成。', 'info', 1800);
+        return;
+      }
+
+      if (isEmbeddedContext()) {
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前是 Google 協作平台內嵌環境，資料夾寫入常會被限制。已改為最後備援：下載 zip 壓縮檔。若要直接輸出到原資料夾內的 Output，請按「開啟獨立模式」後再重新授權。`;
+      } else {
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前無法直接寫入來源資料夾，已改用最後備援：下載 zip 壓縮檔。`;
+      }
+
+      const label = 'Output';
+      const fallbackItems = exportItems.slice();
+      const zipEntries = [];
+      for (const img of fallbackItems) {
+        const { blob, fileName } = await transformImage(img.file, opts);
+        zipEntries.push({ name: `${label}/${fileName}`, blob });
+      }
+      const zipBlob = await buildZipBlob(zipEntries);
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      downloadBlob(`${label}_${stamp}.zip`, zipBlob);
+
+      state.logs.push({ at: new Date(), action: 'export', detail: '無法直寫資料夾，已下載 zip 備援' });
+      els.exportState.textContent = '已下載 zip';
+      els.reportState.textContent = '已產生';
+      setProgress(100, 'zip 已下載');
+      setToast('已下載 zip 備援檔。', 'info', 1800);
+    } catch (err) {
+      console.error(err);
+      setToast('匯出失敗，請檢查瀏覽器權限或改用獨立模式。', 'info', 2400);
+      els.noticeBox.className = 'notice warn';
+      els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 匯出失敗。請確認已授權來源資料夾寫入權限；若在 Google 協作平台內嵌執行，建議先按「開啟獨立模式」再匯出。`;
+    } finally {
+      state.exporting = false;
+      updateStats();
+      renderGroups();
+    }
+  }
+
+  function downloadBlob(filename, blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  function downloadText(filename, text, mime) {
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  function isEmbeddedContext() {
+    try {
+      return window.top !== window.self;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  function makeStandaloneHtml() {
+    return '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  }
+
+  function openStandaloneCopy(reason = '') {
+    try {
+      const html = makeStandaloneHtml();
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank', 'noopener');
+      if (!win) throw new Error('popup_blocked');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      if (reason) {
+        setToast(reason, 'info', 1800);
+      }
+      return true;
+    } catch (err) {
+      console.error(err);
+      setToast('無法開啟獨立模式，請改用瀏覽器允許彈出視窗。', 'info', 2200);
+      return false;
+    }
+  }
+
+  const ZIP_CRC32_TABLE = (() => {
+    const table = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      table[i] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes) {
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) {
+      crc = ZIP_CRC32_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function u16le(value) {
+    const out = new Uint8Array(2);
+    new DataView(out.buffer).setUint16(0, value >>> 0, true);
+    return out;
+  }
+
+  function u32le(value) {
+    const out = new Uint8Array(4);
+    new DataView(out.buffer).setUint32(0, value >>> 0, true);
+    return out;
+  }
+
+  function concatBytes(parts) {
+    const total = parts.reduce((sum, part) => sum + part.length, 0);
+    const out = new Uint8Array(total);
+    let offset = 0;
+    for (const part of parts) {
+      out.set(part, offset);
+      offset += part.length;
+    }
+    return out;
+  }
+
+  function dosDateTime(date = new Date()) {
+    const year = Math.max(1980, date.getFullYear());
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const second = Math.floor(date.getSeconds() / 2);
+    const dosTime = (hour << 11) | (minute << 5) | second;
+    const dosDate = ((year - 1980) << 9) | (month << 5) | day;
+    return { dosTime, dosDate };
+  }
+
+  async function buildZipBlob(entries) {
+    const encoder = new TextEncoder();
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+    const { dosTime, dosDate } = dosDateTime(new Date());
+
+    for (const entry of entries) {
+      const data = new Uint8Array(await entry.blob.arrayBuffer());
+      const name = String(entry.name).replace(/\\/g, '/');
+      const nameBytes = encoder.encode(name);
+      const crc = crc32(data);
+      const size = data.length;
+
+      const localHeader = concatBytes([
+        u32le(0x04034b50),
+        u16le(20),
+        u16le(0x0800),
+        u16le(0),
+        u16le(dosTime),
+        u16le(dosDate),
+        u32le(crc),
+        u32le(size),
+        u32le(size),
+        u16le(nameBytes.length),
+        u16le(0),
+        nameBytes,
+        data
+      ]);
+      localParts.push(localHeader);
+
+      const centralHeader = concatBytes([
+        u32le(0x02014b50),
+        u16le(20),
+        u16le(20),
+        u16le(0x0800),
+        u16le(0),
+        u16le(dosTime),
+        u16le(dosDate),
+        u32le(crc),
+        u32le(size),
+        u32le(size),
+        u16le(nameBytes.length),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u32le(0),
+        u32le(offset),
+        nameBytes
+      ]);
+      centralParts.push(centralHeader);
+      offset += localHeader.length;
+    }
+
+    const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+    const centralOffset = localParts.reduce((sum, part) => sum + part.length, 0);
+    const eocd = concatBytes([
+      u32le(0x06054b50),
+      u16le(0),
+      u16le(0),
+      u16le(entries.length),
+      u16le(entries.length),
+      u32le(centralSize),
+      u32le(centralOffset),
+      u16le(0)
+    ]);
+
+    return new Blob([...localParts, ...centralParts, eocd], { type: 'application/zip' });
+  }
+
+  async function downloadZipFallback(items, opts, label = 'Output') {
+    const exportFiles = [];
+    for (const img of items) {
+      const { blob, fileName } = await transformImage(img.file, opts);
+      exportFiles.push({ name: `${label}/${fileName}`, blob });
+    }
+    const zipBlob = await buildZipBlob(exportFiles);
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    downloadBlob(`${label}_${stamp}.zip`, zipBlob);
+  }
+
+  // Events
+  const refreshSourceHint = () => {
+    const hint = els.sourceRecursiveToggle?.checked
+      ? '已設定：包含子資料夾。拖拉或選取時會一併掃描子資料夾。'
+      : '已設定：不包含子資料夾。拖拉或選取時只掃描最上層照片。';
+    els.sourceHint.textContent = state.sourceFiles.length
+      ? `目前已匯入 ${state.sourceFiles.length} 張圖片。${hint}`
+      : `尚未選擇。${hint}`;
+  };
+
+  const setDropState = (active) => {
+    if (!els.dragDropZone) return;
+    els.dragDropZone.classList.toggle('drag', !!active);
+  };
+
+  const setDragFeedback = (kind = 'idle', title = '', detail = '') => {
+    if (!els.dragDropZone) return;
+    els.dragDropZone.classList.remove('success', 'error');
+    const status = els.dragDropZone.querySelector('#dragStatus');
+    if (kind === 'success') {
+      els.dragDropZone.classList.add('success');
+      if (status) {
+        status.className = 'dragStatus ok';
+        status.innerHTML = `<div>✅ ${title || '已成功匯入圖片。'}</div>${detail ? `<div style="margin-top:4px;font-weight:700;opacity:.98">${detail}</div>` : ''}`;
+      }
+      return;
+    }
+    if (kind === 'error') {
+      els.dragDropZone.classList.add('error');
+      if (status) {
+        status.className = 'dragStatus warn';
+        status.innerHTML = `<div>⚠️ ${title || '拖拉後沒有取得可匯入的圖片。'}</div>${detail ? `<div style="margin-top:4px;font-weight:700;opacity:.98">${detail}</div>` : ''}`;
+      }
+      return;
+    }
+    if (status) {
+      status.className = 'dragStatus';
+      status.textContent = title || '尚未匯入，拖曳圖片或資料夾後會在這裡顯示成功狀態。';
+    }
+  };
+
+  const dropGuard = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const ingestDropped = async (dt) => {
+    const dropped = await getDroppedFiles(dt);
+    const files = Array.isArray(dropped) ? dropped : (dropped.files || []);
+    const sourceHandle = Array.isArray(dropped) ? null : (dropped.sourceHandle || null);
+    const sourceName = Array.isArray(dropped) ? '' : (dropped.sourceName || '');
+
+    if (!files.length) {
+      setDragFeedback('error', '拖拉後沒有取得可匯入的圖片或資料夾。', '請改用「選擇來源資料夾」按鈕，或確認瀏覽器允許拖放。');
+      setBanner('拖拉後沒有取得可匯入的圖片或資料夾。請改用「選擇來源資料夾」按鈕，或確認瀏覽器允許拖放。', 'error', true);
+      return;
+    }
+    await loadSelectedFolder(files, sourceHandle, !!els.sourceRecursiveToggle?.checked);
+    if (state.sourceFiles.length) {
+      setToast(`已拖拉匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
+      els.noticeBox.className = state.sourceDirHandle ? 'notice' : 'notice warn';
+      const writable = sourceHandle ? await ensureSourceWritePermission(sourceHandle, false) : false;
+      const sourceLabel = sourceHandle ? (state.sourceName || sourceName || '來源資料夾') : (sourceName || '未取得來源資料夾句柄');
+      els.noticeBox.innerHTML = `${iconSvg(writable || !sourceHandle ? 'check' : 'warn', 16)} 已成功拖拉匯入來源。${sourceHandle ? (writable ? '來源資料夾權限已確認，可直接建立 Output 資料夾。' : '已取得來源資料夾句柄，但尚未確認寫入權限，請按「確認來源資料夾權限」。') : `目前只能辨識到 ${sourceLabel}，但沒有原資料夾句柄，無法直接在原資料夾內建立 Output 資料夾。請按「確認來源資料夾權限」重新選擇同一個來源資料夾。`}<br>現在可以按下「開始分析」來找出相似照片群組。<br>系統會先檢查模糊照片，再進行分群與保留判斷。<br>預設輸出：原資料夾內新增的Output資料夾`;
+      els.outputStatus.textContent = sourceHandle ? (writable ? 'Output / 已授權' : 'Output / 待授權') : '待授權';
+    } else {
+      setDragFeedback('error', '拖拉後沒有可辨識的圖片檔。', '請確認拖入的是圖片或資料夾。');
+      setBanner('拖拉後沒有可辨識的圖片檔。請確認拖入的是圖片或資料夾。', 'error', true);
+    }
+    refreshSourceHint();
+    updateStats();
+  };
+
+  els.pickSourceBtn.addEventListener('click', async () => {
+    const includeSubfolders = !!els.sourceRecursiveToggle?.checked;
+    if ('showDirectoryPicker' in window) {
+      try {
+        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        const files = await readFilesFromDirectoryHandle(handle, '', includeSubfolders);
+        await loadSelectedFolder(files, handle, includeSubfolders);
+        if (state.sourceFiles.length) {
+          const writable = await ensureSourceWritePermission(handle, false);
+          setToast(`已匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
+          els.noticeBox.className = writable ? 'notice' : 'notice warn';
+          els.noticeBox.innerHTML = `${iconSvg(writable ? 'check' : 'warn', 16)} 已選擇來源資料夾。${writable ? '來源資料夾權限已確認，可直接建立 Output 資料夾。' : '目前已取得來源資料夾，但尚未確認寫入權限，請按「確認來源資料夾權限」完成授權。'}<br>現在可以按下「開始分析」來找出相似照片群組。<br>系統會先檢查模糊照片，再進行分群與保留判斷。<br>預設輸出：原資料夾內新增的Output資料夾`;
+          els.outputStatus.textContent = writable ? 'Output / 已授權' : 'Output / 待授權';
+        }
+        refreshSourceHint();
+        updateStats();
+        return;
+      } catch (err) {
+        if (err?.name !== 'AbortError') {
+          console.error(err);
+          setToast('選擇來源資料夾失敗，改用檔案選取。', 'info', 1600);
+        }
+      }
+    }
+    els.sourceFolderInput.click();
+  });
+  els.sourceFolderInput.addEventListener('change', async (e) => {
+    const files = e.target.files;
+    await loadSelectedFolder(files, null, !!els.sourceRecursiveToggle?.checked);
+    if (state.sourceFiles.length) {
+      setToast(`已匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
+      els.noticeBox.className = 'notice warn';
+      els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 已選取圖片，但目前沒有來源資料夾句柄，因此無法直接在原資料夾內建立 Output。<br>請改用「選擇來源資料夾」重新授權，之後就能直接輸出到 Output 資料夾。`;
+      els.outputStatus.textContent = '待授權';
+    }
+    refreshSourceHint();
+    updateStats();
+  });
+
+  if (els.sourceRecursiveToggle) {
+    els.sourceRecursiveToggle.addEventListener('change', () => {
+      refreshSourceHint();
+    });
+  }
+
+  if (els.dragDropZone) {
+    ['dragenter', 'dragover'].forEach(evt => {
+      els.dragDropZone.addEventListener(evt, e => {
+        dropGuard(e);
+        setDropState(true);
+      }, false);
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      els.dragDropZone.addEventListener(evt, e => {
+        dropGuard(e);
+        setDropState(false);
+      }, false);
+    });
+    els.dragDropZone.addEventListener('drop', async e => {
+      dropGuard(e);
+      setDropState(false);
+      try {
+        await ingestDropped(e.dataTransfer);
+      } catch (err) {
+        console.error(err);
+        setBanner(prettyError(err), 'error', true);
+      }
+    }, false);
+    els.dragDropZone.addEventListener('click', () => els.sourceFolderInput.click());
+    els.dragDropZone.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        els.sourceFolderInput.click();
+      }
+    });
+  }
+
+  window.addEventListener('dragover', dropGuard, false);
+  window.addEventListener('drop', dropGuard, false);
+  document.body.addEventListener('dragover', dropGuard, false);
+
+  els.pickOutputBtn.addEventListener('click', async () => {
+    try {
+      const handle = await ensureWritableSourceHandle();
+      if (handle) {
+        els.outputStatus.textContent = 'Output / 已授權';
+        setToast('已確認來源資料夾權限。', 'info', 1300);
+      }
+    } catch (err) {
+      console.error(err);
+      setToast('確認來源資料夾權限失敗。', 'info', 1600);
+    }
+  });
+
+  if (els.openStandaloneBtn) {
+    els.openStandaloneBtn.addEventListener('click', () => {
+      openStandaloneCopy('已開啟獨立模式。請在新視窗重新選擇來源資料夾並匯出。');
+    });
+  }
+
+  els.similarity.addEventListener('input', () => {
+    els.similarityValue.textContent = els.similarity.value + '%';
+  });
+
+  els.analyzeBtn.addEventListener('click', analyze);
+  els.exportBtn.addEventListener('click', exportResults);
+  els.resetBtn.addEventListener('click', () => {
+    state.images.forEach(img => URL.revokeObjectURL(img.url));
+    resetAll();
+  });
+
+  // Initial state
+  els.similarityValue.textContent = els.similarity.value + '%';
+  if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
+  resetAll(true);
+  if (isEmbeddedContext()) {
+    els.noticeBox.className = 'notice warn';
+    els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前是在 Google 協作平台內嵌環境中執行。若要直接寫入原資料夾內的 Output 資料夾，請先按「開啟獨立模式」，再於新視窗重新授權來源資料夾。`;
+    els.outputStatus.textContent = '嵌入限制';
+  }
+  if (els.dragDropZone) {
+    setToast('拖曳區已啟用，可直接拖拉圖片或資料夾。', 'info', 1400);
+    setDragFeedback('idle', '尚未匯入，拖曳圖片或資料夾後會在這裡顯示成功狀態。');
+  }
+  if (!('showDirectoryPicker' in window)) {
+    els.outputStatus.textContent = isEmbeddedContext() ? '嵌入限制' : '待授權';
+  }
+  if (!('webkitdirectory' in HTMLInputElement.prototype)) {
+    els.sourceHint.textContent = '你的瀏覽器若不支援資料夾選取，建議改用支援 webkitdirectory 的瀏覽器。';
+  }
+
+  window.addEventListener('beforeunload', () => {
+    state.images.forEach(img => {
+      try { URL.revokeObjectURL(img.url); } catch {}
+    });
+  });
+})();
+</script>
+</body>
+</html>
