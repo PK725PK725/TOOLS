@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>📊研習回饋單分析系統</title>
+
+<!-- =====================================================
+     圖示
+===================================================== -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- =====================================================
+     TailwindCSS
+===================================================== -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- =====================================================
+     XLSX 讀取套件
+===================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['"Microsoft JhengHei"', 'sans-serif']
+      },
+      animation: {
+        float: 'float 10s infinite alternate ease-in-out'
+      },
+      keyframes: {
+        float: {
+          '0%': { transform: 'translateY(0px)' },
+          '100%': { transform: 'translateY(35px)' }
+        }
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* =====================================================
+   基本設定
+===================================================== */
+*{
+  box-sizing:border-box;
+}
+
+input,select,textarea{
+  max-width:100%;
+}
+
+body{
+  font-family:"Microsoft JhengHei",sans-serif;
+  background:
+    radial-gradient(circle at top left,#ffd6e7 0%,transparent 30%),
+    radial-gradient(circle at bottom right,#ffe5b4 0%,transparent 30%),
+    linear-gradient(135deg,#fff7f0 0%,#ffeef4 50%,#fff4d5 100%);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* =====================================================
+   毛玻璃
+===================================================== */
+.glass{
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(15px);
+  border:1px solid rgba(255,255,255,.4);
+  box-shadow:0 18px 45px rgba(0,0,0,.12);
+}
+
+/* =====================================================
+   浮動背景
+===================================================== */
+.floating{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(80px);
+  opacity:.35;
+  z-index:-1;
+}
+
+/* =====================================================
+   按鈕
+===================================================== */
+.main-btn{
+  background:linear-gradient(135deg,#ff758f,#ff9a8b);
+  transition:.25s;
+}
+
+.main-btn:hover{
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:0 12px 30px rgba(255,117,143,.35);
+}
+
+.clear-btn{
+  background:linear-gradient(135deg,#36d1dc,#5b86e5);
+  transition:.25s;
+}
+
+.clear-btn:hover{
+  transform:translateY(-3px);
+}
+
+/* =====================================================
+   滿意度大數字
+===================================================== */
+.big-score{
+  font-size:clamp(2.2rem,6vw,4.5rem);
+  font-weight:900;
+  line-height:1;
+}
+
+/* =====================================================
+   進度條
+===================================================== */
+.progress-wrap{
+  width:100%;
+  height:20px;
+  background:#ececec;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.progress-bar{
+  height:100%;
+  border-radius:999px;
+  transition:1s;
+  background:linear-gradient(90deg,#ff758f,#ffb199);
+}
+
+/* =====================================================
+   總滿意度圓餅圖
+===================================================== */
+.overall-satisfaction{
+  display:grid;
+  grid-template-columns:minmax(190px,260px) 1fr;
+  align-items:center;
+  gap:2rem;
+}
+
+.overall-chart{
+  width:min(220px,70vw);
+  aspect-ratio:1;
+  margin:auto;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:conic-gradient(#22c55e 0%,#22c55e 0%,#e5e7eb 0%,#e5e7eb 100%);
+  box-shadow:0 12px 28px rgba(34,197,94,.2);
+  transition:background .55s ease;
+}
+
+.overall-chart__center{
+  width:68%;
+  aspect-ratio:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border-radius:50%;
+  background:#fff;
+}
+
+.overall-chart__score{
+  font-size:clamp(2rem,5vw,3.5rem);
+  font-weight:900;
+  line-height:1;
+  color:#15803d;
+}
+
+.overall-chart__label{
+  margin-top:.4rem;
+  font-size:.9rem;
+  font-weight:700;
+  color:#4b5563;
+}
+
+@media(max-width:640px){
+  .overall-satisfaction{
+    grid-template-columns:1fr;
+    gap:1.25rem;
+  }
+}
+
+/* =====================================================
+   卡片動畫
+===================================================== */
+.card-hover{
+  transition:.25s;
+}
+
+.card-hover:hover{
+  transform:translateY(-6px);
+}
+
+/* =====================================================
+   表格
+===================================================== */
+.table-style{
+  width:100%;
+  border-collapse:collapse;
+  overflow:hidden;
+  border-radius:20px;
+}
+
+.table-style th{
+  background:linear-gradient(135deg,#ff758f,#ff9a8b);
+  color:white;
+  padding:14px;
+  text-align:center;
+  font-size:1rem;
+}
+
+.table-style td{
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #eee;
+  font-weight:600;
+}
+
+.table-style td.item-label{
+  color:#4c1d95;
+  font-weight:800;
+}
+
+.table-style td.needs-attention{
+  color:#dc2626;
+  font-weight:800;
+}
+
+.table-style td.valid-count{
+  color:#2563eb;
+  font-weight:900;
+}
+
+/* =====================================================
+   拖曳上傳與複製按鈕
+===================================================== */
+.drop-zone{
+  min-height:190px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:24px;
+  border:2px dashed #f9a8d4;
+  border-radius:22px;
+  text-align:center;
+  color:#6b7280;
+  background:#fff7fb;
+  cursor:pointer;
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+
+.drop-zone:hover,
+.drop-zone:focus-visible,
+.drop-zone.is-dragging{
+  border-color:#db2777;
+  background:#fce7f3;
+  outline:none;
+  transform:translateY(-2px);
+}
+
+.drop-zone.is-ready{
+  border-color:#16a34a;
+  background:#ecfdf5;
+  color:#166534;
+}
+
+.drop-zone__icon{ font-size:2.5rem; line-height:1; }
+.drop-zone__title{ font-size:1.1rem; font-weight:900; color:#374151; }
+.drop-zone__hint{ font-size:.88rem; }
+
+.import-status{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:14px;
+  color:#475569;
+  background:#f8fafc;
+  font-size:.9rem;
+}
+
+.import-status.is-ready{
+  color:#166534;
+  background:#ecfdf5;
+}
+
+.import-status strong,.import-status span{ display:block; }
+.import-status span{ margin-top:2px; font-size:.82rem; }
+
+.copy-text-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:42px;
+  padding:8px 13px;
+  border:1px solid currentColor;
+  border-radius:12px;
+  background:white;
+  font-size:.9rem;
+  font-weight:800;
+  transition:background .2s ease,transform .2s ease;
+}
+
+.copy-text-btn:hover{ transform:translateY(-1px); }
+.copy-effect{ color:#be185d; }
+.copy-effect:hover{ background:#fdf2f8; }
+.copy-suggest{ color:#c2410c; }
+.copy-suggest:hover{ background:#fff7ed; }
+
+/* =====================================================
+   列表
+===================================================== */
+.result-list li{
+  margin-bottom:12px;
+  line-height:1.8;
+}
+
+/* =====================================================
+   響應式
+===================================================== */
+@media(max-width:768px){
+
+  .mobile-col{
+    grid-template-columns:1fr !important;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     背景裝飾
+===================================================== -->
+<div class="floating w-[300px] h-[300px] bg-pink-300 top-[-100px] left-[-80px] animate-float"></div>
+<div class="floating w-[260px] h-[260px] bg-yellow-300 bottom-[-90px] right-[-60px] animate-float"></div>
+<div class="floating w-[220px] h-[220px] bg-orange-300 top-[40%] right-[-50px] animate-float"></div>
+
+<!-- =====================================================
+     主容器
+===================================================== -->
+<div class="max-w-7xl mx-auto px-4 py-8">
+
+  <!-- =====================================================
+       標題區
+  ===================================================== -->
+  <div class="glass rounded-[35px] p-6 md:p-10 text-center mb-8">
+
+    <div class="text-6xl mb-5">
+      📊✨
+    </div>
+
+    <h1 class="text-3xl md:text-5xl font-black text-gray-800 mb-4">
+      <i class="bi bi-bar-chart-line-fill"></i>
+      研習回饋單分析系統
+    </h1>
+
+    <p class="text-gray-600 text-lg leading-8">
+      上傳 XLSX 檔案，自動分析研習回饋內容與滿意度
+    </p>
+
+  </div>
+
+  <!-- =====================================================
+       注意事項
+  ===================================================== -->
+  <div class="glass rounded-[35px] p-6 md:p-8 mb-8">
+
+    <div class="flex items-center gap-4 mb-6">
+
+      <div class="text-5xl">🔒</div>
+
+      <div>
+
+        <h2 class="text-3xl font-black text-gray-800">
+          上傳檔案注意事項
+        </h2>
+
+        <p class="text-gray-600 mt-2">
+          請先移除個資與可識別資訊
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 shadow-lg border border-pink-100 leading-9 text-gray-700">
+
+      1️⃣ 請務必去除可識別資料與講師、學員個資<br>
+
+      2️⃣ 請重新命名 XLSX 檔名為亂數名稱<br>
+
+      3️⃣ 請刪除「時間戳記」、「您的姓名」、「您的服務單位」欄位<br>
+
+      4️⃣ 請將任何講師、助教姓名取代成空白<br>
+
+    </div>
+
+  </div>
+
+  <!-- =====================================================
+       上傳區
+  ===================================================== -->
+  <div class="glass rounded-[35px] p-6 md:p-8 mb-8">
+
+    <div class="grid md:grid-cols-2 gap-8 mobile-col">
+
+      <!-- 左側 -->
+      <div>
+
+        <h2 class="text-3xl font-black text-gray-800 mb-5">
+          <i class="fa-solid fa-file-excel text-green-600"></i>
+          XLSX 檔案上傳
+        </h2>
+
+        <div class="bg-white rounded-3xl p-5 shadow-lg border border-pink-100 leading-8 text-gray-700">
+
+          <div class="font-black text-pink-600 mb-3">
+            第一區｜研習回饋情況
+          </div>
+
+          • 課程實用性<br>
+          • 研習的意見<br>
+          • 未來課程建議<br>
+          • 其他<br><br>
+
+          <div class="font-black text-orange-500 mb-3">
+            第二區｜研習滿意度
+          </div>
+
+          • 研習課程目標<br>
+          • 研習課程內容<br>
+          • 講座授課方式
+
+        </div>
+
+      </div>
+
+      <!-- 右側 -->
+      <div class="bg-white rounded-3xl p-6 shadow-xl border border-pink-100">
+
+        <input
+          type="file"
+          id="excelFile"
+          accept=".xlsx,.xls"
+          class="hidden"
+        >
+
+        <div
+          id="fileDropZone"
+          class="drop-zone"
+          role="button"
+          tabindex="0"
+          aria-controls="excelFile"
+          aria-describedby="importStatus"
+        >
+          <div class="drop-zone__icon" aria-hidden="true">📂</div>
+          <div id="dropZoneTitle" class="drop-zone__title">拖曳 XLSX 檔案到此處</div>
+          <div class="drop-zone__hint">或點擊此區域選擇檔案（支援 .xlsx、.xls）</div>
+        </div>
+
+        <div id="importStatus" class="import-status" role="status" aria-live="polite">
+          <span aria-hidden="true">ℹ️</span>
+          <div>
+            <strong id="importStatusTitle">尚未匯入檔案</strong>
+            <span id="importStatusInfo">請拖曳或點擊上方區域選擇 Excel 檔案。</span>
+          </div>
+        </div>
+
+        <button
+          onclick="analyzeData()"
+          class="main-btn w-full p-4 rounded-2xl text-white text-xl font-black"
+        >
+          <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
+          開始分析
+        </button>
+
+        <button
+          onclick="clearAll()"
+          class="clear-btn w-full p-4 rounded-2xl text-white text-xl font-black mt-4"
+        >
+          <i class="fa-solid fa-trash-can mr-2"></i>
+          清除資料
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =====================================================
+       結果區
+  ===================================================== -->
+  <div id="resultArea" class="hidden">
+
+    <!-- =====================================================
+         第一區
+    ===================================================== -->
+    <div class="glass rounded-[35px] p-6 md:p-8 mb-8">
+
+      <div class="flex items-center gap-4 mb-8">
+
+        <div class="text-5xl">🧠</div>
+
+        <div>
+
+          <h2 class="text-3xl font-black text-gray-800">
+            第一區｜研習回饋分析
+          </h2>
+
+          <p class="text-gray-600 mt-2">
+            自動彙整學員意見與建議
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mobile-col">
+
+        <!-- 成效 -->
+        <div class="bg-white rounded-3xl p-6 shadow-xl border border-pink-100 card-hover">
+
+          <div class="flex items-center justify-between gap-3 mb-5">
+
+            <div class="flex items-center gap-3">
+
+              <div class="text-4xl">🌟</div>
+
+              <h3 class="text-2xl font-black text-pink-700">
+                研習成效
+              </h3>
+
+            </div>
+
+            <button type="button" class="copy-text-btn copy-effect" onclick="copyListText('effectList',this)">
+              <i class="fa-regular fa-copy" aria-hidden="true"></i>
+              複製文字
+            </button>
+
+          </div>
+
+          <ul id="effectList" class="result-list text-gray-700"></ul>
+
+        </div>
+
+        <!-- 建議 -->
+        <div class="bg-white rounded-3xl p-6 shadow-xl border border-orange-100 card-hover">
+
+          <div class="flex items-center justify-between gap-3 mb-5">
+
+            <div class="flex items-center gap-3">
+
+              <div class="text-4xl">🛠️</div>
+
+              <h3 class="text-2xl font-black text-orange-600">
+                問題檢討與建議
+              </h3>
+
+            </div>
+
+            <button type="button" class="copy-text-btn copy-suggest" onclick="copyListText('suggestList',this)">
+              <i class="fa-regular fa-copy" aria-hidden="true"></i>
+              複製文字
+            </button>
+
+          </div>
+
+          <ul id="suggestList" class="result-list text-gray-700"></ul>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =====================================================
+         第二區
+    ===================================================== -->
+    <div class="glass rounded-[35px] p-6 md:p-8">
+
+      <div class="flex items-center gap-4 mb-8">
+
+        <div class="text-5xl">📈</div>
+
+        <div>
+
+          <h2 class="text-3xl font-black text-gray-800">
+            第二區｜研習滿意度分析
+          </h2>
+
+          <p class="text-gray-600 mt-2">
+            顯示各類型滿意度統計
+          </p>
+
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           滿意度卡片
+      ===================================================== -->
+      <div class="grid md:grid-cols-3 gap-6 mobile-col mb-8">
+
+        <div class="bg-white rounded-3xl p-6 shadow-xl border border-pink-100 text-center card-hover">
+
+          <div class="text-6xl mb-4">🎯</div>
+
+          <h3 class="text-2xl font-black mb-4">
+            研習課程目標
+          </h3>
+
+          <div id="goalScore" class="big-score text-pink-600 mb-5">
+            0%
+          </div>
+
+          <div class="progress-wrap">
+            <div id="goalBar" class="progress-bar" style="width:0%"></div>
+          </div>
+
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 shadow-xl border border-orange-100 text-center card-hover">
+
+          <div class="text-6xl mb-4">📚</div>
+
+          <h3 class="text-2xl font-black mb-4">
+            研習課程內容
+          </h3>
+
+          <div id="contentScore" class="big-score text-orange-500 mb-5">
+            0%
+          </div>
+
+          <div class="progress-wrap">
+            <div id="contentBar" class="progress-bar" style="width:0%"></div>
+          </div>
+
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 shadow-xl border border-red-100 text-center card-hover">
+
+          <div class="text-6xl mb-4">🎤</div>
+
+          <h3 class="text-2xl font-black mb-4">
+            講座授課方式
+          </h3>
+
+          <div id="teacherScore" class="big-score text-red-500 mb-5">
+            0%
+          </div>
+
+          <div class="progress-wrap">
+            <div id="teacherBar" class="progress-bar" style="width:0%"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           總滿意度圓餅圖
+      ===================================================== -->
+      <div class="bg-white rounded-3xl p-6 shadow-xl border border-green-100 mb-8 overall-satisfaction">
+
+        <div
+          id="overallChart"
+          class="overall-chart"
+          role="img"
+          aria-label="總滿意度圓餅圖，目前為 0%"
+        >
+          <div class="overall-chart__center">
+            <div id="overallScore" class="overall-chart__score">0.0%</div>
+            <div class="overall-chart__label">總滿意度</div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-2xl font-black text-gray-800 mb-3">
+            🎯 總滿意度
+          </h3>
+          <p class="text-gray-600 leading-8 mb-2">
+            以「研習課程目標」、「研習課程內容」及「講座授課方式」三項正向滿意度的平均值計算。
+          </p>
+          <p id="overallFormula" class="font-bold text-green-700 leading-8">
+            計算式：((0.0% + 0.0% + 0.0%) ÷ 3) = 0.0%
+          </p>
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           統計表格
+      ===================================================== -->
+      <div class="bg-white rounded-3xl p-6 shadow-xl overflow-x-auto">
+
+        <h3 class="text-2xl font-black text-gray-800 mb-5">
+          📋 滿意度統計表
+        </h3>
+
+        <table class="table-style">
+
+          <thead>
+
+            <tr>
+              <th>項目</th>
+              <th>非常滿意</th>
+              <th>滿意</th>
+              <th>尚可</th>
+              <th>不滿意</th>
+              <th>非常不滿意</th>
+              <th>有效填答數</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="tableBody">
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+<div style="text-align: center;">
+    彭榮生 製作<BR><BR>
+</div>
+
+
+
+<script>
+let selectedFile = null;
+
+/* =====================================================
+   拖曳與選取檔案
+===================================================== */
+const fileInput = document.getElementById("excelFile");
+const fileDropZone = document.getElementById("fileDropZone");
+
+function formatFileSize(bytes){
+
+  if(bytes < 1024){
+    return bytes + " B";
+  }
+
+  return (bytes / 1024 / 1024).toFixed(2) + " MB";
+}
+
+function setSelectedFile(file){
+
+  if(!file){
+    return;
+  }
+
+  const allowedFile = /\.(xlsx|xls)$/i.test(file.name);
+
+  if(!allowedFile){
+
+    selectedFile = null;
+
+    fileInput.value = "";
+
+    fileDropZone.classList.remove("is-ready");
+
+    document.getElementById("dropZoneTitle").innerText = "請選擇 XLSX 或 XLS 檔案";
+
+    document.getElementById("importStatus").classList.remove("is-ready");
+
+    document.getElementById("importStatusTitle").innerText = "檔案格式不支援";
+
+    document.getElementById("importStatusInfo").innerText = "請改選 .xlsx 或 .xls 格式的 Excel 檔案。";
+
+    return;
+  }
+
+  selectedFile = file;
+
+  fileDropZone.classList.remove("is-dragging");
+  fileDropZone.classList.add("is-ready");
+
+  document.getElementById("dropZoneTitle").innerText = "✓ 已完成匯入檔案";
+
+  document.getElementById("importStatus").classList.add("is-ready");
+
+  document.getElementById("importStatusTitle").innerText = "已完成匯入，準備分析";
+
+  document.getElementById("importStatusInfo").innerText = `檔名：${file.name}｜大小：${formatFileSize(file.size)}｜請點選「開始分析」。`;
+}
+
+fileDropZone.addEventListener("click",()=>fileInput.click());
+
+fileDropZone.addEventListener("keydown",event=>{
+
+  if(event.key === "Enter" || event.key === " "){
+
+    event.preventDefault();
+
+    fileInput.click();
+  }
+});
+
+fileInput.addEventListener("change",()=>setSelectedFile(fileInput.files[0]));
+
+["dragenter","dragover"].forEach(eventName=>{
+
+  fileDropZone.addEventListener(eventName,event=>{
+
+    event.preventDefault();
+
+    fileDropZone.classList.add("is-dragging");
+  });
+});
+
+["dragleave","drop"].forEach(eventName=>{
+
+  fileDropZone.addEventListener(eventName,event=>{
+
+    event.preventDefault();
+
+    fileDropZone.classList.remove("is-dragging");
+  });
+});
+
+fileDropZone.addEventListener("drop",event=>{
+
+  const file = event.dataTransfer.files[0];
+
+  setSelectedFile(file);
+});
+
+/* =====================================================
+   第一區：成效分類
+===================================================== */
+const effectKeywords = [
+  {title:"提升 AI 與數位工具應用能力",keywords:["AI","人工智慧","數位","工具"]},
+  {title:"課程內容具有高度實用性",keywords:["實用","有幫助","好用"]},
+  {title:"增加教學與行政應用能力",keywords:["教學","行政","應用"]},
+  {title:"提升資訊科技操作能力",keywords:["操作","練習","使用"]},
+  {title:"講師解說清楚易懂",keywords:["清楚","易懂","講解"]},
+  {title:"增加創新教學想法",keywords:["創新","創意","互動"]},
+  {title:"實作活動有助於理解內容",keywords:["實作","操作","體驗"]},
+  {title:"課程內容豐富且具啟發性",keywords:["豐富","精彩","收穫"]},
+  {title:"有助提升工作效率",keywords:["效率","快速","方便"]},
+  {title:"學員對整體課程反應良好",keywords:["滿意","很好","優秀"]}
+];
+
+/* =====================================================
+   第一區：建議分類
+===================================================== */
+const suggestKeywords = [
+  {title:"建議增加更多實作操作時間",keywords:["時間不夠","實作","操作"]},
+  {title:"希望開設進階相關課程",keywords:["進階","深入","高階"]},
+  {title:"建議增加 AI 應用主題",keywords:["AI","人工智慧"]},
+  {title:"希望增加更多教學案例分享",keywords:["案例","分享","範例"]},
+  {title:"建議放慢課程進行速度",keywords:["太快","速度"]},
+  {title:"希望延長研習時間",keywords:["延長","更多時間"]},
+  {title:"建議增加基礎課程內容",keywords:["基礎","初學"]},
+  {title:"希望提供講義與教材下載",keywords:["講義","教材","下載"]},
+  {title:"建議改善設備與網路環境",keywords:["設備","網路"]},
+  {title:"希望增加互動與討論時間",keywords:["互動","討論"]}
+];
+
+/* =====================================================
+   複製分析文字
+===================================================== */
+async function copyListText(listId,button){
+
+  const list = document.getElementById(listId);
+
+  const text = [...list.querySelectorAll("li")]
+    .map(item=>item.dataset.copyText || item.textContent.trim())
+    .filter(Boolean)
+    .join("\n");
+
+  if(!text){
+
+    alert("目前沒有可複製的分析文字。");
+
+    return;
+  }
+
+  try{
+
+    await navigator.clipboard.writeText(text);
+
+  }
+  catch(error){
+
+    const textarea = document.createElement("textarea");
+
+    textarea.value = text;
+
+    textarea.style.position = "fixed";
+
+    textarea.style.opacity = "0";
+
+    document.body.appendChild(textarea);
+
+    textarea.select();
+
+    document.execCommand("copy");
+
+    textarea.remove();
+  }
+
+  const originalHtml = button.innerHTML;
+
+  button.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i> 已複製';
+
+  setTimeout(()=>{
+
+    button.innerHTML = originalHtml;
+
+  },1400);
+}
+
+/* =====================================================
+   主分析
+===================================================== */
+function analyzeData(){
+
+  const file = selectedFile;
+
+  if(!file){
+
+    alert("請先上傳 XLSX 檔案！");
+    return;
+
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+
+    const data = new Uint8Array(e.target.result);
+
+    const workbook = XLSX.read(data,{type:'array'});
+
+    const sheetName = workbook.SheetNames[0];
+
+    const worksheet = workbook.Sheets[sheetName];
+
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    if(jsonData.length===0){
+
+      alert("檔案沒有資料！");
+      return;
+
+    }
+
+    analyzeFeedback(jsonData);
+
+    analyzeSatisfaction(jsonData);
+
+    document.getElementById("resultArea").classList.remove("hidden");
+
+    playSuccessSound();
+
+  }
+
+  reader.readAsArrayBuffer(file);
+}
+
+/* =====================================================
+   第一區分析
+===================================================== */
+function analyzeFeedback(data){
+
+  let allText = "";
+
+  data.forEach(row=>{
+
+    allText += `
+      ${row["課程實用性"] || ""}
+      ${row["研習的意見"] || ""}
+      ${row["未來課程建議"] || ""}
+      ${row["其他"] || ""}
+    `;
+
+  });
+
+  const effectResults = [];
+
+  effectKeywords.forEach(item=>{
+
+    let found = false;
+
+    item.keywords.forEach(keyword=>{
+
+      if(allText.includes(keyword)){
+
+        found = true;
+
+      }
+
+    });
+
+    if(found){
+
+      effectResults.push(item.title);
+
+    }
+
+  });
+
+  const suggestResults = [];
+
+  suggestKeywords.forEach(item=>{
+
+    let found = false;
+
+    item.keywords.forEach(keyword=>{
+
+      if(allText.includes(keyword)){
+
+        found = true;
+
+      }
+
+    });
+
+    if(found){
+
+      suggestResults.push(item.title);
+
+    }
+
+  });
+
+  while(effectResults.length < 5){
+
+    effectResults.push("學員普遍表示本次研習具有學習收穫");
+
+  }
+
+  while(suggestResults.length < 5){
+
+    suggestResults.push("建議持續辦理相關研習課程");
+
+  }
+
+  const effectDom = document.getElementById("effectList");
+
+  effectDom.innerHTML = "";
+
+  effectResults.slice(0,10).forEach(item=>{
+
+    effectDom.innerHTML += `
+      <li data-copy-text="${item}">✅ ${item}</li>
+    `;
+
+  });
+
+  const suggestDom = document.getElementById("suggestList");
+
+  suggestDom.innerHTML = "";
+
+  suggestResults.slice(0,10).forEach(item=>{
+
+    suggestDom.innerHTML += `
+      <li data-copy-text="${item}">📌 ${item}</li>
+    `;
+
+  });
+
+}
+
+/* =====================================================
+   第二區分析
+===================================================== */
+function analyzeSatisfaction(data){
+
+  const goalStats = countAllLevels(data,["研習課程目標", "研習課程目標 （必填）"]);
+
+  const contentStats = countAllLevels(data,["研習課程內容", "研習課程內", "研習課程內容 （必填）"]);
+
+  const teacherStats = countAllLevels(data,["講座授課方式", "講座授課方式 （必填）"]);
+
+  updateSatisfactionUI(
+    "goalScore",
+    "goalBar",
+    goalStats.percent
+  );
+
+  updateSatisfactionUI(
+    "contentScore",
+    "contentBar",
+    contentStats.percent
+  );
+
+  updateSatisfactionUI(
+    "teacherScore",
+    "teacherBar",
+    teacherStats.percent
+  );
+
+  updateOverallSatisfaction(goalStats,contentStats,teacherStats);
+
+  createTable(goalStats,contentStats,teacherStats);
+}
+
+/* =====================================================
+   統計所有滿意程度
+===================================================== */
+function countAllLevels(data,columns){
+
+  const columnNames = Array.isArray(columns) ? columns : [columns];
+
+  const stats = {
+    veryGood:0,
+    good:0,
+    normal:0,
+    bad:0,
+    veryBad:0,
+    score:0,
+    validResponses:0,
+    total:data.length,
+    percent:0
+  };
+
+  data.forEach(row=>{
+
+    // 同一題目可使用不同欄位名稱；若同列同時存在，優先採用第一個有填答的欄位。
+    const value = String(
+      columnNames.map(column => row[column]).find(value => value !== undefined && value !== null && String(value).trim() !== "") || ""
+    ).trim();
+
+    if(value==="非常滿意"){
+
+      stats.veryGood++;
+      stats.score++;
+      stats.validResponses++;
+
+    }
+    else if(value==="滿意"){
+
+      stats.good++;
+      stats.score++;
+      stats.validResponses++;
+
+    }
+    else if(value==="尚可"){
+
+      stats.normal++;
+      stats.validResponses++;
+
+    }
+    else if(value==="不滿意"){
+
+      stats.bad++;
+      stats.validResponses++;
+
+    }
+    else if(value==="非常不滿意"){
+
+      stats.veryBad++;
+      stats.validResponses++;
+
+    }
+
+  });
+
+  stats.percent = (
+    stats.validResponses > 0
+      ? (stats.score / stats.validResponses) * 100
+      : 0
+  ).toFixed(1);
+
+  return stats;
+}
+
+/* =====================================================
+   更新滿意度 UI
+===================================================== */
+function updateSatisfactionUI(textId,barId,score){
+
+  document.getElementById(textId).innerText = score + "%";
+
+  document.getElementById(barId).style.width = score + "%";
+}
+
+/* =====================================================
+   更新總滿意度圓餅圖
+===================================================== */
+function updateOverallSatisfaction(goal,content,teacher){
+
+  const scores = [goal,content,teacher]
+    .filter(item => item.validResponses > 0)
+    .map(item => Number(item.percent));
+
+  const overall = scores.length
+    ? scores.reduce((sum,score) => sum + score,0) / scores.length
+    : 0;
+
+  const displayScore = overall.toFixed(1);
+  const chart = document.getElementById("overallChart");
+
+  document.getElementById("overallScore").innerText = displayScore + "%";
+
+  chart.style.background = `conic-gradient(#22c55e 0% ${displayScore}%,#e5e7eb ${displayScore}% 100%)`;
+
+  chart.setAttribute(
+    "aria-label",
+    `總滿意度圓餅圖，目前為 ${displayScore}%`
+  );
+
+  document.getElementById("overallFormula").innerText = scores.length === 3
+    ? `計算式：((${goal.percent}% + ${content.percent}% + ${teacher.percent}%) ÷ 3) = ${displayScore}%`
+    : `目前僅有 ${scores.length} 項有效滿意度資料，總滿意度以可用項目平均為 ${displayScore}%。`;
+}
+
+/* =====================================================
+   建立統計表格
+===================================================== */
+function createTable(goal,content,teacher){
+
+  const tbody = document.getElementById("tableBody");
+
+  tbody.innerHTML = `
+    <tr>
+      <td class="item-label">研習課程目標</td>
+      <td>${goal.veryGood}</td>
+      <td>${goal.good}</td>
+      <td class="needs-attention">${goal.normal}</td>
+      <td class="needs-attention">${goal.bad}</td>
+      <td class="needs-attention">${goal.veryBad}</td>
+      <td class="valid-count">${goal.validResponses}</td>
+    </tr>
+
+    <tr>
+      <td class="item-label">研習課程內容</td>
+      <td>${content.veryGood}</td>
+      <td>${content.good}</td>
+      <td class="needs-attention">${content.normal}</td>
+      <td class="needs-attention">${content.bad}</td>
+      <td class="needs-attention">${content.veryBad}</td>
+      <td class="valid-count">${content.validResponses}</td>
+    </tr>
+
+    <tr>
+      <td class="item-label">講座授課方式</td>
+      <td>${teacher.veryGood}</td>
+      <td>${teacher.good}</td>
+      <td class="needs-attention">${teacher.normal}</td>
+      <td class="needs-attention">${teacher.bad}</td>
+      <td class="needs-attention">${teacher.veryBad}</td>
+      <td class="valid-count">${teacher.validResponses}</td>
+    </tr>
+  `;
+}
+
+/* =====================================================
+   清除資料
+===================================================== */
+function clearAll(){
+
+  document.getElementById("excelFile").value = "";
+
+  selectedFile = null;
+
+  fileDropZone.classList.remove("is-ready","is-dragging");
+
+  document.getElementById("dropZoneTitle").innerText = "拖曳 XLSX 檔案到此處";
+
+  document.getElementById("importStatus").classList.remove("is-ready");
+
+  document.getElementById("importStatusTitle").innerText = "尚未匯入檔案";
+
+  document.getElementById("importStatusInfo").innerText = "請拖曳或點擊上方區域選擇 Excel 檔案。";
+
+  document.getElementById("resultArea").classList.add("hidden");
+
+  document.getElementById("effectList").innerHTML = "";
+
+  document.getElementById("suggestList").innerHTML = "";
+
+  document.getElementById("tableBody").innerHTML = "";
+
+  updateSatisfactionUI("goalScore","goalBar",0);
+  updateSatisfactionUI("contentScore","contentBar",0);
+  updateSatisfactionUI("teacherScore","teacherBar",0);
+
+  updateOverallSatisfaction(
+    {percent:0,validResponses:0},
+    {percent:0,validResponses:0},
+    {percent:0,validResponses:0}
+  );
+
+  playClearSound();
+}
+
+/* =====================================================
+   成功音效
+===================================================== */
+function playSuccessSound(){
+
+  const ctx = new(window.AudioContext||window.webkitAudioContext)();
+
+  const osc = ctx.createOscillator();
+
+  const gain = ctx.createGain();
+
+  osc.type = "triangle";
+
+  osc.frequency.setValueAtTime(400,ctx.currentTime);
+
+  osc.frequency.exponentialRampToValueAtTime(
+    900,
+    ctx.currentTime+0.3
+  );
+
+  gain.gain.setValueAtTime(0.001,ctx.currentTime);
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.4,
+    ctx.currentTime+0.05
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    ctx.currentTime+0.5
+  );
+
+  osc.connect(gain);
+
+  gain.connect(ctx.destination);
+
+  osc.start();
+
+  osc.stop(ctx.currentTime+0.5);
+}
+
+/* =====================================================
+   清除音效
+===================================================== */
+function playClearSound(){
+
+  const ctx = new(window.AudioContext||window.webkitAudioContext)();
+
+  const osc = ctx.createOscillator();
+
+  const gain = ctx.createGain();
+
+  osc.type = "sine";
+
+  osc.frequency.setValueAtTime(700,ctx.currentTime);
+
+  osc.frequency.exponentialRampToValueAtTime(
+    200,
+    ctx.currentTime+0.3
+  );
+
+  gain.gain.setValueAtTime(0.001,ctx.currentTime);
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.3,
+    ctx.currentTime+0.05
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    ctx.currentTime+0.4
+  );
+
+  osc.connect(gain);
+
+  gain.connect(ctx.destination);
+
+  osc.start();
+
+  osc.stop(ctx.currentTime+0.4);
+}
+</script>
+
+</body>
+</html>
