@@ -386,6 +386,58 @@
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap: 14px;
     }
+    .group-navigator{
+      grid-column: 1 / -1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px;
+      border-radius:18px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.09);
+    }
+    .group-nav-title{ display:flex; align-items:center; gap:8px; min-width:0; }
+    .group-nav-title strong{ font-size:14px; white-space:nowrap; }
+    .more-link{
+      appearance:none;
+      border:0;
+      background:transparent;
+      color:#62e0ff;
+      font:inherit;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      padding:8px;
+      border-radius:10px;
+    }
+    .more-link:hover, .more-link:focus-visible{ background:rgba(98,224,255,.12); outline:none; }
+    .group-page-controls{ display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+    .group-page-btn{
+      width:38px; height:38px; border-radius:12px; border:1px solid rgba(255,255,255,.13);
+      background:rgba(255,255,255,.06); color:#fff; cursor:pointer; font-size:22px; line-height:1;
+    }
+    .group-page-btn:hover:not(:disabled), .group-page-btn:focus-visible{ background:rgba(124,140,255,.25); outline:2px solid rgba(98,224,255,.7); outline-offset:2px; }
+    .group-page-btn:disabled{ opacity:.35; cursor:not-allowed; }
+    .group-page-indicator{ min-width:86px; text-align:center; color:#dfe7ff; font-size:13px; font-weight:800; }
+    .groups > .card{ grid-column: 1 / -1; }
+    .help-modal[hidden]{ display:none; }
+    .help-modal{
+      position:fixed; z-index:1000; inset:0; display:grid; place-items:center;
+      padding:max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      background:rgba(2,6,18,.62); backdrop-filter:blur(8px);
+    }
+    .help-dialog{
+      position:relative; width:min(620px, 100%); max-height:calc(100vh - 32px); overflow:auto;
+      padding:24px; border-radius:24px; background:linear-gradient(160deg, #18213e, #0d1428);
+      border:1px solid rgba(152,170,255,.35); box-shadow:0 22px 70px rgba(0,0,0,.5); color:#f5f7ff;
+    }
+    .help-dialog h3{ margin:0 42px 12px 0; font-size:20px; }
+    .help-dialog h4{ margin:18px 0 7px; color:#9deeff; font-size:15px; }
+    .help-dialog p, .help-dialog li{ color:#d9e2ff; line-height:1.75; font-size:14px; }
+    .help-dialog ul{ margin:7px 0; padding-left:22px; }
+    .help-close{ position:absolute; top:14px; right:14px; width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); color:#fff; cursor:pointer; font-size:23px; }
+    .help-close:hover, .help-close:focus-visible{ background:rgba(255,125,136,.2); outline:2px solid rgba(255,202,103,.8); outline-offset:2px; }
     .card{
       border-radius: 24px;
       padding: 16px;
@@ -580,6 +632,7 @@
       border: 1px solid rgba(255,255,255,.07);
     }
     .small-muted{ color: var(--muted); font-size: 12px; }
+    .label-icon{ display:inline-flex; vertical-align:-2px; margin-right:6px; color:#62e0ff; }
     .preview{
       position: sticky;
       top: 18px;
@@ -792,73 +845,281 @@
       .meta-grid{ grid-template-columns: 1fr; }
       .details-grid{ grid-template-columns: 1fr; }
       .toolbar, .toolbar .left, .toolbar .right{ justify-content:flex-start; }
+      .group-navigator{ align-items:flex-start; flex-direction:column; }
+      .group-page-controls{ width:100%; justify-content:space-between; }
       .mini-stat b{ font-size: 22px; }
+    }
+    /* V8 工作流程介面：以單一主要任務、漸進揭露取代資訊堆疊。 */
+    :root{
+      --bg:#0b1220;
+      --bg2:#111827;
+      --active-gradient:linear-gradient(110deg, #67e8f9 0%, #60a5fa 25%, #ffffff 44%, #f0abfc 52%, #a78bfa 70%, #fde68a 100%);
+      --card:#111b2e;
+      --card2:#16243a;
+      --line:#2a3a53;
+      --text:#f4f7fb;
+      --muted:#aab8cc;
+      --accent:#3b82f6;
+      --accent2:#38bdf8;
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --radius:16px;
+      --radius2:12px;
+      --radius3:10px;
+      --shadow:0 10px 28px rgba(2,6,23,.28);
+    }
+    body{
+      background:
+        radial-gradient(circle at 8% 8%, rgba(59,130,246,.28), transparent 30%),
+        radial-gradient(circle at 92% 14%, rgba(14,165,233,.18), transparent 26%),
+        radial-gradient(circle at 52% 100%, rgba(30,64,175,.28), transparent 42%),
+        linear-gradient(135deg, #0b1730 0%, #132a4a 48%, #101b38 100%);
+      background-attachment:fixed;
+    }
+    .app{ max-width:1240px; padding:20px; }
+    .hero,.panel,.card{
+      background:linear-gradient(145deg, rgba(20,38,65,.94), rgba(12,25,47,.92));
+      border-color:rgba(148,184,235,.20);
+      box-shadow:0 14px 34px rgba(2,8,23,.25);
+      backdrop-filter:blur(10px);
+    }
+    .hero{ padding:24px; border-radius:20px; }
+    .hero::before{ display:none; }
+    .hero-grid{ grid-template-columns:minmax(0,1fr) auto; align-items:center; }
+    .title-wrap{ min-height:0; gap:8px; }
+    .eyebrow{ padding:5px 9px; background:#172554; border-color:#264a83; color:#cfe4ff; }
+    h1{
+      font-family:"Arial Black", "Noto Sans TC", system-ui, sans-serif;
+      font-size:clamp(30px,4vw,45px);
+      font-weight:900;
+      letter-spacing:-.055em;
+      color:transparent !important;
+      background:var(--active-gradient);
+      background-size:260% 100%;
+      background-position:0% 50%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 2px 10px rgba(125,211,252,.25));
+      animation:titleShimmer 32s ease-in-out infinite;
+    }
+    .title-wrap h1 span{ color:inherit !important; }
+    @keyframes titleShimmer{
+      0%, 18%{ background-position:0% 50%; }
+      50%, 68%{ background-position:100% 50%; }
+      100%{ background-position:0% 50%; }
+    }
+    .subtitle{ max-width:720px; color:var(--muted); font-size:15px; line-height:1.65; }
+    .hero-chip-row{ margin-top:6px; }
+    .chip{ background:#162238; border-color:var(--line); color:#d9e7fb; }
+    .hero-side{ display:block; }
+    .hero-side .mini-stat:not(:first-child){ display:none; }
+    .hero-side{ min-width:340px; }
+    .mini-stat{ width:100%; min-width:340px; min-height:126px; padding:20px 22px; border-radius:17px; background:linear-gradient(145deg, #1b3b67, #162746); border-color:#5682b8; box-shadow:0 12px 26px rgba(2,12,31,.24); }
+    .mini-stat > span{ font-size:14px; color:#cfe8ff; font-weight:800; }
+    .mini-stat b{ display:block; margin-top:7px; font-size:25px; line-height:1.25; color:#fff; }
+    .export-progress{ display:none; margin-top:16px; width:100%; }
+    .app[data-stage="exporting"] .export-progress{ display:block; }
+    .export-progress > div:first-child{ display:flex; justify-content:space-between; gap:12px; color:#fef3c7; font-size:14px; }
+    .export-progress-track{ width:100%; height:18px; margin-top:9px; overflow:hidden; border-radius:999px; background:#071326; border:2px solid rgba(255,255,255,.24); }
+    .export-progress-track > span{ display:block; width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg, #22d3ee, #60a5fa, #c084fc, #fbbf24); box-shadow:0 0 14px rgba(96,165,250,.75); transition:width .22s ease; }
+    .workflow-steps{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:14px 0; }
+    .workflow-step{ padding:10px 12px; border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:13px; background:#101a2d; }
+    .workflow-step[aria-current="step"]{
+      color:#10213f;
+      font-weight:900;
+      background:var(--active-gradient);
+      border-color:#dbeafe;
+      box-shadow:0 7px 18px rgba(96,165,250,.32);
+    }
+    .layout{ grid-template-columns:330px minmax(0,1fr); gap:14px; margin-top:0; }
+    .panel{ border-radius:16px; padding:16px; }
+    .control-panel{ position:sticky; top:14px; }
+    .section-title{ margin-bottom:10px; }
+    .section-title h2{ font-size:17px; }
+    .field{ padding:12px; border-radius:12px; background:linear-gradient(145deg, rgba(23,44,74,.94), rgba(14,29,53,.94)); border-color:rgba(148,184,235,.18); }
+    .help{ line-height:1.45; }
+    .field .help[style], .field span[style]{ color:var(--muted) !important; }
+    .btn{ min-height:44px; padding:10px 13px; border-radius:10px; background:linear-gradient(135deg, #0ea5e9, #2563eb); color:#fff; font-weight:800; box-shadow:0 8px 18px rgba(14,165,233,.22); }
+    .btn.good{ background:linear-gradient(135deg, #22c55e, #059669); box-shadow:0 8px 18px rgba(34,197,94,.22); }
+    .btn.warn{ background:linear-gradient(135deg, #f59e0b, #ea580c); color:#fff; box-shadow:0 8px 18px rgba(245,158,11,.24); }
+    .btn.secondary{ background:linear-gradient(135deg, #1e3a5f, #233d67); border-color:#5b85b9; color:#eaf4ff; box-shadow:none; }
+    #pickSourceBtn{ background:linear-gradient(135deg, #06b6d4, #2563eb); }
+    #analyzeBtn{ background:linear-gradient(135deg, #22c55e, #059669); }
+    #exportBtn{ background:linear-gradient(135deg, #fbbf24, #ea580c); }
+    .btn:focus-visible,.thumb:focus-visible,.mini-thumb:focus-visible,.switch input:focus-visible + .slider{ outline:3px solid #93c5fd; outline-offset:3px; }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; filter:none; transform:none; }
+    .switch input{ position:absolute; opacity:0; width:1px; height:1px; }
+    .dragArea{
+      margin-top:0; min-height:210px; padding:18px; border-radius:14px;
+      background:linear-gradient(145deg, #ffffff, #eef5ff);
+      border-color:#3b82f6;
+      box-shadow:0 12px 26px rgba(2,12,31,.18);
+    }
+    .dragArea:hover{ border-color:#2563eb; background:linear-gradient(145deg, #ffffff, #e7f1ff); box-shadow:0 16px 30px rgba(30,64,175,.22); }
+    .dragArea.drag{ background:linear-gradient(145deg, #eff6ff, #dbeafe); border-color:#2563eb; box-shadow:0 0 0 3px rgba(59,130,246,.18),0 16px 30px rgba(30,64,175,.20); }
+    .dragArea.success{ background:linear-gradient(145deg, #f0fdf4, #dcfce7); border-color:#16a34a; box-shadow:0 0 0 3px rgba(34,197,94,.15),0 16px 30px rgba(22,163,74,.15); }
+    .dragArea.error{ background:linear-gradient(145deg, #fff7ed, #ffedd5); border-color:#ea580c; box-shadow:0 0 0 3px rgba(249,115,22,.15),0 16px 30px rgba(234,88,12,.13); }
+    .dragTitle h3{ margin:0; font-size:18px; color:#10213f !important; }
+    .dragTitle h4{ margin:2px 0 0; font-size:13px; font-weight:600; color:#52637b !important; }
+    .dragText{ color:#40516b; font-weight:600; }
+    .dragIcon{ background:linear-gradient(145deg, #2563eb, #1d4ed8); color:#fff; box-shadow:0 10px 20px rgba(37,99,235,.24); }
+    .dragMeta{ display:none; }
+    .dragStatus{ font-weight:700; border-radius:10px; background:#f8fbff; border-color:#c7d8f3; color:#243b5a; }
+    .dragStatus.ok{ background:#ecfdf3; border-color:#86efac; color:#166534; }
+    .dragStatus.warn{ background:#fff7ed; border-color:#fdba74; color:#9a3412; }
+    .meta-grid{ gap:8px; }
+    .metric{ min-height:76px; padding:12px; border-radius:12px; background:linear-gradient(145deg, #132d50, #10213d); border-color:#365a85; }
+    .metric .v{ font-size:22px; margin-top:5px; color:#7dd3fc; font-weight:900; }
+    .metric:nth-child(2) .v{ color:#a7f3d0; }
+    .metric:nth-child(3) .v{ color:#fde68a; }
+    .metric:nth-child(4) .v{ color:#fda4af; }
+    .badge{ background:rgba(30,64,110,.82); border-color:#4d7eb6; color:#e8f4ff; font-weight:700; }
+    #scanBadge{ background:linear-gradient(135deg, #1d4ed8, #0e7490); border-color:#67e8f9; color:#fff; }
+    .notice{ background:linear-gradient(135deg, rgba(6,78,59,.88), rgba(15,118,110,.64)); border-color:#5eead4; color:#ecfdf5; }
+    .notice.warn{ background:linear-gradient(135deg, rgba(120,53,15,.90), rgba(154,52,18,.70)); border-color:#fcd34d; color:#fffbeb; }
+    input[type="range"]{ accent-color:#38bdf8; }
+    .preview{ position:static; }
+    .preview-hero{ border-radius:12px; }
+    .groups{ grid-template-columns:1fr; }
+    .card{ border-radius:14px; padding:14px; }
+    .thumb,.mini-thumb{ border-radius:10px; }
+    .thumb{ border:0; padding:0; text-align:left; }
+    .mini-thumb{ border:1px solid var(--line); padding:0; }
+    .group-navigator{ border-radius:12px; background:#101a2d; border-color:var(--line); }
+    .notice{ border-radius:12px; }
+    .toast{ border-radius:12px; }
+    .footer{ margin-top:14px; padding:12px; border-radius:12px; }
+    .app[data-stage="import"] .stage-ready,
+    .app[data-stage="import"] .stage-review,
+    .app[data-stage="import"] .stage-export,
+    .app[data-stage="ready"] .stage-review,
+    .app[data-stage="ready"] .stage-export,
+    .app[data-stage="analyzing"] .stage-export,
+    .app[data-stage="analyzing"] .stage-review{ display:none !important; }
+    .app[data-stage="review"] .stage-ready,
+    .app[data-stage="exporting"] .stage-ready{ display:none !important; }
+    .app[data-stage="ready"] .stage-import,
+    .app[data-stage="analyzing"] .stage-import,
+    .app[data-stage="review"] .stage-import,
+    .app[data-stage="exporting"] .stage-import{ display:none !important; }
+    .stage-conditional{ transition:opacity .18s ease; }
+    .preset-row{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+    .preset-btn{ min-height:44px; border:1px solid var(--line); border-radius:10px; background:#162238; color:var(--text); cursor:pointer; padding:8px; font:inherit; font-size:13px; }
+    .preset-btn[aria-pressed="true"]{ border-color:#60a5fa; background:#17345f; }
+    .preset-btn[data-export-preset], .preset-btn[data-export-preset] small{ color:#fde047; font-weight:800; }
+    .yellow-label{ color:#fde047 !important; font-weight:900; }
+    .compact-note{ margin-top:8px; color:var(--muted); font-size:12px; line-height:1.5; }
+    .similarity-guide{ margin-top:8px; color:#fde047; font-size:12px; font-weight:800; line-height:1.7; }
+    .export-complete{ position:fixed; z-index:1200; inset:0; display:grid; place-items:center; padding:20px; background:rgba(2,8,23,.58); backdrop-filter:blur(6px); }
+    .export-complete[hidden]{ display:none; }
+    .export-complete-card{ display:flex; align-items:flex-start; gap:14px; width:min(560px,100%); padding:22px; border:1px solid #86efac; border-radius:20px; background:linear-gradient(135deg, #14532d, #0f766e); color:#f0fdf4; box-shadow:0 24px 60px rgba(2,8,23,.56); animation:completePop .35s ease both; }
+    .export-complete-icon{ display:grid; place-items:center; width:48px; height:48px; flex:0 0 auto; border-radius:50%; background:linear-gradient(135deg, #bef264, #22c55e); color:#12351f; font-size:28px; font-weight:900; }
+    .export-complete-body{ min-width:0; flex:1; }
+    .export-complete-card strong{ display:block; color:#fff; font-size:22px; }
+    .export-complete-card p{ margin:4px 0 0; color:#dcfce7; font-size:14px; line-height:1.5; }
+    .export-complete-close{ margin-left:auto; align-self:flex-start; width:44px; height:44px; flex:0 0 44px; border:1px solid rgba(255,255,255,.38); border-radius:12px; background:rgba(255,255,255,.12); color:#fff; cursor:pointer; font-size:24px; line-height:1; }
+    .export-complete-close:hover,.export-complete-close:focus-visible{ background:rgba(255,255,255,.22); outline:3px solid rgba(255,255,255,.68); outline-offset:3px; }
+    .export-complete-card .export-path-link{ display:flex; align-items:center; gap:10px; width:100%; height:auto; min-height:52px; margin:15px 0 0; padding:11px 13px; border:1px solid #99f6e4; border-radius:12px; background:rgba(2,44,52,.64); color:#fef3c7; cursor:pointer; text-align:left; font:inherit; font-size:14px; font-weight:800; line-height:1.5; }
+    .export-path-link:hover,.export-path-link:focus-visible{ background:rgba(13,148,136,.54) !important; border-color:#fef08a !important; outline:3px solid rgba(253,224,71,.65); outline-offset:3px; }
+    .export-path-link[hidden]{ display:none; }
+    .export-path-link .path-icon{ display:grid; place-items:center; flex:0 0 24px; }
+    .export-path-link .path-text{ display:block; min-width:0; flex:1; white-space:normal; overflow-wrap:anywhere; }
+    @keyframes completePop{ from{ transform:scale(.94) translateY(12px); opacity:0; } to{ transform:scale(1) translateY(0); opacity:1; } }
+    .review-queue{ margin-top:14px; }
+    .review-queue[hidden]{ display:none; }
+    .review-queue:not([hidden]){ margin:0 0 18px; padding:3px; border-radius:17px; background:linear-gradient(110deg, #f97316, #facc15, #fb7185); box-shadow:0 12px 30px rgba(249,115,22,.20); }
+    .review-queue .card{ margin:0; border-color:transparent; background:linear-gradient(145deg, #3b1d22, #1d2945); }
+    .review-queue .group-title h3{ color:#fde047; font-size:19px; }
+    .review-queue .detail{ border-color:rgba(253,224,71,.25); }
+    .failure-list{ margin:8px 0 0; padding-left:18px; color:#fde68a; font-size:12px; }
+    .file-input{ position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; }
+    #cancelAnalyzeBtn{ display:none; }
+    .app[data-stage="analyzing"] #cancelAnalyzeBtn{ display:inline-flex; }
+    .app:not([data-embedded="true"]) #openStandaloneBtn{ display:none; }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+    }
+    @media (max-width:980px){
+      .layout{ grid-template-columns:1fr; }
+      .control-panel{ position:static; }
+      .hero-grid{ grid-template-columns:1fr; }
+      .hero-side{ display:block; min-width:0; margin-top:14px; }
+      .mini-stat{ min-width:0; min-height:112px; }
+    }
+    @media (max-width:620px){
+      .app{ padding:12px; }
+      .hero{ padding:18px; }
+      .workflow-steps{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .workflow-step{ padding:8px 10px; }
+      .hero-chip-row{ display:none; }
+      .preset-row{ grid-template-columns:1fr; }
+      .input-row .btn{ width:100%; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="app" id="appShell" data-stage="import">
     <section class="hero">
       <div class="hero-grid">
         <div class="title-wrap">
-          <div class="eyebrow">✨ 免費活動照片挑選器｜Event Photo Selector</div>
-          <h1><span style="color:#ffff00">免費活動照片挑選器</span></h1>
-          <p class="subtitle">
-            這是一個專為一般大眾設計的單頁網頁應用程式：選取資料夾後，可自動找出類似照片、每組只留一張最佳照片，並將結果安全輸出到其他資料夾。全程本機處理，操作簡單、畫面清楚、流程安全。
-          </p>
-
-
-          <div class="subtitle" style="color:#6699ff; line-height:1.9; margin-top:6px;">
-● 全部本機處理，不上傳雲端，使用者照片不會離開電腦<br>
-● 不影響原檔，不會刪除照片，預設輸出：原資料夾內新增的Output資料夾<br>
-● 優先移除模糊的照片，比較類似照片，挑選出合適的照片<br>
-● 支援常見格式：JPG、PNG、HEIC、WEBP、GIF，批次轉換成JPG<br>
-● 支援批次縮小圖片：可開啟"長"和"寬"均限制在1980像素以內<br>
-● 批次壓縮比例：可選95%、90%、75%、70%(預設)
-</div>
-
-
+          <div class="eyebrow">活動照片整理工具</div>
+          <h1>活動照片挑選器</h1>
+          <p class="subtitle">找出相似與低清晰度照片，全程在你的電腦上完成；原始照片不會被刪除。</p>
           <div class="hero-chip-row">
-            <div class="chip">🔒 全部本機處理</div>
-            <div class="chip">🧭 一鍵分群挑選</div>
-            <div class="chip">🖼️ JPG / PNG / HEIC / WEBP / GIF</div>
-            <div class="chip">⚡ 批次轉 JPG / 縮小 / 壓縮</div>
+            <div class="chip">本機處理</div>
+            <div class="chip">人工覆核後再匯出</div>
           </div>
         </div>
         <div class="hero-side">
           <div class="mini-stat">
             <span>目前狀態</span>
             <b id="heroStatus">等待匯入照片</b>
-          </div>
-          <div class="mini-stat">
-            <span>安全模式</span>
-            <b>預設不刪原檔</b>
-          </div>
-          <div class="mini-stat">
-            <span>頁面模式</span>
-            <b>單頁獨立執行</b>
+            <div class="export-progress" id="exportProgress" aria-live="polite">
+              <div><strong>本機匯出中</strong><span id="exportProgressPct">0%</span></div>
+              <div class="export-progress-track" role="progressbar" aria-label="本機匯出進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="exportProgressBar"></span></div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
+    <nav class="workflow-steps" aria-label="處理步驟">
+      <div class="workflow-step" id="stepImport" aria-current="step">1　匯入照片</div>
+      <div class="workflow-step" id="stepAnalyze">2　分析設定</div>
+      <div class="workflow-step" id="stepReview">3　覆核結果</div>
+      <div class="workflow-step" id="stepExport">4　匯出照片</div>
+    </nav>
+
     <div class="layout">
-      <aside class="panel">
+      <aside class="panel control-panel">
         <div class="section-title">
           <div>
-            <h2>操作控制區</h2>
-            <p>每個設定都附上白話說明，讓一般使用者能直接上手。</p>
+            <h2>從資料夾開始</h2>
+            <p>依步驟完成匯入、分析、覆核與匯出。</p>
           </div>
         </div>
 
         <div class="stack">
+          <div class="field stage-export stage-conditional">
+            <label>輸出方案 <span class="small-muted">原檔優先，避免不必要的重新編碼</span></label>
+            <div class="preset-row" aria-label="輸出方案">
+              <button type="button" class="preset-btn" data-export-preset="original">保留原檔<br><small>建議留存</small></button>
+              <button type="button" class="preset-btn" data-export-preset="archive" aria-pressed="true">一般留存<br><small>JPG 90%</small></button>
+              <button type="button" class="preset-btn" data-export-preset="share">網路分享<br><small>JPG 75%</small></button>
+              <button type="button" class="preset-btn" data-export-preset="custom">自訂輸出<br><small>調整下方選項</small></button>
+            </div>
+            <div class="compact-note" id="exportPresetHint">轉成 JPG 90%，長邊最多 2560 像素，適合一般留存。</div>
+          </div>
+
           <div class="field">
             <label>來源資料夾 <span class="small-muted">選取要分析的照片資料夾</span></label>
             <div class="input-row">
               <button class="btn" id="pickSourceBtn">
                 <span>📁</span><span>選擇來源資料夾</span>
               </button>
-              <input id="sourceFolderInput" class="hidden" type="file" webkitdirectory multiple />
+              <input id="sourceFolderInput" class="file-input" type="file" webkitdirectory multiple />
             </div>
             <div class="help" id="sourceHint">尚未選擇。可先選擇是否包含子資料夾，預設關閉。</div>
           </div>
@@ -878,13 +1139,8 @@
 
           <div class="dragArea" id="dragDropZone" tabindex="0" role="button" aria-label="拖曳圖片或資料夾到這裡">
             <div class="dragIcon">🖼️</div>
-            <div class="dragTitle">
-
-            <span style="color:#ffff00"><h3>拖曳圖片或資料夾到這裡</h3></span>
-            <span style="color:#ffff00"><h4>（拖入後請稍等，讀取需數秒）</h4></span>
-
-</div>
-            <div class="dragText">支援單張、多張圖片，以及整個資料夾。放開後會自動匯入來源資料夾，並立即檢核是否成功讀取。</div>
+            <div class="dragTitle"><h3>拖曳圖片或資料夾到這裡</h3><h4>或按上方按鈕選擇來源資料夾</h4></div>
+            <div class="dragText">支援 JPG、PNG、WEBP 與可由目前瀏覽器讀取的 HEIC／GIF 圖片。</div>
             <div class="dragMeta">
               <span class="pill">📷 圖片檔</span>
               <span class="pill">📁 資料夾</span>
@@ -894,7 +1150,7 @@
             <div class="dragStatus" id="dragStatus">尚未匯入，拖曳圖片或資料夾後會在這裡顯示成功狀態。</div>
           </div>
 
-          <div class="field">
+          <div class="field stage-export stage-conditional">
             <label>來源寫入權限 <span class="small-muted">預設直接在原資料夾內建立 Output 資料夾</span></label>
             <div class="input-row">
               <button class="btn secondary" id="pickOutputBtn">
@@ -906,30 +1162,31 @@
             <div class="help"><BR>若目前沒有可寫入權限，請先按「確認來源資料夾權限」重新選擇同一個來源資料夾並允許存取；若你是從 Google 協作平台內嵌開啟，建議按「開啟獨立模式」後再進行匯出，成功率最高。</div>
           </div>
 
-          <div class="field">
+          <div class="field stage-ready stage-conditional">
             <div class="toggle-row">
               <div class="mode">
-                <label>相似度門檻 <span class="small-muted">越低(輸出少)、越高(輸出多)</span></label>
+                <label for="similarity">相似度判定 <span class="small-muted">先選預設，必要時再微調</span></label>
+                <div class="preset-row" aria-label="相似度預設">
+                  <button type="button" class="preset-btn" data-similarity-preset="92">保守<br><small>保留較多</small></button>
+                  <button type="button" class="preset-btn" data-similarity-preset="85" aria-pressed="true">平衡<br><small>建議使用</small></button>
+                  <button type="button" class="preset-btn" data-similarity-preset="75">精簡<br><small>合併較多</small></button>
+                </div>
+                <details open>
+                  <summary>微調相似度</summary>
                 <div class="range-row">
-                  <input id="similarity" class="range" type="range" min="70" max="98" value="85" />
+                  <input id="similarity" class="range" type="range" min="50" max="95" value="85" />
                   <output id="similarityValue">85%</output>
                 </div>
-                <div class="help">建議先用 85% (預設)，75% (輸出少)、95% (輸出多)。
-
-<span style="color:#ffff00">
-<br>● 數值越低「相似」判定越寬，更多合併，輸出越少。
-<br>● 數值越高「相似」判定越嚴，更少合併，輸出越多。
-</span>
-
-</div>
+                <div class="similarity-guide">● 數值低「相似」判定寬，合併多，輸出少<br>● 數值高「相似」判定嚴，合併少，輸出多</div>
+                </details>
               </div>
             </div>
           </div>
 
-          <div class="field">
+          <div class="field stage-export stage-conditional">
             <div class="toggle-row">
               <div class="mode">
-                <label>批次轉 JPG <span class="small-muted">將輸出統一為 JPG</span></label>
+                <label class="yellow-label">批次轉 JPG <span class="small-muted">將輸出統一為 JPG</span></label>
                 <div class="help">適合想要統一格式、分享或節省空間時使用。</div>
               </div>
               <label class="switch">
@@ -939,10 +1196,10 @@
             </div>
           </div>
 
-          <div class="field">
+          <div class="field stage-export stage-conditional">
             <div class="toggle-row">
               <div class="mode">
-                <label>批次縮小圖片 <span class="small-muted">長寬限制在 1980 像素內</span></label>
+                <label class="yellow-label">批次縮小圖片 <span class="small-muted">長寬限制在 1980 像素內</span></label>
                 <div class="help">保留清晰度同時降低檔案大小，適合大量活動照。</div>
               </div>
               <label class="switch">
@@ -952,67 +1209,51 @@
             </div>
           </div>
 
-          <div class="field">
-            <label>壓縮比例 <span class="small-muted">預設 70%</span></label>
-            <select id="quality">
-              <option value="0.95">95%</option>
-              <option value="0.9">90%</option>
-              <option value="0.75">75%</option>
-              <option value="0.7" selected>70%</option>
-            </select>
+          <div class="field stage-export stage-conditional">
+            <label for="quality">自訂壓縮比例 <span class="small-muted">僅在自訂方案時使用</span></label>
+            <div class="range-row">
+              <input id="quality" class="range" type="range" min="30" max="95" value="90" step="1" />
+              <output id="qualityValue">90%</output>
+            </div>
             <div class="help">數值越低，檔案越小；若是一般活動照片，70% 通常足夠平衡品質與容量。<br></div>
             <div class="help" style="color:#ffff00">一般照片留存建議選擇90%，網路上傳照片建議選擇70%。</span></div>
           </div>
 
 
 
-          <div class="field">
+          <div class="field stage-ready stage-conditional">
             <label>分析進度</label>
             <div class="progress-wrap">
               <div class="progress-head">
                 <span id="progressText">尚未開始</span>
                 <span id="progressPct">0%</span>
               </div>
-              <div class="progress-bar"><span id="progressBar"></span></div>
+              <div class="progress-bar" role="progressbar" aria-label="分析進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progressBar"></span></div>
             </div>
           </div>
 
           <div class="field">
             <div class="input-row">
-              <button class="btn good" id="analyzeBtn">
-                <span>⚙️</span><span>開始分析</span>
+              <button class="btn good stage-ready stage-conditional" id="analyzeBtn">
+                <span>開始分析</span>
               </button>
-              <button class="btn warn" id="exportBtn" disabled>
-                <span>⬇️</span><span>匯出篩選照片</span>
+              <button class="btn secondary" id="cancelAnalyzeBtn" type="button">取消分析</button>
+              <button class="btn warn stage-export stage-conditional" id="exportBtn" disabled>
+                <span>匯出照片</span>
               </button>
-              <button class="btn secondary" id="openStandaloneBtn" type="button">
-                <span>⧉</span><span>開啟獨立模式</span>
+              <button class="btn secondary stage-export stage-conditional" id="openStandaloneBtn" type="button">
+                <span>開啟獨立模式</span>
               </button>
-              <button class="btn" id="resetBtn" type="button">
-                <span>↺</span><span>清空重置</span>
+              <button class="btn secondary" id="resetBtn" type="button">
+                <span>重新選擇來源</span>
               </button>
             </div>
-            <div class="help" style="color:#ffff00">請先「開始分析」，分析完後，再「匯出篩選照片」。</div>
-            <div class="help">分析後可逐組檢查，系統會先檢查模糊照片，再進行保留判斷與輸出。</div>
-            <div class="help">預設輸出：原資料夾內新增的Output資料夾。
-
-<span style="color:#ffff00">
-<BR><BR>
-注意：Google協作平台內嵌，因為權限限制，<BR>
-　　　預設會輸出壓縮檔(壓縮需時，請稍等)
-
-<BR><BR>
-注意：「開啟獨立模式」，能另開完整新視窗，<BR>
-　　　預設輸出為原資料夾內的Output資料夾
-</span>
-
-
-</div>
+            <div class="compact-note">匯出時才會要求寫入權限；若無法寫入，會提供 ZIP 備援下載。</div>
           </div>
         </div>
       </aside>
 
-      <main class="workspace">
+      <main class="workspace stage-review stage-conditional">
         <section class="panel">
           <div class="section-title">
             <div>
@@ -1034,14 +1275,14 @@
               <div class="s">自動分群結果</div>
             </div>
             <div class="metric">
-              <div class="k">保留照片</div>
-              <div class="v" id="keepCount">0</div>
+              <div class="k" style="color:#ffff00">保留照片</div>
+              <div class="v" id="keepCount" style="color:#ffff00">0</div>
               <div class="s">每組保留或手動指定的照片</div>
             </div>
             <div class="metric">
-              <div class="k">排除照片</div>
-              <div class="v" id="rejectCount">0</div>
-              <div class="s">將被移至隔離資料夾</div>
+              <div class="k" style="color:#f59e0b">待確認照片</div>
+              <div class="v" id="rejectCount" style="color:#f59e0b">0</div>
+              <div class="s">低清晰度照片預設不輸出</div>
             </div>
           </div>
         </section>
@@ -1073,7 +1314,6 @@
             </div>
             <div class="right">
               <div class="badge">🧠 類似照片以本機演算法分群</div>
-              <div class="badge">🧾 可輸出 CSV / JSON 報告</div>
             </div>
           </div>
           <div class="divider"></div>
@@ -1086,10 +1326,11 @@
         <section class="panel">
           <div class="section-title">
             <div>
-              <h2>分群結果</h2>
-              <p>每一組都可人工覆核，並能直接改選保留照片。</p>
+              <h2>模糊照片優先覆核</h2>
+              <p>先確認疑似模糊照片，再檢查相似分群與系統建議。</p>
             </div>
           </div>
+          <div class="review-queue" id="lowClarityQueue" hidden></div>
           <div class="groups" id="groups"></div>
         </section>
 
@@ -1097,24 +1338,24 @@
           <div class="section-title">
             <div>
               <h2>處理摘要</h2>
-              <p>完成匯出後，可在此檢視結果、報表與操作狀態。</p>
+              <p>完成匯出後，可在此檢視結果、輸出位置與操作狀態。</p>
             </div>
           </div>
           <div class="meta-grid">
             <div class="metric">
               <div class="k">匯出狀態</div>
               <div class="v" id="exportState">尚未匯出</div>
-              <div class="s">保留照與隔離照將寫入指定資料夾</div>
+              <div class="s">僅輸出保留或手動確認的照片</div>
             </div>
             <div class="metric">
-              <div class="k">復原狀態</div>
-              <div class="v" id="restoreState">可復原</div>
-              <div class="s">保留操作紀錄，方便回頭檢查</div>
+              <div class="k">人工覆核</div>
+              <div class="v" id="restoreState">尚未覆核</div>
+              <div class="s">可保留低清晰度照片或取消群組</div>
             </div>
             <div class="metric">
-              <div class="k">報告輸出</div>
-              <div class="v" id="reportState">未產生</div>
-              <div class="s">可輸出 CSV / JSON / TXT 摘要</div>
+              <div class="k">輸出位置</div>
+              <div class="v" id="outputLocation">尚未設定</div>
+              <div class="s">完成匯出後顯示 Output 資料夾或 ZIP 下載</div>
             </div>
             <div class="metric">
               <div class="k">本機隱私</div>
@@ -1134,7 +1375,22 @@
   </div>
 
   <div class="floating">
-    <div class="toast" id="toast"><div class="spinner"></div><div id="toastText">處理中…</div></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"><div class="spinner"></div><div id="toastText">處理中…</div></div>
+  </div>
+
+  <div class="export-complete" id="exportCompleteNotice" hidden role="dialog" aria-modal="true" aria-labelledby="exportCompleteTitle">
+    <div class="export-complete-card">
+      <div class="export-complete-icon">✓</div>
+      <div class="export-complete-body"><strong id="exportCompleteTitle">處理完成</strong><p id="exportCompleteText">照片已完成輸出。</p><button type="button" class="export-path-link" id="exportCompletePath" hidden aria-label="查看輸出檔案"><span class="path-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span class="path-text" id="exportCompletePathText"></span></button></div>
+      <button type="button" class="export-complete-close" id="closeExportComplete" aria-label="關閉完成通知">×</button>
+    </div>
+  </div>
+
+  <div class="help-modal" id="helpModal" hidden aria-hidden="true">
+    <section class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle">
+      <button type="button" class="help-close" id="helpCloseBtn" aria-label="關閉說明">×</button>
+      <div id="helpDialogContent"></div>
+    </section>
   </div>
 
 <script>
@@ -1153,6 +1409,15 @@
     analyzing: false,
     exporting: false,
     selectedPreview: null,
+    groupPage: 0,
+    outputLocation: '尚未設定',
+    outputFolderName: '',
+    permissionCanceled: false,
+    failures: [],
+    cancelRequested: false,
+    blurPage: 0,
+    lastFocused: null,
+    exportPreset: 'archive',
     logs: [],
     stats: {
       total: 0,
@@ -1163,6 +1428,7 @@
   };
 
   const els = {
+    app: $('appShell'),
     sourceFolderInput: $('sourceFolderInput'),
     dragDropZone: $('dragDropZone'),
     sourceRecursiveToggle: $('sourceRecursiveToggle'),
@@ -1175,19 +1441,25 @@
     convertJpg: $('convertJpg'),
     resizeToggle: $('resizeToggle'),
     quality: $('quality'),
+    qualityValue: $('qualityValue'),
     quarantineToggle: $('quarantineToggle'),
     analyzeBtn: $('analyzeBtn'),
+    cancelAnalyzeBtn: $('cancelAnalyzeBtn'),
     exportBtn: $('exportBtn'),
     openStandaloneBtn: $('openStandaloneBtn'),
     resetBtn: $('resetBtn'),
     progressBar: $('progressBar'),
     progressText: $('progressText'),
     progressPct: $('progressPct'),
+    exportProgress: $('exportProgress'),
+    exportProgressBar: $('exportProgressBar'),
+    exportProgressPct: $('exportProgressPct'),
     totalCount: $('totalCount'),
     groupCount: $('groupCount'),
     keepCount: $('keepCount'),
     rejectCount: $('rejectCount'),
     groups: $('groups'),
+    lowClarityQueue: $('lowClarityQueue'),
     previewHero: $('previewHero'),
     previewMeta: $('previewMeta'),
     noticeBox: $('noticeBox'),
@@ -1195,11 +1467,25 @@
     sourceBadge: $('sourceBadge'),
     exportState: $('exportState'),
     restoreState: $('restoreState'),
-    reportState: $('reportState'),
+    outputLocation: $('outputLocation'),
     heroStatus: $('heroStatus'),
     privacyBadge: $('privacyBadge'),
+    helpModal: $('helpModal'),
+    helpDialogContent: $('helpDialogContent'),
+    helpCloseBtn: $('helpCloseBtn'),
     toast: $('toast'),
-    toastText: $('toastText')
+    toastText: $('toastText'),
+    exportCompleteNotice: $('exportCompleteNotice'),
+    exportCompleteText: $('exportCompleteText'),
+    exportCompletePath: $('exportCompletePath'),
+    exportCompletePathText: $('exportCompletePathText'),
+    closeExportComplete: $('closeExportComplete'),
+    steps: {
+      import: $('stepImport'),
+      analyze: $('stepAnalyze'),
+      review: $('stepReview'),
+      export: $('stepExport')
+    }
   };
 
   function iconSvg(name, size=18) {
@@ -1209,10 +1495,61 @@
       check: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
       eye: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`,
       download: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>`,
+      lock: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg>`,
+      monitor: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>`,
       reset: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>`,
       warn: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`
     };
     return icons[name] || icons.spark;
+  }
+
+  function decorateInterfaceIcons() {
+    const iconForText = (text) => {
+      if (/來源資料夾|來源寫入權限/.test(text)) return 'folder';
+      if (/相似度門檻|分析進度|分群結果/.test(text)) return 'spark';
+      if (/目前狀態/.test(text)) return 'spark';
+      if (/安全模式/.test(text)) return 'lock';
+      if (/頁面模式/.test(text)) return 'monitor';
+      if (/照片預覽/.test(text)) return 'eye';
+      if (/狀態與摘要|處理摘要/.test(text)) return 'check';
+      if (/批次轉 JPG|批次縮小圖片|壓縮比例/.test(text)) return 'download';
+      return null;
+    };
+    document.querySelectorAll('label, .section-title h2, .metric .k, .mini-stat > span').forEach(el => {
+      if (el.dataset.iconReady) return;
+      const icon = iconForText(el.textContent || '');
+      if (!icon) return;
+      el.dataset.iconReady = 'true';
+      el.insertAdjacentHTML('afterbegin', `<span class="label-icon" aria-hidden="true">${iconSvg(icon, 15)}</span>`);
+    });
+  }
+
+  function openHelpDialog(kind) {
+    state.lastFocused = document.activeElement;
+    const content = kind === 'similarity'
+      ? `<h3 id="helpDialogTitle">相似度門檻說明</h3>
+          <p><b>「相似度門檻」</b>是「要達到多少相似，才會被合併成同一組」。</p>
+          <h4>一眼看懂</h4>
+          <ul>
+            <li><b>門檻低（例如 75%）</b>：較不相似的照片也會被視為同組 → 合併成較大群組 → 每組只留一張 → 輸出較少。</li>
+            <li><b>門檻高（例如 95%）</b>：必須非常相似才會合併 → 更多照片被視為不同照片／單張 → 都會保留輸出 → 輸出較多。</li>
+          </ul>
+          <h4>建議怎麼選？</h4><p>第一次使用請先選 <b>85%</b>。若覺得不同畫面被合併太多，調高；若覺得重複照片留下太多，調低。</p>`
+      : `<h3 id="helpDialogTitle">所有項目：新手快速說明</h3>
+          <h4>這裡會顯示什麼？</h4><p>系統把相似照片放在同一個群組，並從每組挑出一張較清楚、較適合保留的照片。使用左右按鈕可一次查看一個群組，不會讓所有卡片塞滿畫面。</p>
+          <h4>簡易範例</h4><p>你連拍 5 張同一個人站在舞台上：系統可能把這 5 張放成一組，預設保留其中最清楚的一張。若你偏好別張，直接點選下方縮圖，再按「保留這張」。</p>
+          <h4>注意事項</h4><ul><li>系統的分群是建議，重要照片請在匯出前快速覆核。</li><li>按「取消群組」只會取消相似判定；疑似模糊照片仍須逐張確認後才能輸出。</li><li>未被分組的單張照片仍會先通過嚴格模糊審核。</li></ul>`;
+    els.helpDialogContent.innerHTML = content;
+    els.helpModal.hidden = false;
+    els.helpModal.setAttribute('aria-hidden', 'false');
+    els.helpCloseBtn.focus();
+  }
+
+  function closeHelpDialog() {
+    els.helpModal.hidden = true;
+    els.helpModal.setAttribute('aria-hidden', 'true');
+    state.lastFocused?.focus?.();
+    state.lastFocused = null;
   }
 
   function setToast(msg, kind='info', ttl=2200) {
@@ -1225,11 +1562,85 @@
     }, ttl);
   }
 
+  function prettyError(err) {
+    if (!err) return '發生未預期錯誤。';
+    if (err.name === 'NotAllowedError') return '瀏覽器未允許讀取這個資料夾。';
+    if (err.name === 'AbortError') return '操作已取消。';
+    return err.message || '無法完成這項操作。';
+  }
+
+  function showExportComplete(message, path = '') {
+    if (!els.exportCompleteNotice) return;
+    state.lastFocused = document.activeElement;
+    els.exportCompleteText.textContent = message;
+    if (els.exportCompletePath) {
+      els.exportCompletePath.hidden = !path;
+      const actionLabel = state.outputDirHandle ? '查看輸出檔案' : '複製 ZIP 下載位置';
+      els.exportCompletePathText.textContent = path ? `${actionLabel}：${path}` : '';
+      els.exportCompletePath.setAttribute('aria-label', path ? `${actionLabel}：${path}` : actionLabel);
+    }
+    els.exportCompleteNotice.hidden = false;
+    setTimeout(() => (path ? els.exportCompletePath : els.closeExportComplete)?.focus(), 0);
+  }
+
+  async function openExportOutputPath() {
+    const displayPath = state.outputLocation;
+    if (!displayPath || displayPath === '尚未設定') return;
+    try {
+      if (state.outputDirHandle && 'showOpenFilePicker' in window) {
+        // 資料夾選擇器只顯示子資料夾，會讓含有照片的資料夾看似空白；
+        // 改用檔案選擇器，並從剛完成輸出的結果資料夾開始，讓照片實際顯示。
+        const selectedFiles = await window.showOpenFilePicker({
+          startIn: state.outputDirHandle,
+          multiple: true
+        });
+        if (selectedFiles.length) setToast(`已選取 ${selectedFiles.length} 個輸出檔案。`, 'info', 1800);
+        return;
+      }
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(displayPath);
+      setToast('此瀏覽器將 ZIP 存入下載位置；已複製輸出位置。', 'info', 2600);
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        console.warn('無法開啟輸出資料夾', err);
+        try { await navigator.clipboard?.writeText?.(displayPath); } catch {}
+        setToast('無法直接開啟，已複製輸出位置。', 'info', 2400);
+      }
+    }
+  }
+
+  function setBanner(message, kind='info') {
+    els.noticeBox.className = kind === 'error' ? 'notice warn' : 'notice';
+    els.noticeBox.textContent = message;
+    setToast(message, kind === 'error' ? 'info' : kind, 2400);
+  }
+
   function setProgress(pct, text) {
     const value = Math.max(0, Math.min(100, pct));
     els.progressBar.style.width = value + '%';
     els.progressPct.textContent = Math.round(value) + '%';
     els.progressText.textContent = text || (value + '%');
+    els.progressBar.parentElement?.setAttribute('aria-valuenow', String(Math.round(value)));
+    if (els.exportProgressBar) {
+      els.exportProgressBar.style.width = value + '%';
+      els.exportProgressPct.textContent = Math.round(value) + '%';
+      els.exportProgressBar.parentElement?.setAttribute('aria-valuenow', String(Math.round(value)));
+    }
+  }
+
+  function syncWorkflowStage() {
+    const stage = state.exporting ? 'exporting'
+      : state.analyzing ? 'analyzing'
+      : state.sourceLoaded ? 'review'
+      : state.sourceFiles.length ? 'ready'
+      : 'import';
+    els.app.dataset.stage = stage;
+    els.app.dataset.embedded = String(isEmbeddedContext());
+    const active = stage === 'import' ? 'import' : stage === 'ready' || stage === 'analyzing' ? 'analyze' : stage === 'exporting' ? 'export' : 'review';
+    Object.entries(els.steps).forEach(([name, element]) => {
+      if (!element) return;
+      if (name === active) element.setAttribute('aria-current', 'step');
+      else element.removeAttribute('aria-current');
+    });
   }
 
   function updateStats() {
@@ -1243,13 +1654,14 @@
       : (state.groups.length ? '匯出不同的照片' : '匯出全部照片');
     const exportLabelEl = els.exportBtn?.querySelector('span:last-child');
     if (exportLabelEl) exportLabelEl.textContent = exportLabel;
-    els.heroStatus.textContent = state.analyzing ? '分析中' : (state.stats.total ? '已完成匯入' : '等待匯入照片');
+    els.heroStatus.textContent = state.exporting ? '匯出中' : state.analyzing ? '分析中' : state.sourceLoaded ? '等待覆核' : (state.sourceFiles.length ? '可開始分析' : '等待匯入照片');
     els.sourceBadge.textContent = '來源：' + state.sourceName;
     els.scanBadge.textContent = state.stats.total ? `已掃描 ${state.stats.total} 張` : '尚未掃描';
-    els.privacyBadge.textContent = state.exporting ? '本機匯出中' : '🔒 本機處理中';
+    els.privacyBadge.textContent = state.exporting ? '本機匯出中' : '本機處理';
     els.exportState.textContent = state.exporting ? '匯出中' : (state.stats.keep ? '可匯出' : '尚未匯出');
-    els.restoreState.textContent = state.logs.length ? '已保留記錄' : '可復原';
-    els.reportState.textContent = state.groups.length ? '可產生' : '未產生';
+    els.restoreState.textContent = state.stats.reject ? `${state.stats.reject} 張待確認` : (state.sourceLoaded ? '已完成覆核' : '尚未覆核');
+    els.outputLocation.textContent = state.outputLocation;
+    syncWorkflowStage();
   }
 
   function humanSize(bytes) {
@@ -1506,9 +1918,9 @@
 
     if (state.sourceFiles.length) {
       if (state.sourceDirHandle) {
-        setDragFeedback('success', `✅ 已成功匯入 ${state.sourceFiles.length} 張圖片。`, `來源資料夾已辨識：${state.sourceName}。現在可以確認權限並直接在原資料夾內建立 Output 資料夾。`);
+        setDragFeedback('success', `已成功匯入 ${state.sourceFiles.length} 張圖片。`, `來源資料夾已辨識：${state.sourceName}。匯出時才會要求寫入權限。`);
       } else {
-        setDragFeedback('error', `⚠️ 已匯入 ${state.sourceFiles.length} 張圖片，但瀏覽器未提供來源資料夾句柄。`, `這代表目前只有圖片本身，無法直接判定原資料夾並建立 Output。請按「確認來源資料夾權限」重新選擇同一個來源資料夾。`);
+        setDragFeedback('error', `已匯入 ${state.sourceFiles.length} 張圖片，但尚未取得來源資料夾權限。`, `匯出時可重新選擇來源資料夾，或改用 ZIP 備援下載。`);
       }
     } else {
       setDragFeedback('error', '⚠️ 沒有找到可匯入的圖片。', '請拖曳圖片或資料夾，或改用「選擇來源資料夾」。');
@@ -1530,10 +1942,22 @@
     state.analyzing = false;
     state.exporting = false;
     state.selectedPreview = null;
+    state.groupPage = 0;
+    state.outputLocation = '尚未設定';
+    state.outputFolderName = '';
+    state.permissionCanceled = false;
+    state.failures = [];
+    state.cancelRequested = false;
+    state.blurPage = 0;
+    state.lastFocused = null;
+    state.exportPreset = 'archive';
+    if (typeof selectExportPreset === 'function') selectExportPreset('archive');
     state.logs = [];
     state.stats = { total: 0, groups: 0, keep: 0, reject: 0 };
     els.groups.innerHTML = '';
     if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
+    if (els.convertJpg) els.convertJpg.checked = true;
+    if (els.resizeToggle) els.resizeToggle.checked = true;
     els.previewHero.innerHTML = `
       <div class="empty" style="margin:0; min-height:0; width:100%;">
         <div class="icon">🖼️</div>
@@ -1682,12 +2106,22 @@
   function scoreBlurProfile(grayVals, width, height, contrast) {
     const total = width * height;
     const idx = (x, y) => y * width + x;
+    const tileCols = 4;
+    const tileRows = 4;
+    const tileEdgeCounts = new Array(tileCols * tileRows).fill(0);
+    const tilePixelCounts = new Array(tileCols * tileRows).fill(0);
 
     let lapSum = 0;
     let lapSumSq = 0;
+    let lapAbsSum = 0;
+    let lapFourthSum = 0;
     let gradSum = 0;
     let gradSqSum = 0;
     let edgeCount = 0;
+    let weakEdgeCount = 0;
+    let strongEdgeCount = 0;
+    let gxEnergy = 0;
+    let gyEnergy = 0;
     let count = 0;
 
     for (let y = 1; y < height - 1; y++) {
@@ -1711,20 +2145,39 @@
 
         lapSum += lap;
         lapSumSq += lap * lap;
+        lapAbsSum += Math.abs(lap);
+        lapFourthSum += lap ** 4;
         gradSum += mag;
         gradSqSum += mag * mag;
-        if (mag > 40) edgeCount++;
+        gxEnergy += gx * gx;
+        gyEnergy += gy * gy;
+        // 固定門檻會把昏暗但對焦正確的照片誤判為模糊；依全圖對比自適應。
+        const edgeThreshold = Math.max(18, Math.min(58, (contrast || 0) * 1.05));
+        if (mag > edgeThreshold * 0.48) weakEdgeCount++;
+        if (mag > edgeThreshold) edgeCount++;
+        if (mag > edgeThreshold * 1.75) strongEdgeCount++;
+        const tileX = Math.min(tileCols - 1, Math.floor(x * tileCols / width));
+        const tileY = Math.min(tileRows - 1, Math.floor(y * tileRows / height));
+        const tileIndex = tileY * tileCols + tileX;
+        tilePixelCounts[tileIndex]++;
+        if (mag > edgeThreshold) tileEdgeCounts[tileIndex]++;
         count++;
       }
     }
 
     const lapMean = lapSum / Math.max(1, count);
     const lapVar = Math.max(0, (lapSumSq / Math.max(1, count)) - (lapMean * lapMean));
+    const lapAbsMean = lapAbsSum / Math.max(1, count);
+    const lapKurtosis = lapFourthSum / Math.max(1, count) / Math.max(1, lapVar * lapVar);
     const gradMean = gradSum / Math.max(1, count);
+    const edgeAcutance = lapAbsMean / Math.max(1, gradMean);
+    const gradVariance = Math.max(0, (gradSqSum / Math.max(1, count)) - (gradMean * gradMean));
     const edgeDensity = edgeCount / Math.max(1, count);
+    const weakEdgeDensity = weakEdgeCount / Math.max(1, count);
+    const strongEdgeDensity = strongEdgeCount / Math.max(1, count);
+    const edgeStrengthRatio = strongEdgeCount / Math.max(1, weakEdgeCount);
+    const directionalBalance = Math.min(gxEnergy, gyEnergy) / Math.max(1, Math.max(gxEnergy, gyEnergy));
 
-    const tileCols = 4;
-    const tileRows = 4;
     let tileVarSum = 0;
     let tileCount = 0;
     for (let ty = 0; ty < tileRows; ty++) {
@@ -1754,6 +2207,13 @@
       }
     }
     const localVariance = tileCount ? tileVarSum / tileCount : 0;
+    // 取較低分位的區塊，而非只看整張平均值，避免少量字幕／雜訊把失焦照誤判成清晰。
+    const tileEdgeDensities = tileEdgeCounts
+      .map((edges, i) => edges / Math.max(1, tilePixelCounts[i]))
+      .sort((a, b) => a - b);
+    const tileEdgeP25 = tileEdgeDensities[Math.floor((tileEdgeDensities.length - 1) * 0.25)] || 0;
+    const tileEdgeP50 = tileEdgeDensities[Math.floor((tileEdgeDensities.length - 1) * 0.50)] || 0;
+    const detailCoverage = tileEdgeDensities.filter(value => value >= 0.018).length / Math.max(1, tileEdgeDensities.length);
 
     const hist = new Array(32).fill(0);
     for (let i = 0; i < total; i++) {
@@ -1769,32 +2229,201 @@
     }
     const entropyNorm = entropy / Math.log2(hist.length);
 
-    const lapScore = normalizeRange(lapVar, 120, 1400);
-    const gradScore = normalizeRange(gradMean, 10, 78);
-    const edgeScore = normalizeRange(edgeDensity, 0.02, 0.18);
-    const localScore = normalizeRange(localVariance, 28, 820);
+    const lapScore = normalizeRange(lapVar, 70, 1550);
+    const gradScore = normalizeRange(gradMean, 10, 92);
+    const edgeScore = normalizeRange(edgeDensity, 0.018, 0.18);
+    const strongEdgeScore = normalizeRange(strongEdgeDensity, 0.004, 0.075);
+    const edgeStrengthScore = normalizeRange(edgeStrengthRatio, 0.07, 0.42);
+    const localScore = normalizeRange(localVariance, 20, 900);
+    const distributedDetailScore = normalizeRange(tileEdgeP25, 0.004, 0.085);
+    const coverageScore = normalizeRange(detailCoverage, 0.12, 0.72);
     const entropyScore = clamp01(entropyNorm);
     const contrastScore = normalizeRange(contrast || 0, 16, 56);
 
     const clarityScore = Math.round(100 * (
-      lapScore * 0.34 +
-      gradScore * 0.28 +
-      edgeScore * 0.18 +
-      localScore * 0.12 +
-      entropyScore * 0.08
-    ) * (0.78 + contrastScore * 0.22));
+      lapScore * 0.24 +
+      gradScore * 0.17 +
+      edgeScore * 0.13 +
+      strongEdgeScore * 0.14 +
+      edgeStrengthScore * 0.08 +
+      localScore * 0.06 +
+      distributedDetailScore * 0.11 +
+      coverageScore * 0.05 +
+      entropyScore * 0.02
+    ) * (0.88 + contrastScore * 0.12));
 
-    const blurRisk = Math.max(0, Math.min(100, Math.round(100 - clarityScore)));
+    // 多個獨立線索共同投票，避免文字、噪點或單一強邊緣掩蓋整體失焦。
+    const cueRisks = [
+      1 - lapScore,
+      1 - gradScore,
+      1 - edgeScore,
+      1 - strongEdgeScore,
+      1 - edgeStrengthScore,
+      1 - distributedDetailScore,
+      1 - coverageScore
+    ].sort((a, b) => b - a);
+    const evidenceCount = cueRisks.filter(value => value >= 0.58).length;
+    const severeEvidenceCount = cueRisks.filter(value => value >= 0.78).length;
+    const cueRisk = cueRisks.slice(0, 5).reduce((sum, value) => sum + value, 0) / 5;
+    const baseRisk = 100 - clarityScore;
+    // 移動模糊常保留與移動方向垂直的強邊緣，因此不能只用「強邊緣少」判斷。
+    // 梯度能量高度偏向單一方向，且強／弱邊緣比例下降時，視為方向性模糊證據。
+    const motionRisk = directionalBalance < 0.055 && edgeStrengthRatio < 0.62 && weakEdgeDensity > 0.025 ? 66 : 0;
+    // 複合相機晃動／旋轉模糊會保留大量邊緣，卻把邊緣攤寬。此時一階梯度仍高，
+    // 但二階變化、尖銳度與強弱邊緣比例會同步下降；以「矛盾訊號」專門補抓。
+    const edgeSpreadSignals = [
+      edgeAcutance < 0.60,
+      gradMean > 45 && lapAbsMean < 58,
+      edgeDensity > 0.20 && lapVar < 10500,
+      edgeDensity > 0.25 && edgeStrengthRatio < 0.50,
+      lapKurtosis > 11 && edgeAcutance < 0.62
+    ].filter(Boolean).length;
+    const cameraShakeRisk = edgeSpreadSignals >= 4 ? 82 : edgeSpreadSignals >= 3 ? 74 : edgeSpreadSignals >= 2 ? 62 : 0;
+    const blurRisk = Math.max(0, Math.min(100, Math.round(Math.max(
+      baseRisk * 0.55 + cueRisk * 100 * 0.45,
+      evidenceCount >= 5 ? 62 : 0,
+      severeEvidenceCount >= 3 ? 70 : 0,
+      motionRisk,
+      cameraShakeRisk
+    ))));
 
     return {
       lapVar,
+      lapAbsMean,
+      lapKurtosis,
+      edgeAcutance,
       gradMean,
+      gradVariance,
       edgeDensity,
+      weakEdgeDensity,
+      strongEdgeDensity,
+      edgeStrengthRatio,
+      directionalBalance,
+      tileEdgeP25,
+      tileEdgeP50,
+      detailCoverage,
       localVariance,
       entropy: entropyNorm,
+      evidenceCount,
+      severeEvidenceCount,
+      edgeSpreadSignals,
       clarityScore: Math.max(0, Math.min(100, clarityScore)),
       blurRisk,
-      blurLabel: blurRisk <= 35 ? '清晰' : blurRisk <= 55 ? '邊界' : '模糊'
+      priorityBlur: blurRisk >= 48 || evidenceCount >= 5 || severeEvidenceCount >= 3 || edgeSpreadSignals >= 2,
+      blurLabel: blurRisk < 38 ? '清晰' : blurRisk < 48 ? '邊界' : '模糊'
+    };
+  }
+
+  function grayContrast(values) {
+    if (!values.length) return 0;
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const variance = values.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / values.length;
+    return Math.sqrt(variance);
+  }
+
+  function centerCropGray(values, width, height, ratio = 0.64) {
+    const cropW = Math.max(32, Math.floor(width * ratio));
+    const cropH = Math.max(32, Math.floor(height * ratio));
+    const startX = Math.max(0, Math.floor((width - cropW) / 2));
+    const startY = Math.max(0, Math.floor((height - cropH) / 2));
+    const cropped = new Array(cropW * cropH);
+    let outputIndex = 0;
+    for (let y = 0; y < cropH; y++) {
+      const rowStart = (startY + y) * width + startX;
+      for (let x = 0; x < cropW; x++) cropped[outputIndex++] = values[rowStart + x];
+    }
+    return { values: cropped, width: cropW, height: cropH };
+  }
+
+  function cropGrayRegion(values, width, height, xRatio, yRatio, widthRatio, heightRatio) {
+    const startX = Math.max(0, Math.min(width - 2, Math.floor(width * xRatio)));
+    const startY = Math.max(0, Math.min(height - 2, Math.floor(height * yRatio)));
+    const cropW = Math.max(24, Math.min(width - startX, Math.floor(width * widthRatio)));
+    const cropH = Math.max(24, Math.min(height - startY, Math.floor(height * heightRatio)));
+    const cropped = new Array(cropW * cropH);
+    let outputIndex = 0;
+    for (let y = 0; y < cropH; y++) {
+      const rowStart = (startY + y) * width + startX;
+      for (let x = 0; x < cropW; x++) cropped[outputIndex++] = values[rowStart + x];
+    }
+    return { values: cropped, width: cropW, height: cropH };
+  }
+
+  function halfScaleGray(values, width, height) {
+    const targetW = Math.max(32, Math.floor(width / 2));
+    const targetH = Math.max(32, Math.floor(height / 2));
+    const scaled = new Array(targetW * targetH);
+    let outputIndex = 0;
+    for (let y = 0; y < targetH; y++) {
+      const y0 = Math.min(height - 1, y * 2);
+      const y1 = Math.min(height - 1, y0 + 1);
+      for (let x = 0; x < targetW; x++) {
+        const x0 = Math.min(width - 1, x * 2);
+        const x1 = Math.min(width - 1, x0 + 1);
+        scaled[outputIndex++] = (
+          values[y0 * width + x0] + values[y0 * width + x1] +
+          values[y1 * width + x0] + values[y1 * width + x1]
+        ) / 4;
+      }
+    }
+    return { values: scaled, width: targetW, height: targetH };
+  }
+
+  function combineBlurProfiles(base, center, half, regions = []) {
+    const votes = [
+      base.priorityBlur || base.blurRisk >= 48,
+      center.priorityBlur || center.blurRisk >= 52,
+      half.priorityBlur || half.blurRisk >= 56
+    ].filter(Boolean).length;
+    const centerClearlySharp = center.blurRisk < 32 && center.strongEdgeDensity >= 0.024 && (base.edgeSpreadSignals ?? 0) < 2;
+    const regionalRisks = regions.map(region => region.blurRisk).sort((a, b) => b - a);
+    const regionalHits = regionalRisks.filter(risk => risk >= 52).length;
+    const regionalSevereHits = regionalRisks.filter(risk => risk >= 68).length;
+    // 空白牆面、天空等低細節區不能單獨定罪；區域命中須與全圖、中央或邊緣擴散互相佐證。
+    const regionalCorroborated = regionalHits >= 2 && (
+      base.blurRisk >= 30 || center.blurRisk >= 38 || (base.edgeSpreadSignals ?? 0) >= 1
+    );
+    const regionalIndependent = regionalSevereHits >= 3;
+    const weightedRisk = base.blurRisk * 0.44 + center.blurRisk * 0.36 + Math.max(0, half.blurRisk - 5) * 0.20;
+    let blurRisk = Math.round(Math.max(
+      weightedRisk,
+      votes >= 2 && !centerClearlySharp ? 55 : 0,
+      center.blurRisk >= 64 ? 60 : 0,
+      base.blurRisk >= 72 ? 66 : 0,
+      (base.edgeSpreadSignals ?? 0) >= 4 ? 78 : (base.edgeSpreadSignals ?? 0) >= 3 ? 70 : (base.edgeSpreadSignals ?? 0) >= 2 ? 62 : 0,
+      regionalIndependent ? 76 : regionalCorroborated ? (regionalSevereHits >= 2 ? 72 : 64) : 0
+    ));
+    if (centerClearlySharp && votes < 3) blurRisk = Math.max(0, blurRisk - 7);
+    blurRisk = Math.max(0, Math.min(100, blurRisk));
+
+    const reasons = [];
+    if (votes >= 2) reasons.push('多尺度均判定細節不足');
+    if (center.blurRisk >= 52) reasons.push('中央主體疑似失焦');
+    if (base.strongEdgeDensity < 0.018) reasons.push('強邊緣過少');
+    if (base.detailCoverage < 0.38) reasons.push('清晰細節分布不足');
+    if (base.lapVar < 360) reasons.push('高頻細節偏低');
+    if ((base.edgeSpreadSignals ?? 0) >= 2) reasons.push('邊緣擴散，疑似相機晃動或旋轉模糊');
+    if (regionalCorroborated || regionalIndependent) reasons.push('多個局部區域通過嚴格模糊門檻');
+    if (base.directionalBalance < 0.055 && base.edgeStrengthRatio < 0.62 && base.weakEdgeDensity > 0.025) reasons.push('疑似方向性移動模糊');
+    if (!reasons.length && blurRisk >= 42) reasons.push('多項清晰度指標偏低');
+
+    const priorityBlur = blurRisk >= 46 || (votes >= 2 && !centerClearlySharp) || center.blurRisk >= 64 || regionalCorroborated || regionalIndependent;
+    return {
+      ...base,
+      clarityScore: Math.max(0, Math.min(100, 100 - blurRisk)),
+      blurRisk,
+      priorityBlur,
+      blurLabel: priorityBlur ? '模糊' : blurRisk >= 38 ? '邊界' : '清晰',
+      confidence: Math.max(0, Math.min(100, Math.round(blurRisk * 0.72 + votes * 9))),
+      crossCheckVotes: votes,
+      regionalHits,
+      regionalRisks,
+      reasons: reasons.slice(0, 4),
+      passes: {
+        full: base.blurRisk,
+        center: center.blurRisk,
+        reduced: half.blurRisk
+      }
     };
   }
 
@@ -1803,8 +2432,11 @@
     const h = img.naturalHeight || img.height;
     const size = Math.max(1, w * h);
 
-    const sampleW = 48;
-    const sampleH = 48;
+    // 48px 會將微失焦與移動模糊一起平均掉；保留比例並提高採樣解析度。
+    const longestSide = 256;
+    const scale = Math.min(1, longestSide / Math.max(w, h));
+    const sampleW = Math.max(64, Math.round(w * scale));
+    const sampleH = Math.max(64, Math.round(h * scale));
     const canvas = makeCanvas(sampleW, sampleH);
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     ctx.drawImage(img, 0, 0, sampleW, sampleH);
@@ -1833,7 +2465,18 @@
     variance /= grayVals.length;
     const contrast = Math.sqrt(variance);
 
-    const blur = scoreBlurProfile(grayVals, sampleW, sampleH, contrast);
+    const baseBlur = scoreBlurProfile(grayVals, sampleW, sampleH, contrast);
+    const centerGray = centerCropGray(grayVals, sampleW, sampleH);
+    const centerBlur = scoreBlurProfile(centerGray.values, centerGray.width, centerGray.height, grayContrast(centerGray.values));
+    const halfGray = halfScaleGray(grayVals, sampleW, sampleH);
+    const halfBlur = scoreBlurProfile(halfGray.values, halfGray.width, halfGray.height, grayContrast(halfGray.values));
+    const regionalBlurs = [
+      [0, 0], [0.5, 0], [0, 0.5], [0.5, 0.5]
+    ].map(([x, y]) => {
+      const region = cropGrayRegion(grayVals, sampleW, sampleH, x, y, 0.5, 0.5);
+      return scoreBlurProfile(region.values, region.width, region.height, grayContrast(region.values));
+    });
+    const blur = combineBlurProfiles(baseBlur, centerBlur, halfBlur, regionalBlurs);
     const sharpness = blur.clarityScore;
 
     let diffHash = 0n;
@@ -1892,6 +2535,8 @@
       focusScore: blur.clarityScore,
       blurRisk: blur.blurRisk,
       blurLabel: blur.blurLabel,
+      priorityBlur: blur.priorityBlur,
+      blurConfidence: blur.confidence,
       blurProfile: blur,
       exposureBalance,
       aspect,
@@ -1904,7 +2549,9 @@
   async function processFiles(files) {
     const list = Array.from(files).filter(isSupportedFile);
     const images = [];
+    state.failures = [];
     for (let i = 0; i < list.length; i++) {
+      if (state.cancelRequested) break;
       const file = list[i];
       try {
         const { img, url } = await fileToImage(file);
@@ -1922,14 +2569,20 @@
           groupId: null,
           keep: false,
           manual: false,
+          blurReviewed: false,
           score: 0,
           isSystemKeep: false,
           exportName: null
         });
-        setProgress(((i + 1) / list.length) * 60, `分析圖片中… ${i + 1} / ${list.length}`);
-        if (i % 8 === 0) await new Promise(r => requestAnimationFrame(r));
+        setProgress(5 + ((i + 1) / Math.max(1, list.length)) * 55, `多尺度、多區域嚴格核對模糊照片… ${i + 1} / ${list.length}`);
+        if (i % 4 === 0) await new Promise(resolve => setTimeout(resolve, 0));
       } catch (err) {
         console.warn('無法讀取圖片', file.name, err);
+        const ext = fileExt(file.name).toUpperCase();
+        state.failures.push({
+          name: file.name,
+          reason: /HEIC|HEIF/.test(ext) ? '此瀏覽器無法解碼 HEIC／HEIF。' : '圖片無法讀取或格式不受目前瀏覽器支援。'
+        });
       }
     }
     return images;
@@ -1960,12 +2613,12 @@
   function compareKeepPriority(a, b) {
     const blurA = a.metrics.blurRisk ?? 100;
     const blurB = b.metrics.blurRisk ?? 100;
-    const clearA = blurA <= 35;
-    const clearB = blurB <= 35;
+    const clearA = !isPriorityBlur(a) && blurA < 38;
+    const clearB = !isPriorityBlur(b) && blurB < 38;
     if (clearA !== clearB) return clearA ? -1 : 1;
 
-    const borderA = blurA <= 55;
-    const borderB = blurB <= 55;
+    const borderA = !isPriorityBlur(a);
+    const borderB = !isPriorityBlur(b);
     if (borderA !== borderB) return borderA ? -1 : 1;
 
     if (blurA !== blurB) return blurA - blurB;
@@ -1980,14 +2633,14 @@
     const samples = group.samples;
     const blurSorted = [...samples].sort((a, b) => (a.metrics.blurRisk ?? 100) - (b.metrics.blurRisk ?? 100) || compareKeepPriority(a, b));
     const bestBlur = blurSorted[0];
-    const clearCandidates = samples.filter(img => (img.metrics.blurRisk ?? 100) <= 35);
-    const borderCandidates = samples.filter(img => (img.metrics.blurRisk ?? 100) <= 55);
+    const clearCandidates = samples.filter(img => !isPriorityBlur(img) && (img.metrics.blurRisk ?? 100) < 38);
+    const borderCandidates = samples.filter(img => !isPriorityBlur(img));
 
-    if (clearCandidates.length && (candidate.metrics.blurRisk ?? 100) > 35) {
+    if (clearCandidates.length && (isPriorityBlur(candidate) || (candidate.metrics.blurRisk ?? 100) >= 38)) {
       return clearCandidates.sort(compareKeepPriority)[0];
     }
 
-    if (!clearCandidates.length && borderCandidates.length && (candidate.metrics.blurRisk ?? 100) > 55) {
+    if (!clearCandidates.length && borderCandidates.length && isPriorityBlur(candidate)) {
       return borderCandidates.sort(compareKeepPriority)[0];
     }
 
@@ -1998,11 +2651,48 @@
     return candidate;
   }
 
-  function groupImages(images, similarityPct) {
-    const threshold = Math.max(70, Math.min(98, Number(similarityPct) || 85));
+  function applyRelativeBlurCheck(samples) {
+    if (!samples || samples.length < 2) return;
+    const reference = [...samples].sort((a, b) => (a.metrics.blurRisk ?? 100) - (b.metrics.blurRisk ?? 100))[0];
+    const ref = reference.metrics;
+    if ((ref.blurRisk ?? 100) >= 46) return;
+
+    samples.forEach(img => {
+      if (img === reference) return;
+      const metrics = img.metrics;
+      const relativeSignals = [
+        (metrics.blurRisk ?? 100) - (ref.blurRisk ?? 100) >= 14,
+        (metrics.focusScore ?? 0) < Math.max(1, (ref.focusScore ?? 1) * 0.76),
+        (metrics.blurProfile?.strongEdgeDensity ?? 0) < Math.max(0.003, (ref.blurProfile?.strongEdgeDensity ?? 0) * 0.56),
+        (metrics.blurProfile?.lapVar ?? 0) < Math.max(80, (ref.blurProfile?.lapVar ?? 0) * 0.52)
+      ].filter(Boolean).length;
+
+      if (relativeSignals >= 2) {
+        metrics.priorityBlur = true;
+        metrics.blurRisk = Math.max(52, metrics.blurRisk ?? 0);
+        metrics.blurLabel = '模糊';
+        metrics.focusScore = Math.max(0, 100 - metrics.blurRisk);
+        metrics.blurConfidence = Math.max(72, metrics.blurConfidence ?? 0);
+        if (metrics.blurProfile) {
+          metrics.blurProfile.priorityBlur = true;
+          metrics.blurProfile.blurRisk = metrics.blurRisk;
+          metrics.blurProfile.confidence = metrics.blurConfidence;
+          metrics.blurProfile.reasons = [...new Set([
+            '與同組清晰照片比較後明顯較模糊',
+            ...(metrics.blurProfile.reasons || [])
+          ])].slice(0, 4);
+        }
+      }
+    });
+  }
+
+  async function groupImages(images, similarityPct, progressStart = 62, progressEnd = 84) {
+    const threshold = Math.max(50, Math.min(95, Number(similarityPct) || 85));
     const groups = [];
 
-    for (const img of images) {
+    for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
+      if (state.cancelRequested) break;
+      const img = images[imageIndex];
       let bestGroup = null;
       let bestScore = -1;
 
@@ -2045,12 +2735,16 @@
           systemSelectedId: null
         });
       }
+      if (imageIndex % 12 === 0) {
+        setProgress(progressStart + ((imageIndex + 1) / Math.max(1, images.length)) * (progressEnd - progressStart), `建立相似群組… ${imageIndex + 1} / ${images.length}`);
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
     }
 
     return groups.filter(g => g.samples.length > 1);
   }
 
-  function finalizeGroups(groups) {
+  async function finalizeGroups(groups) {
     const refined = [];
     for (const group of groups) {
       const cohesion = group.samples.length > 1
@@ -2064,7 +2758,7 @@
       }
 
       const splitThreshold = Math.min(98, Math.max(72, Math.round(cohesion + 4)));
-      const subGroups = groupImages(group.samples, splitThreshold);
+        const subGroups = await groupImages(group.samples, splitThreshold, 84, 90);
       if (subGroups.length > 1) {
         refined.push(...subGroups);
       } else {
@@ -2075,15 +2769,17 @@
     groups.length = 0;
     groups.push(...refined);
 
-    groups.forEach((group, idx) => {
+    for (let idx = 0; idx < groups.length; idx++) {
+      const group = groups[idx];
+      applyRelativeBlurCheck(group.samples);
       group.samples.forEach(img => {
         img.score = scoreImageInGroup(img, group);
       });
 
       group.samples.sort(compareKeepPriority);
 
-      const clearCandidates = group.samples.filter(img => (img.metrics.blurRisk ?? 100) <= 35);
-      const borderCandidates = group.samples.filter(img => (img.metrics.blurRisk ?? 100) <= 55);
+      const clearCandidates = group.samples.filter(img => !isPriorityBlur(img) && (img.metrics.blurRisk ?? 100) < 38);
+      const borderCandidates = group.samples.filter(img => !isPriorityBlur(img));
       const preferred = clearCandidates[0] || borderCandidates[0] || group.samples[0];
       const validated = validateBlurSelection(group, preferred);
 
@@ -2105,29 +2801,43 @@
       group.blurSummary = blurSummary;
       group.label = `群組 ${String(idx + 1).padStart(3,'0')}`;
       group.note = `${group.samples.length} 張相似照片 · 清晰 ${blurSummary['清晰'] || 0} / 邊界 ${blurSummary['邊界'] || 0} / 模糊 ${blurSummary['模糊'] || 0}`;
-    });
+      if (idx % 8 === 0) await new Promise(resolve => setTimeout(resolve, 0));
+    }
   }
 
   function computeStats() {
     state.stats.total = state.images.length;
     state.stats.groups = state.groups.length;
-    let keep = 0;
-    let reject = 0;
-    state.groups.forEach(group => {
-      if (group.canceled) {
-        keep += group.samples.length;
-        return;
-      }
-      group.samples.forEach(img => {
-        if (img.keep) keep++; else reject++;
-      });
-    });
-    if (!state.groups.length && state.images.length) {
-      keep = state.images.length;
-      reject = 0;
+    state.stats.keep = state.images.filter(shouldExportImage).length;
+    state.stats.reject = state.images.length - state.stats.keep;
+  }
+
+  function isPriorityBlur(img) {
+    const metrics = img?.metrics;
+    if (!metrics) return true;
+    return metrics.priorityBlur === true ||
+      (metrics.blurRisk ?? 0) >= 46 ||
+      (metrics.blurProfile?.crossCheckVotes ?? 0) >= 2 ||
+      (metrics.blurProfile?.evidenceCount ?? 0) >= 5;
+  }
+
+  function shouldExportImage(img) {
+    if (!img) return false;
+    const group = img.groupId ? state.groups.find(item => item.id === img.groupId) : null;
+    // 只有逐張明確按下「保留」才能覆寫模糊排除；取消相似群組不得繞過模糊審核。
+    if (img.manual) return true;
+    if (group?.canceled) return !isPriorityBlur(img);
+    // 模糊照片優先排除。即使整組都疑似模糊，也必須經人工確認才可輸出。
+    if (group) {
+      if (!img.keep) return false;
+      return !isPriorityBlur(img);
     }
-    state.stats.keep = keep;
-    state.stats.reject = reject;
+    // 單張疑似模糊照片會優先進入待確認區，除非手動保留，否則不自動輸出。
+    return !isPriorityBlur(img);
+  }
+
+  function countAutoExcludedBlur(images) {
+    return images.filter(img => !img.manual && !shouldExportImage(img)).length;
   }
 
   function renderPreview(image, group) {
@@ -2158,9 +2868,68 @@
     return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
   }
 
+  function renderLowClarityQueue() {
+    if (!els.lowClarityQueue) return;
+    const items = state.images
+      .filter(img => !img.blurReviewed && !img.manual && isPriorityBlur(img))
+      .sort((a, b) => (b.metrics?.blurRisk ?? 0) - (a.metrics?.blurRisk ?? 0));
+    if (!items.length) {
+      els.lowClarityQueue.hidden = true;
+      els.lowClarityQueue.innerHTML = '';
+      return;
+    }
+    state.blurPage = Math.max(0, Math.min(state.blurPage, items.length - 1));
+    const img = items[state.blurPage];
+    els.lowClarityQueue.hidden = false;
+    els.lowClarityQueue.innerHTML = `
+      <div class="card">
+        <div class="group-top">
+          <div class="group-title"><h3>優先覆核：疑似模糊照片</h3><small>第 ${state.blurPage + 1} / ${items.length} 張。已先暫停輸出，必須由你決定是否保留。</small></div>
+          <span class="tag bad">模糊風險 ${Math.round(img.metrics.blurRisk)}% · 信心 ${Math.round(img.metrics.blurConfidence ?? img.metrics.blurRisk)}%</span>
+        </div>
+        <div class="thumb-main">
+          <button type="button" class="thumb" data-low-action="preview" aria-label="預覽 ${escapeHtml(img.name)}"><img src="${img.url}" alt="${escapeHtml(img.name)}"><div class="overlay">${escapeHtml(img.name)}</div></button>
+          <div class="details">
+            <div class="details-grid">
+              <div class="detail"><div class="k">解析度</div><div class="v">${img.metrics.width} × ${img.metrics.height}</div></div>
+              <div class="detail"><div class="k">清晰度</div><div class="v">${Math.round(img.metrics.focusScore)}</div></div>
+              <div class="detail"><div class="k">跨尺度／區域核對</div><div class="v">尺度 ${img.metrics.blurProfile?.crossCheckVotes ?? 0} / 3 · 區域 ${img.metrics.blurProfile?.regionalHits ?? 0} / 4</div></div>
+              <div class="detail"><div class="k">判定依據</div><div class="v">${escapeHtml((img.metrics.blurProfile?.reasons || ['多項清晰度指標偏低']).join('、'))}</div></div>
+            </div>
+            <div class="actions">
+              <button class="btn small good" type="button" data-low-action="keep">仍要保留</button>
+              <button class="btn small secondary" type="button" data-low-action="skip">維持不輸出</button>
+              <button class="btn small secondary" type="button" data-low-action="next">下一張</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    els.lowClarityQueue.querySelectorAll('[data-low-action]').forEach(button => {
+      button.addEventListener('click', () => {
+        const action = button.dataset.lowAction;
+        if (action === 'preview') return renderPreview(img, state.groups.find(group => group.id === img.groupId));
+        if (action === 'keep') {
+          img.manual = true;
+          img.blurReviewed = true;
+          setToast('已加入匯出清單。', 'info', 1400);
+        }
+        if (action === 'skip') {
+          img.manual = false;
+          img.blurReviewed = true;
+          setToast('維持不輸出。', 'info', 1200);
+        }
+        if (action === 'next' || action === 'keep' || action === 'skip') {
+          if (action === 'next') state.blurPage = Math.min(state.blurPage + 1, Math.max(0, items.length - 1));
+          computeStats();
+          updateStats();
+          renderLowClarityQueue();
+        }
+      });
+    });
+  }
+
   function renderGroups() {
     els.groups.innerHTML = '';
-    if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
     if (!state.groups.length) {
       els.groups.innerHTML = `
         <div class="empty">
@@ -2168,10 +2937,30 @@
           <div>尚未建立相似照片群組</div>
           <div class="small-muted">匯入並分析後，這裡會顯示每一組的最佳照片與可手動修改的選項。</div>
         </div>`;
+      renderLowClarityQueue();
       return;
     }
 
-    state.groups.forEach((group, idx) => {
+    state.groupPage = Math.max(0, Math.min(state.groupPage, state.groups.length - 1));
+    els.groups.innerHTML = `
+      <div class="group-navigator" aria-label="分群切換">
+        <div class="group-nav-title"><strong>所有項目</strong><button type="button" class="more-link" data-help="all-items" aria-haspopup="dialog">(+更多)</button></div>
+        <div class="group-page-controls">
+          <button type="button" class="group-page-btn" data-group-page="prev" aria-label="上一個群組" ${state.groupPage === 0 ? 'disabled' : ''}>‹</button>
+          <span class="group-page-indicator">第 ${state.groupPage + 1} / ${state.groups.length} 組</span>
+          <button type="button" class="group-page-btn" data-group-page="next" aria-label="下一個群組" ${state.groupPage === state.groups.length - 1 ? 'disabled' : ''}>›</button>
+        </div>
+      </div>`;
+    els.groups.querySelectorAll('[data-group-page]').forEach(button => {
+      button.addEventListener('click', () => {
+        state.groupPage += button.dataset.groupPage === 'next' ? 1 : -1;
+        renderGroups();
+      });
+    });
+
+    const idx = state.groupPage;
+    const group = state.groups[idx];
+    {
       const selected = group.samples.find(x => x.id === group.selectedId) || group.samples[0];
       const sys = group.samples.find(x => x.id === group.systemSelectedId) || selected;
       const card = document.createElement('div');
@@ -2190,24 +2979,23 @@
         </div>
 
         <div class="thumb-main">
-          <div class="thumb" data-preview="${selected.id}">
+          <button type="button" class="thumb" data-preview="${selected.id}" aria-label="預覽目前保留照片 ${escapeHtml(selected.name)}">
             <img src="${selected.url}" alt="${escapeHtml(selected.name)}">
             <div class="thumb-badge ${selected.id === sys.id ? 'system' : 'manual'}">
               ${selected.id === sys.id ? '系統保留' : '手動保留'}
             </div>
             <div class="overlay">${selected.score} 分 · ${selected.metrics.width}×${selected.metrics.height} · ${selected.metrics.blurLabel || '模糊'}</div>
-          </div>
+          </button>
 
           <div class="details">
             <div class="details-grid">
               <div class="detail"><div class="k">目前保留</div><div class="v">${escapeHtml(selected.name)}</div></div>
               <div class="detail"><div class="k">檔案大小</div><div class="v">${humanSize(selected.size)}</div></div>
-              <div class="detail"><div class="k">拍攝時間</div><div class="v">${selected.createdAt ? selected.createdAt.toLocaleString('zh-Hant') : '未知'}</div></div>
               <div class="detail"><div class="k">目前評分</div><div class="v">${selected.score} / 100</div></div>
               <div class="detail"><div class="k">模糊風險</div><div class="v">${Math.round(selected.metrics.blurRisk ?? 0)} / 100</div></div>
             </div>
             <div class="tag-row">
-              <span class="tag ${selected.metrics.blurRisk <= 35 ? 'good' : selected.metrics.blurRisk <= 55 ? 'warn' : 'bad'}">模糊風險 ${Math.round(selected.metrics.blurRisk ?? 0)}%</span>
+              <span class="tag ${isPriorityBlur(selected) ? 'bad' : selected.metrics.blurRisk >= 38 ? 'warn' : 'good'}">模糊風險 ${Math.round(selected.metrics.blurRisk ?? 0)}%</span>
               <span class="tag">清晰度 ${Math.min(100, Math.round(selected.metrics.focusScore ?? selected.metrics.sharpness)).toFixed(0)}</span>
               <span class="tag">曝光 ${Math.round(selected.metrics.exposureBalance * 100)}%</span>
               <span class="tag">對比 ${Math.min(100, Math.round(selected.metrics.contrast)).toFixed(0)}</span>
@@ -2224,12 +3012,12 @@
 
         <div class="thumb-strip">
           ${group.samples.map((img, i) => `
-            <div class="mini-thumb ${img.id === selected.id ? 'active' : ''}" data-thumb="${img.id}">
+            <button type="button" class="mini-thumb ${img.id === selected.id ? 'active' : ''}" data-thumb="${img.id}" aria-label="選擇第 ${i + 1} 張照片 ${escapeHtml(img.name)}" aria-pressed="${img.id === selected.id}">
               <img src="${img.url}" alt="${escapeHtml(img.name)}">
               <div class="thumb-badge ${img.id === sys.id ? 'system' : ''}" style="transform:scale(.9); top:6px; left:6px; ${img.id===selected.id ? 'box-shadow: 0 0 0 2px rgba(98,224,255,.9)' : ''}">
                 ${i+1}
               </div>
-            </div>
+            </button>
           `).join('')}
         </div>
       `;
@@ -2240,7 +3028,7 @@
           if (img) {
             group.selectedId = img.id;
             group.samples.forEach(x => x.keep = (x.id === img.id));
-            group.samples.forEach(x => x.manual = (x.id === img.id && x.id !== group.systemSelectedId));
+            group.samples.forEach(x => x.manual = (x.id === img.id));
             computeStats();
             renderGroups();
             renderPreview(img, group);
@@ -2252,7 +3040,7 @@
       card.querySelector('[data-action="keep"]').addEventListener('click', () => {
         group.selectedId = selected.id;
         group.samples.forEach(x => x.keep = (x.id === selected.id));
-        group.samples.forEach(x => x.manual = (x.id === selected.id && x.id !== group.systemSelectedId));
+        group.samples.forEach(x => x.manual = (x.id === selected.id));
         computeStats();
         renderGroups();
         renderPreview(selected, group);
@@ -2263,7 +3051,7 @@
       card.querySelector('[data-action="cancel"]').addEventListener('click', () => {
         group.canceled = !group.canceled;
         if (group.canceled) {
-          group.samples.forEach(x => { x.keep = true; x.manual = false; });
+          group.samples.forEach(x => { x.keep = true; });
           group.selectedId = null;
         } else {
           group.selectedId = group.systemSelectedId;
@@ -2273,15 +3061,16 @@
         renderGroups();
         renderPreview(group.samples[0], group);
         updateStats();
-        setToast(group.canceled ? '群組已取消，將全部保留。' : '已恢復群組分辨。', 'info', 1600);
+        setToast(group.canceled ? '已取消相似群組；疑似模糊照片仍須逐張確認。' : '已恢復群組分辨。', 'info', 2000);
       });
       els.groups.appendChild(card);
-    });
+    }
 
     computeStats();
     if (state.groups.length && !state.selectedPreview) {
       renderPreview(state.groups[0].samples[0], state.groups[0]);
     }
+    renderLowClarityQueue();
   }
 
   async function analyze() {
@@ -2292,11 +3081,14 @@
     }
 
     state.analyzing = true;
+    state.cancelRequested = false;
+    state.sourceLoaded = false;
+    if (els.cancelAnalyzeBtn) els.cancelAnalyzeBtn.disabled = false;
     state.images.forEach(img => URL.revokeObjectURL(img.url));
     state.images = [];
     state.groups = [];
+    state.groupPage = 0;
     els.groups.innerHTML = '';
-    if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
     els.noticeBox.className = 'notice warn';
     els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 正在分析本機照片，請稍候。分析完成後會顯示相似群組與系統建議保留照片。`;
     updateStats();
@@ -2310,26 +3102,44 @@
       setProgress(68, `已分析 ${images.length} 張，開始分群…`);
 
       const sim = Number(els.similarity.value);
-      const groups = groupImages(images, sim);
-      finalizeGroups(groups);
+      const groups = await groupImages(images, sim);
+      await finalizeGroups(groups);
       state.groups = groups;
 
+      if (state.cancelRequested) {
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.textContent = '分析已取消；尚未產生可匯出的結果。';
+        state.images.forEach(img => URL.revokeObjectURL(img.url));
+        state.images = [];
+        state.groups = [];
+        setProgress(0, '已取消分析');
+        return;
+      }
+
+      const failedHint = state.failures.length
+        ? `<details><summary>另有 ${state.failures.length} 張無法讀取</summary><ul class="failure-list">${state.failures.slice(0, 12).map(item => `<li>${escapeHtml(item.name)}：${escapeHtml(item.reason)}</li>`).join('')}${state.failures.length > 12 ? `<li>另有 ${state.failures.length - 12} 張未列出</li>` : ''}</ul></details>`
+        : '';
+      const priorityBlurCount = images.filter(isPriorityBlur).length;
+      const blurHint = priorityBlurCount
+        ? `<strong>已優先挑出 ${priorityBlurCount} 張疑似模糊照片，並暫停自動輸出，請先覆核。</strong>`
+        : '<strong>多尺度、多區域嚴格核對後，未發現明顯模糊照片。</strong>';
       if (!groups.length) {
         els.noticeBox.className = 'notice';
-        els.noticeBox.innerHTML = `${iconSvg('check', 16)} 沒有找到明顯相似的照片群組。你可以調低相似度門檻再試一次，或直接匯出全部照片。`;
+        const excluded = countAutoExcludedBlur(images);
+        els.noticeBox.innerHTML = `${iconSvg('check', 16)} ${blurHint}<br>沒有找到明顯相似的照片群組。${excluded ? `目前共有 ${excluded} 張照片不會自動輸出。` : '其餘照片可直接匯出。'} ${failedHint}`;
       } else {
         els.noticeBox.className = 'notice';
-        els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已完成分群：系統會以多重模糊檢查（拉普拉斯、梯度、邊緣密度、區塊細節）先排除模糊照片，再在每組中自動選出最佳照片。你可以逐組檢查、手動改選，然後再匯出。`;
+        els.noticeBox.innerHTML = `${iconSvg('check', 16)} ${blurHint}<br>已完成相似分群；請先處理上方模糊照片，再覆核群組。${failedHint}`;
       }
+      state.sourceLoaded = true;
       computeStats();
       renderGroups();
       updateStats();
       setProgress(100, '分析完成');
-      state.sourceLoaded = true;
       state.analyzing = false;
       els.exportBtn.disabled = !state.groups.length && !state.images.length;
       els.scanBadge.textContent = `已掃描 ${state.stats.total} 張`;
-      setToast(`分析完成，共 ${state.stats.groups} 組相似照片。`, 'info', 2200);
+      setToast(`分析完成：優先挑出 ${priorityBlurCount} 張疑似模糊照片。`, 'info', 3200);
     } catch (err) {
       console.error(err);
       state.analyzing = false;
@@ -2348,10 +3158,15 @@
 
   async function transformImage(file, opts) {
     const { convertJpg, resize, quality } = opts;
+    const ext = fileExt(file.name);
+    // 重新繪製 GIF 只會留下單一影格；預設完整保留動畫檔。
+    if (ext === 'gif') {
+      return { blob: file.slice(0, file.size, file.type || 'image/gif'), fileName: file.name, preservedOriginal: true };
+    }
     const bitmap = await createImageBitmap(file);
     const srcW = bitmap.width;
     const srcH = bitmap.height;
-    const maxSide = 1980;
+    const maxSide = opts.maxSide || 1980;
     let targetW = srcW;
     let targetH = srcH;
     if (resize) {
@@ -2363,6 +3178,11 @@
     canvas.width = targetW;
     canvas.height = targetH;
     const ctx = canvas.getContext('2d');
+    if (convertJpg) {
+      // JPG 不支援透明度；先鋪白底，避免透明 PNG 轉出黑底。
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, targetW, targetH);
+    }
     ctx.drawImage(bitmap, 0, 0, targetW, targetH);
     bitmap.close?.();
 
@@ -2372,8 +3192,29 @@
     }
 
     const blob = convertJpg || resize ? await canvasToBlob(canvas, mime, quality) : file.slice(0, file.size, file.type || mime);
+    if (!blob) throw new Error('無法建立轉換後的圖片檔。');
     const fileName = convertJpg ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : file.name;
     return { blob, fileName };
+  }
+
+  function timestampLabel() {
+    return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  }
+
+  function safePathPart(name, fallback = '未命名') {
+    return String(name || fallback)
+      .replace(/[\\/:*?"<>|\u0000-\u001F]/g, '_')
+      .replace(/^\.+$/, fallback)
+      .slice(0, 120) || fallback;
+  }
+
+  function exportRelativePath(img, fileName) {
+    const parts = String(img.path || img.name || '')
+      .replace(/\\/g, '/')
+      .split('/')
+      .filter(Boolean);
+    const folders = parts.length > 2 ? parts.slice(1, -1).map(part => safePathPart(part)) : [];
+    return [...folders, safePathPart(fileName, 'photo.jpg')];
   }
 
   async function ensureSourceWritePermission(handle, prompt = false) {
@@ -2396,6 +3237,7 @@
 
   async function ensureWritableSourceHandle() {
     const embedded = isEmbeddedContext();
+    state.permissionCanceled = false;
 
     if (state.sourceDirHandle) {
       const granted = await ensureSourceWritePermission(state.sourceDirHandle, true);
@@ -2430,6 +3272,7 @@
         return null;
       } catch (err) {
         if (err?.name === 'AbortError') {
+          state.permissionCanceled = true;
           setToast('已取消來源資料夾選擇。', 'info', 1200);
         } else {
           console.error(err);
@@ -2457,97 +3300,48 @@
     await writable.close();
   }
 
-  function buildReport() {
-    const rows = [];
-    rows.push(['群組', '檔名', '保留', '系統建議', '分數', '模糊風險', '清晰度', '解析度', '檔案大小', '路徑']);
-    state.groups.forEach((g) => {
-      g.samples.forEach(img => {
-        rows.push([
-          g.label,
-          img.name,
-          img.keep ? '是' : '否',
-          img.id === g.systemSelectedId ? '是' : '否',
-          String(img.score),
-          String(Math.round(img.metrics.blurRisk ?? 0)),
-          String(Math.round(img.metrics.focusScore ?? img.metrics.sharpness ?? 0)),
-          `${img.metrics.width}x${img.metrics.height}`,
-          String(img.size),
-          img.path
-        ]);
-      });
-    });
-    const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
-    const json = JSON.stringify({
-      product: 'Event Photo Selector',
-      generatedAt: new Date().toISOString(),
-      total: state.stats.total,
-      groups: state.stats.groups,
-      keep: state.stats.keep,
-      reject: state.stats.reject,
-      groupsData: state.groups.map(g => ({
-        label: g.label,
-        canceled: g.canceled,
-        selectedId: g.selectedId,
-        systemSelectedId: g.systemSelectedId,
-        blurSummary: g.blurSummary,
-        items: g.samples.map(img => ({
-          name: img.name,
-          path: img.path,
-          keep: img.keep,
-          score: img.score,
-          blurRisk: img.metrics.blurRisk,
-          blurLabel: img.metrics.blurLabel,
-          focusScore: img.metrics.focusScore,
-          width: img.metrics.width,
-          height: img.metrics.height,
-          size: img.size
-        }))
-      }))
-    }, null, 2);
-    return { csv, json };
+  function getExportOptions() {
+    if (state.exportPreset === 'archive') return { convertJpg: true, resize: true, quality: 0.9, maxSide: 2560 };
+    if (state.exportPreset === 'share') return { convertJpg: true, resize: true, quality: 0.75, maxSide: 1920 };
+    if (state.exportPreset === 'custom') {
+      return {
+        convertJpg: !!els.convertJpg.checked,
+        resize: !!els.resizeToggle.checked,
+        quality: Number(els.quality.value) / 100,
+        maxSide: 1980
+      };
+    }
+    return { convertJpg: false, resize: false, quality: 0.95, maxSide: 0 };
   }
 
   async function exportResults() {
     if (state.exporting || !state.images.length) return;
+    // 匯出進度位於頁首；開始處理時立即回到最上方，避免使用者錯過狀態與進度。
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    } catch {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
     state.exporting = true;
+    state.outputDirHandle = null;
     updateStats();
     setProgress(0, '準備匯出…');
     setToast('開始匯出不同的照片。', 'loading', 1200);
 
-    const opts = {
-      convertJpg: els.convertJpg.checked,
-      resize: els.resizeToggle.checked,
-      quality: Number(els.quality.value)
-    };
+    const opts = getExportOptions();
 
     const exportItems = [];
     const seen = new Set();
     const addItem = (img) => {
       if (!img || seen.has(img.id)) return;
+      if (!shouldExportImage(img)) return;
       seen.add(img.id);
       exportItems.push(img);
     };
 
     try {
-      if (!state.groups.length) {
-        state.images.forEach(addItem);
-      } else {
-        const groupedIds = new Set();
-        state.groups.forEach(group => {
-          group.samples.forEach(img => groupedIds.add(img.id));
-          if (group.canceled) {
-            group.samples.forEach(addItem);
-            return;
-          }
-          const keep = group.samples.find(img => img.id === group.selectedId)
-            || group.samples.find(img => img.id === group.systemSelectedId)
-            || group.samples[0];
-          addItem(keep);
-        });
-        state.images.forEach(img => {
-          if (!groupedIds.has(img.id)) addItem(img);
-        });
-      }
+      state.images.forEach(addItem);
 
       const totalToWrite = exportItems.length;
       if (!totalToWrite) {
@@ -2560,50 +3354,63 @@
       const baseDir = await ensureWritableSourceHandle();
       if (baseDir) {
         const outputRoot = await baseDir.getDirectoryHandle('Output', { create: true });
+        state.outputFolderName = `結果_${timestampLabel()}`;
+        const outputDir = await outputRoot.getDirectoryHandle(state.outputFolderName, { create: true });
+        state.outputDirHandle = outputDir;
 
         let written = 0;
         for (const img of exportItems) {
           const { blob, fileName } = await transformImage(img.file, opts);
-          await writeFileInDir(outputRoot, [fileName], blob);
+          await writeFileInDir(outputDir, exportRelativePath(img, fileName), blob);
           written++;
           setProgress((written / Math.max(1, totalToWrite)) * 100, `匯出不同的照片… ${written} / ${totalToWrite}`);
           await new Promise(r => setTimeout(r, 0));
         }
 
         state.logs.push({ at: new Date(), action: 'export', detail: '完成匯出不同的照片' });
+        state.outputLocation = `Output／${state.outputFolderName}`;
         els.exportState.textContent = '已匯出';
-        els.reportState.textContent = '已產生';
         els.noticeBox.className = 'notice';
-        els.noticeBox.innerHTML = `${iconSvg('check', 16)} 匯出完成。所有「不同的照片」已集中輸出到原資料夾內的 Output 資料夾。`;
+        els.noticeBox.innerHTML = `${iconSvg('check', 16)} 匯出完成。已輸出 ${written} 張照片至 Output／${escapeHtml(state.outputFolderName)}，並保留原本的子資料夾結構。`;
         setProgress(100, '匯出完成');
         setToast('匯出完成。', 'info', 1800);
+        showExportComplete(`已完成 ${written} 張照片輸出。點擊下方按鈕可在系統視窗查看輸出檔案。`, state.outputLocation);
+        return;
+      }
+
+      if (state.permissionCanceled) {
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 已取消資料夾授權；尚未建立或下載任何輸出檔。`;
+        setProgress(0, '已取消匯出');
         return;
       }
 
       if (isEmbeddedContext()) {
         els.noticeBox.className = 'notice warn';
-        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前是 Google 協作平台內嵌環境，資料夾寫入常會被限制。已改為最後備援：下載 zip 壓縮檔。若要直接輸出到原資料夾內的 Output，請按「開啟獨立模式」後再重新授權。`;
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前是 Google 協作平台內嵌環境，資料夾寫入常會被限制。將改為下載 ZIP 備援檔；若要直接輸出到 Output，請按「開啟獨立模式」後重新授權。`;
       } else {
         els.noticeBox.className = 'notice warn';
-        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前無法直接寫入來源資料夾，已改用最後備援：下載 zip 壓縮檔。`;
+        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前無法直接寫入來源資料夾，將改用 ZIP 備援下載。`;
       }
 
       const label = 'Output';
+      state.outputFolderName = `結果_${timestampLabel()}`;
       const fallbackItems = exportItems.slice();
       const zipEntries = [];
       for (const img of fallbackItems) {
         const { blob, fileName } = await transformImage(img.file, opts);
-        zipEntries.push({ name: `${label}/${fileName}`, blob });
+        zipEntries.push({ name: `${label}/${state.outputFolderName}/${exportRelativePath(img, fileName).join('/')}`, blob });
       }
       const zipBlob = await buildZipBlob(zipEntries);
-      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const stamp = timestampLabel();
       downloadBlob(`${label}_${stamp}.zip`, zipBlob);
 
       state.logs.push({ at: new Date(), action: 'export', detail: '無法直寫資料夾，已下載 zip 備援' });
+      state.outputLocation = `ZIP 下載／${state.outputFolderName}`;
       els.exportState.textContent = '已下載 zip';
-      els.reportState.textContent = '已產生';
       setProgress(100, 'zip 已下載');
       setToast('已下載 zip 備援檔。', 'info', 1800);
+      showExportComplete(`已完成 ${fallbackItems.length} 張照片處理，ZIP 檔案已開始下載。`, state.outputLocation);
     } catch (err) {
       console.error(err);
       setToast('匯出失敗，請檢查瀏覽器權限或改用獨立模式。', 'info', 2400);
@@ -2617,16 +3424,6 @@
   }
 
   function downloadBlob(filename, blob) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
-  }
-
-  function downloadText(filename, text, mime) {
-    const blob = new Blob([text], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -2813,6 +3610,13 @@
       : `尚未選擇。${hint}`;
   };
 
+  let dragDepth = 0;
+
+  const hasDroppedFiles = (dt) => {
+    if (!dt) return false;
+    return Array.from(dt.types || []).includes('Files') || Array.from(dt.items || []).some(item => item.kind === 'file');
+  };
+
   const setDropState = (active) => {
     if (!els.dragDropZone) return;
     els.dragDropZone.classList.toggle('drag', !!active);
@@ -2847,10 +3651,15 @@
   const dropGuard = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+    if (e.dataTransfer && hasDroppedFiles(e.dataTransfer)) e.dataTransfer.dropEffect = 'copy';
   };
 
   const ingestDropped = async (dt) => {
+    if (!hasDroppedFiles(dt)) {
+      setDragFeedback('error', '拖入的內容不是圖片或資料夾。', '請拖曳圖片檔、一次多張圖片，或完整資料夾。');
+      return;
+    }
+    setDragFeedback('idle', '正在讀取拖入內容…', '正在確認圖片格式、重複檔案與資料夾結構，請稍候。');
     const dropped = await getDroppedFiles(dt);
     const files = Array.isArray(dropped) ? dropped : (dropped.files || []);
     const sourceHandle = Array.isArray(dropped) ? null : (dropped.sourceHandle || null);
@@ -2865,10 +3674,9 @@
     if (state.sourceFiles.length) {
       setToast(`已拖拉匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
       els.noticeBox.className = state.sourceDirHandle ? 'notice' : 'notice warn';
-      const writable = sourceHandle ? await ensureSourceWritePermission(sourceHandle, false) : false;
-      const sourceLabel = sourceHandle ? (state.sourceName || sourceName || '來源資料夾') : (sourceName || '未取得來源資料夾句柄');
-      els.noticeBox.innerHTML = `${iconSvg(writable || !sourceHandle ? 'check' : 'warn', 16)} 已成功拖拉匯入來源。${sourceHandle ? (writable ? '來源資料夾權限已確認，可直接建立 Output 資料夾。' : '已取得來源資料夾句柄，但尚未確認寫入權限，請按「確認來源資料夾權限」。') : `目前只能辨識到 ${sourceLabel}，但沒有原資料夾句柄，無法直接在原資料夾內建立 Output 資料夾。請按「確認來源資料夾權限」重新選擇同一個來源資料夾。`}<br>現在可以按下「開始分析」來找出相似照片群組。<br>系統會先檢查模糊照片，再進行分群與保留判斷。<br>預設輸出：原資料夾內新增的Output資料夾`;
-      els.outputStatus.textContent = sourceHandle ? (writable ? 'Output / 已授權' : 'Output / 待授權') : '待授權';
+      els.noticeBox.className = 'notice';
+      els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已匯入 ${state.sourceFiles.length} 張圖片。請選擇相似度預設後開始分析；寫入權限會在匯出時才詢問。`;
+      els.outputStatus.textContent = sourceHandle ? '匯出時詢問' : 'ZIP 備援可用';
     } else {
       setDragFeedback('error', '拖拉後沒有可辨識的圖片檔。', '請確認拖入的是圖片或資料夾。');
       setBanner('拖拉後沒有可辨識的圖片檔。請確認拖入的是圖片或資料夾。', 'error', true);
@@ -2881,15 +3689,15 @@
     const includeSubfolders = !!els.sourceRecursiveToggle?.checked;
     if ('showDirectoryPicker' in window) {
       try {
-        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        // 匯入階段只需讀取；寫入權限延後到真正匯出時才詢問。
+        const handle = await window.showDirectoryPicker();
         const files = await readFilesFromDirectoryHandle(handle, '', includeSubfolders);
         await loadSelectedFolder(files, handle, includeSubfolders);
         if (state.sourceFiles.length) {
-          const writable = await ensureSourceWritePermission(handle, false);
           setToast(`已匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
-          els.noticeBox.className = writable ? 'notice' : 'notice warn';
-          els.noticeBox.innerHTML = `${iconSvg(writable ? 'check' : 'warn', 16)} 已選擇來源資料夾。${writable ? '來源資料夾權限已確認，可直接建立 Output 資料夾。' : '目前已取得來源資料夾，但尚未確認寫入權限，請按「確認來源資料夾權限」完成授權。'}<br>現在可以按下「開始分析」來找出相似照片群組。<br>系統會先檢查模糊照片，再進行分群與保留判斷。<br>預設輸出：原資料夾內新增的Output資料夾`;
-          els.outputStatus.textContent = writable ? 'Output / 已授權' : 'Output / 待授權';
+          els.noticeBox.className = 'notice';
+          els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已選擇來源資料夾，共 ${state.sourceFiles.length} 張圖片。現在可開始分析；寫入權限會在匯出時才詢問。`;
+          els.outputStatus.textContent = '匯出時詢問';
         }
         refreshSourceHint();
         updateStats();
@@ -2926,17 +3734,19 @@
     ['dragenter', 'dragover'].forEach(evt => {
       els.dragDropZone.addEventListener(evt, e => {
         dropGuard(e);
+        if (!hasDroppedFiles(e.dataTransfer)) return;
+        if (evt === 'dragenter') dragDepth++;
         setDropState(true);
       }, false);
     });
-    ['dragleave', 'drop'].forEach(evt => {
-      els.dragDropZone.addEventListener(evt, e => {
-        dropGuard(e);
-        setDropState(false);
-      }, false);
-    });
+    els.dragDropZone.addEventListener('dragleave', e => {
+      dropGuard(e);
+      dragDepth = Math.max(0, dragDepth - 1);
+      if (!dragDepth) setDropState(false);
+    }, false);
     els.dragDropZone.addEventListener('drop', async e => {
       dropGuard(e);
+      dragDepth = 0;
       setDropState(false);
       try {
         await ingestDropped(e.dataTransfer);
@@ -2945,11 +3755,11 @@
         setBanner(prettyError(err), 'error', true);
       }
     }, false);
-    els.dragDropZone.addEventListener('click', () => els.sourceFolderInput.click());
+    els.dragDropZone.addEventListener('click', () => els.pickSourceBtn.click());
     els.dragDropZone.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        els.sourceFolderInput.click();
+        els.pickSourceBtn.click();
       }
     });
   }
@@ -2979,17 +3789,84 @@
 
   els.similarity.addEventListener('input', () => {
     els.similarityValue.textContent = els.similarity.value + '%';
+    document.querySelectorAll('[data-similarity-preset]').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.similarityPreset) === Number(els.similarity.value))));
+  });
+  els.quality.addEventListener('input', () => {
+    els.qualityValue.textContent = els.quality.value + '%';
+  });
+  document.querySelectorAll('[data-similarity-preset]').forEach(button => {
+    button.addEventListener('click', () => {
+      els.similarity.value = button.dataset.similarityPreset;
+      els.similarity.dispatchEvent(new Event('input'));
+    });
+  });
+  function selectExportPreset(preset) {
+    state.exportPreset = preset;
+    document.querySelectorAll('[data-export-preset]').forEach(item => {
+      item.setAttribute('aria-pressed', String(item.dataset.exportPreset === preset));
+    });
+    const hint = {
+      original: '保留原始格式與尺寸；動畫 GIF 一律保留原檔。',
+      archive: '轉成 JPG 90%，長邊最多 2560 像素，適合一般留存。',
+      share: '轉成 JPG 75%，長邊最多 1920 像素，適合網路分享。',
+      custom: '依下方格式、縮圖與品質設定輸出；動畫 GIF 一律保留原檔。'
+    }[preset];
+    const hintEl = $('exportPresetHint');
+    if (hintEl) hintEl.textContent = hint;
+  }
+
+  document.querySelectorAll('[data-export-preset]').forEach(button => {
+    button.addEventListener('click', () => selectExportPreset(button.dataset.exportPreset));
+  });
+  [els.convertJpg, els.resizeToggle, els.quality].forEach(control => {
+    control?.addEventListener('change', () => selectExportPreset('custom'));
+  });
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-help]');
+    if (trigger) {
+      openHelpDialog(trigger.dataset.help);
+      return;
+    }
+    if (event.target === els.helpModal || event.target.closest('#helpCloseBtn')) closeHelpDialog();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !els.helpModal.hidden) closeHelpDialog();
+    if (event.key === 'Escape' && !els.exportCompleteNotice.hidden) {
+      els.exportCompleteNotice.hidden = true;
+      state.lastFocused?.focus?.();
+      state.lastFocused = null;
+    }
   });
 
   els.analyzeBtn.addEventListener('click', analyze);
+  els.cancelAnalyzeBtn?.addEventListener('click', () => {
+    state.cancelRequested = true;
+    els.cancelAnalyzeBtn.disabled = true;
+    setToast('正在停止分析…', 'loading', 1600);
+  });
   els.exportBtn.addEventListener('click', exportResults);
+  els.closeExportComplete?.addEventListener('click', () => {
+    els.exportCompleteNotice.hidden = true;
+    state.lastFocused?.focus?.();
+    state.lastFocused = null;
+  });
+  els.exportCompletePath?.addEventListener('click', openExportOutputPath);
   els.resetBtn.addEventListener('click', () => {
+    if (state.images.length && !window.confirm('重新選擇來源會清除目前的分析與覆核結果，確定要繼續嗎？')) return;
     state.images.forEach(img => URL.revokeObjectURL(img.url));
     resetAll();
   });
 
   // Initial state
   els.similarityValue.textContent = els.similarity.value + '%';
+  els.qualityValue.textContent = els.quality.value + '%';
+  const exportPresetField = document.querySelector('[data-export-preset]')?.closest('.field');
+  const outputPermissionField = els.pickOutputBtn?.closest('.field');
+  if (exportPresetField && outputPermissionField) outputPermissionField.parentElement.insertBefore(exportPresetField, outputPermissionField);
+  const controlItems = Array.from(document.querySelector('.control-panel .stack')?.children || []);
+  controlItems.slice(0, 3).forEach(item => item.classList.add('stage-import'));
+  decorateInterfaceIcons();
   if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
   resetAll(true);
   if (isEmbeddedContext()) {
