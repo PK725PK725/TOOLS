@@ -799,6 +799,51 @@
       border-color:rgba(255,125,136,.30);
       color:#ffe0e4;
     }
+    .folderReadProgress{
+      width:100%;
+      max-width:760px;
+      padding:13px 15px;
+      border:1px solid rgba(56,189,248,.38);
+      border-radius:14px;
+      background:rgba(8,47,73,.86);
+      color:#e0f2fe;
+      text-align:left;
+      box-shadow:0 12px 28px rgba(2,8,23,.18);
+    }
+    .folderReadProgress[hidden]{ display:none !important; }
+    .folderReadProgressText{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-size:14px;
+      font-weight:800;
+    }
+    .folderReadProgressText small{
+      color:#a5f3fc;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .folderReadTrack{
+      height:8px;
+      margin-top:10px;
+      border-radius:999px;
+      background:#07111d;
+      overflow:hidden;
+    }
+    .folderReadTrack::after{
+      content:"";
+      display:block;
+      width:38%;
+      height:100%;
+      border-radius:inherit;
+      background:linear-gradient(90deg,#22d3ee,#38bdf8,#6366f1);
+      animation:folderReadMove 1.1s ease-in-out infinite;
+    }
+    @keyframes folderReadMove{
+      0%{ transform:translateX(-105%); }
+      100%{ transform:translateX(365%); }
+    }
     .dragIcon{
       width:72px;
       height:72px;
@@ -927,7 +972,7 @@
     .workflow-steps{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:14px 0; }
     .workflow-step{ padding:10px 12px; border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:13px; background:#101a2d; }
     .workflow-step[aria-current="step"]{
-      color:#10213f;
+      color:#dbeafe;
       font-weight:900;
       background:var(--active-gradient);
       border-color:#dbeafe;
@@ -946,7 +991,26 @@
     .btn.warn{ background:linear-gradient(135deg, #f59e0b, #ea580c); color:#fff; box-shadow:0 8px 18px rgba(245,158,11,.24); }
     .btn.secondary{ background:linear-gradient(135deg, #1e3a5f, #233d67); border-color:#5b85b9; color:#eaf4ff; box-shadow:none; }
     #pickSourceBtn{ background:linear-gradient(135deg, #06b6d4, #2563eb); }
-    #analyzeBtn{ background:linear-gradient(135deg, #22c55e, #059669); }
+    #analyzeBtn{
+      min-height:54px;
+      padding:10px 19px;
+      gap:11px;
+      background:linear-gradient(135deg, #22c55e, #059669);
+      font-size:16px;
+      box-shadow:0 10px 24px rgba(34,197,94,.34);
+    }
+    #analyzeBtn .analyze-button-icon{
+      display:grid;
+      place-items:center;
+      width:32px;
+      height:32px;
+      border:1px solid rgba(255,255,255,.62);
+      border-radius:10px;
+      background:rgba(2,44,34,.30);
+      color:#fef08a;
+      filter:drop-shadow(0 0 7px rgba(254,240,138,.58));
+    }
+    #analyzeBtn .analyze-button-icon svg{ width:26px; height:26px; stroke-width:2.3; }
     #exportBtn{ background:linear-gradient(135deg, #fbbf24, #ea580c); }
     .btn:focus-visible,.thumb:focus-visible,.mini-thumb:focus-visible,.switch input:focus-visible + .slider{ outline:3px solid #93c5fd; outline-offset:3px; }
     .btn:disabled{ opacity:.45; cursor:not-allowed; filter:none; transform:none; }
@@ -969,6 +1033,24 @@
     .dragStatus{ font-weight:700; border-radius:10px; background:#f8fbff; border-color:#c7d8f3; color:#243b5a; }
     .dragStatus.ok{ background:#ecfdf3; border-color:#86efac; color:#166534; }
     .dragStatus.warn{ background:#fff7ed; border-color:#fdba74; color:#9a3412; }
+    .folderReadProgress{
+      border-color:#38bdf8;
+      background:linear-gradient(135deg,#071a2e,#0c2843 58%,#101b34);
+      color:#f8fafc;
+      box-shadow:0 0 0 2px rgba(56,189,248,.18),0 14px 32px rgba(2,8,23,.38),inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .folderReadProgressText span{
+      color:#fde047;
+      text-shadow:0 0 14px rgba(253,224,71,.30);
+    }
+    .folderReadProgressText small{
+      color:#67e8f9;
+      text-shadow:0 0 12px rgba(103,232,249,.28);
+    }
+    .folderReadTrack{
+      background:#020617;
+      border:1px solid rgba(125,211,252,.22);
+    }
     .meta-grid{ gap:8px; }
     .metric{ min-height:76px; padding:12px; border-radius:12px; background:linear-gradient(145deg, #132d50, #10213d); border-color:#365a85; }
     .metric .v{ font-size:22px; margin-top:5px; color:#7dd3fc; font-weight:900; }
@@ -1057,6 +1139,353 @@
       .preset-row{ grid-template-columns:1fr; }
       .input-row .btn{ width:100%; }
     }
+
+    /* V9 簡化版：四步驟垂直工作流 */
+    .workflow-steps{
+      position:sticky;
+      top:0;
+      z-index:50;
+      padding:8px;
+      margin:14px 0 18px;
+      border:1px solid rgba(148,184,235,.22);
+      border-radius:16px;
+      background:rgba(7,18,36,.88);
+      box-shadow:0 12px 28px rgba(2,8,23,.28);
+      backdrop-filter:blur(14px);
+    }
+    .workflow-step{
+      --step-gradient:var(--active-gradient);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      min-height:48px;
+      padding:10px 13px;
+      color:#dbeafe;
+      font-weight:900;
+      text-align:left;
+      cursor:pointer;
+      opacity:1;
+      background:linear-gradient(rgba(7,18,36,.68), rgba(7,18,36,.68)), var(--step-gradient);
+      border-color:rgba(148,184,235,.36);
+      box-shadow:inset 0 1px rgba(255,255,255,.05);
+      transition:background .18s ease, box-shadow .18s ease, border-color .18s ease, filter .18s ease;
+    }
+    .workflow-step[data-workflow="import"],
+    .workflow-card[data-workflow="import"]{ --step-gradient:linear-gradient(110deg,#67e8f9 0%,#60a5fa 34%,#f0abfc 68%,#fde68a 100%); }
+    .workflow-step[data-workflow="analyze"],
+    .workflow-card[data-workflow="analyze"]{ --step-gradient:linear-gradient(110deg,#6ee7b7 0%,#22d3ee 36%,#60a5fa 70%,#c4b5fd 100%); }
+    .workflow-step[data-workflow="review"],
+    .workflow-card[data-workflow="review"]{ --step-gradient:linear-gradient(110deg,#fde68a 0%,#fb923c 35%,#fb7185 68%,#c084fc 100%); }
+    .workflow-step[data-workflow="export"],
+    .workflow-card[data-workflow="export"]{ --step-gradient:linear-gradient(110deg,#c4b5fd 0%,#f0abfc 35%,#fb7185 68%,#fbbf24 100%); }
+    .workflow-step:hover,
+    .workflow-step:focus-visible{ filter:brightness(1.12); outline:3px solid rgba(147,197,253,.72); outline-offset:2px; }
+    .workflow-step[aria-current="step"]{
+      color:#10213f;
+      background:linear-gradient(110deg, rgba(255,255,255,.28), rgba(255,255,255,.06)), var(--step-gradient);
+      border-color:#fff;
+      box-shadow:0 0 0 2px rgba(125,211,252,.38), 0 10px 26px rgba(96,165,250,.56), inset 0 1px rgba(255,255,255,.72);
+    }
+    .workflow-step[data-status="complete"]{
+      color:#10213f;
+      background:linear-gradient(rgba(7,18,36,.24), rgba(7,18,36,.24)), var(--step-gradient);
+      border-color:rgba(255,255,255,.58);
+      box-shadow:inset 0 1px rgba(255,255,255,.32);
+    }
+    .workflow-step-status{
+      flex:0 0 auto;
+      padding:3px 7px;
+      border-radius:999px;
+      background:rgba(2,8,23,.52);
+      color:#dbeafe;
+      font-size:11px;
+      line-height:1.2;
+    }
+    .workflow-step[aria-current="step"] .workflow-step-status,
+    .workflow-step[data-status="complete"] .workflow-step-status{ background:rgba(255,255,255,.72); color:#19345b; }
+    .workflow-flow{
+      display:grid;
+      gap:18px;
+      margin-top:0;
+    }
+    .workflow-card{
+      --step-gradient:var(--active-gradient);
+      position:relative;
+      padding:0;
+      overflow:hidden;
+      scroll-margin-top:92px;
+      border-radius:20px;
+      transition:opacity .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .workflow-card::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto;
+      height:4px;
+      background:var(--step-gradient);
+      opacity:.92;
+    }
+    .workflow-card[data-workflow="export"]{
+      background:linear-gradient(145deg,rgba(36,28,70,.96),rgba(31,24,52,.94));
+      border-color:rgba(216,180,254,.34);
+    }
+    .workflow-card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:20px 22px 16px;
+      border-bottom:1px solid rgba(255,255,255,.64);
+      background:
+        linear-gradient(110deg, rgba(255,255,255,.34), rgba(255,255,255,.08) 55%, rgba(255,255,255,.24)),
+        var(--step-gradient);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 8px 18px rgba(2,12,31,.12);
+    }
+    .workflow-heading{
+      display:flex;
+      align-items:flex-start;
+      gap:13px;
+      min-width:0;
+    }
+    .workflow-number{
+      display:grid;
+      place-items:center;
+      width:38px;
+      height:38px;
+      flex:0 0 38px;
+      border-radius:12px;
+      background:var(--step-gradient);
+      color:#10213f;
+      font-weight:950;
+      box-shadow:0 7px 18px rgba(96,165,250,.22);
+    }
+    .workflow-heading h2{ margin:0; font-size:22px; color:#10213f; text-shadow:0 1px 0 rgba(255,255,255,.48); }
+    .workflow-heading p{ margin:4px 0 0; color:#193b63; font-size:13px; font-weight:700; line-height:1.5; }
+    .step-state-badge{
+      flex:0 0 auto;
+      padding:7px 10px;
+      border:1px solid #4d7eb6;
+      border-radius:999px;
+      background:#142945;
+      color:#dbeafe;
+      font-size:12px;
+      font-weight:800;
+    }
+    .workflow-head-actions{ display:flex; align-items:center; justify-content:flex-end; gap:9px; flex-wrap:wrap; }
+    .workflow-card.is-active{ border-color:rgba(125,211,252,.48); box-shadow:0 18px 42px rgba(2,12,31,.32),0 0 0 1px rgba(96,165,250,.12); }
+    .workflow-card.is-complete .step-state-badge{ border-color:#34d399; background:#123d38; color:#d1fae5; }
+    .workflow-card.is-locked{ opacity:.58; }
+    .workflow-card.is-locked .workflow-card-body{ filter:saturate(.62); }
+    .workflow-card-body{ padding:20px 22px 22px; }
+    .workflow-card .field{ margin:0; }
+    .workflow-card .stack{ gap:14px; }
+    .import-actions,
+    .primary-action-row{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:10px;
+    }
+    .import-actions{ margin-bottom:14px; }
+    .source-summary{
+      flex:1 1 280px;
+      min-width:220px;
+      padding:11px 13px;
+      border:1px solid #365a85;
+      border-radius:11px;
+      background:#10213d;
+      color:#cfe4ff;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .analysis-layout{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      align-items:start;
+    }
+    .analysis-layout > .field{
+      width:100%;
+      min-width:0;
+    }
+    .analysis-layout .toggle-row{ display:block; }
+    .analysis-layout .mode,
+    .analysis-layout .advanced-disclosure,
+    .analysis-layout .preset-row{ width:100%; }
+    #similarity{
+      --similarity-progress:77.78%;
+      appearance:none;
+      -webkit-appearance:none;
+      height:12px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:999px;
+      background:
+        linear-gradient(90deg, #22d3ee 0%, #60a5fa 42%, #c084fc 72%, #fbbf24 100%) 0 / var(--similarity-progress) 100% no-repeat,
+        #334155;
+      box-shadow:inset 0 1px 2px rgba(2,8,23,.65);
+      cursor:pointer;
+    }
+    #similarity::-webkit-slider-runnable-track{
+      height:10px;
+      border:0;
+      border-radius:999px;
+      background:transparent;
+    }
+    #similarity::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:20px;
+      height:20px;
+      margin-top:-5px;
+      border:2px solid #fff;
+      border-radius:50%;
+      background:linear-gradient(135deg, #67e8f9, #a78bfa 60%, #fbbf24);
+      box-shadow:0 3px 9px rgba(2,8,23,.42);
+    }
+    #similarity::-moz-range-track{ height:10px; border:0; border-radius:999px; background:#334155; }
+    #similarity::-moz-range-progress{
+      height:10px;
+      border-radius:999px;
+      background:linear-gradient(90deg, #22d3ee, #60a5fa 42%, #c084fc 72%, #fbbf24);
+    }
+    #similarity::-moz-range-thumb{
+      width:16px;
+      height:16px;
+      border:2px solid #fff;
+      border-radius:50%;
+      background:linear-gradient(135deg, #67e8f9, #a78bfa 60%, #fbbf24);
+      box-shadow:0 3px 9px rgba(2,8,23,.42);
+    }
+    #similarity:focus-visible{ outline:3px solid rgba(125,211,252,.85); outline-offset:4px; }
+    .analysis-actions{ display:grid; gap:14px; }
+    .advanced-disclosure{
+      border:1px solid rgba(148,184,235,.22);
+      border-radius:12px;
+      background:#0f1c31;
+      overflow:hidden;
+    }
+    .advanced-disclosure > summary{
+      min-height:48px;
+      padding:14px 16px;
+      cursor:pointer;
+      color:#dbeafe;
+      font-weight:850;
+      list-style:none;
+    }
+    .advanced-disclosure > summary::-webkit-details-marker{ display:none; }
+    .advanced-disclosure > summary::after{ content:"＋"; float:right; color:#67e8f9; }
+    .advanced-disclosure[open] > summary::after{ content:"－"; }
+    .advanced-disclosure-body{ display:grid; gap:12px; padding:0 14px 14px; }
+    .advanced-disclosure .field{ background:#12243e; }
+    .review-topline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .review-topline .meta-grid{ flex:1 1 720px; }
+    .advanced-toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:9px;
+      min-height:44px;
+      padding:8px 10px 8px 13px;
+      border:1px solid #5b85b9;
+      border-radius:999px;
+      background:#132942;
+      color:#eaf4ff;
+      cursor:pointer;
+      font:inherit;
+      font-size:13px;
+      font-weight:850;
+    }
+    .advanced-toggle-track{
+      width:40px;
+      height:22px;
+      padding:3px;
+      border-radius:999px;
+      background:#52637b;
+      transition:background .18s ease;
+    }
+    .advanced-toggle-knob{
+      display:block;
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:#fff;
+      transition:transform .18s ease;
+    }
+    .advanced-toggle[aria-expanded="true"] .advanced-toggle-track{ background:linear-gradient(135deg,#22d3ee,#6366f1); }
+    .advanced-toggle[aria-expanded="true"] .advanced-toggle-knob{ transform:translateX(18px); }
+    .advanced-toggle:focus-visible{ outline:3px solid #93c5fd; outline-offset:3px; }
+    .advanced-toggle-state{ min-width:28px; color:#bae6fd; }
+    .workflow-card[data-advanced="false"] .advanced-only{ display:none !important; }
+    .review-core{ display:grid; gap:14px; }
+    .review-empty-hint{
+      padding:14px 16px;
+      border:1px dashed #365a85;
+      border-radius:12px;
+      color:var(--muted);
+      background:#0f1c31;
+      font-size:13px;
+    }
+    .review-preview-panel{ margin-top:14px; }
+    .review-preview-panel .preview-box{ display:grid; grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr); gap:14px; }
+    .review-preview-panel .preview-hero{ min-height:260px; }
+    .export-layout{ display:grid; gap:14px; }
+    .export-layout [aria-label="輸出方案"]{
+      grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+    .export-summary-grid{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .export-actions{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:14px;
+      border:1px solid rgba(216,180,254,.28);
+      border-radius:13px;
+      background:rgba(31,25,56,.72);
+    }
+    .export-actions .compact-note{ flex:1 1 360px; margin:0; }
+    .app .workflow-flow .stage-conditional,
+    .app .workflow-flow .stage-ready,
+    .app .workflow-flow .stage-review,
+    .app .workflow-flow .stage-export,
+    .app .workflow-flow .stage-import{ display:block !important; }
+    .app .workflow-flow .btn.stage-conditional,
+    .app .workflow-flow .btn.stage-ready,
+    .app .workflow-flow .btn.stage-export{ display:inline-flex !important; }
+    .workflow-flow #cancelAnalyzeBtn{ display:none !important; }
+    .app[data-stage="analyzing"] .workflow-flow #cancelAnalyzeBtn{ display:inline-flex !important; }
+    .app:not([data-embedded="true"]) .workflow-flow #openStandaloneBtn{ display:none !important; }
+    .workflow-footer{ margin-top:18px; }
+    @media (max-width:980px){
+      .analysis-layout{ grid-template-columns:1fr; }
+      .review-preview-panel .preview-box{ grid-template-columns:1fr; }
+      .export-summary-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width:620px){
+      .workflow-steps{ position:static; padding:6px; }
+      .workflow-step{ min-height:46px; padding:9px 10px; font-size:12px; }
+      .workflow-step-status{ display:none; }
+      .workflow-card-head{ align-items:flex-start; padding:18px 16px 14px; }
+      .workflow-card[data-workflow="review"] .workflow-card-head{ flex-direction:column; }
+      .workflow-card[data-workflow="review"] .workflow-head-actions{ width:100%; justify-content:stretch; }
+      .workflow-card[data-workflow="review"] #privacyBadge{ display:none; }
+      .workflow-heading h2{ font-size:19px; }
+      .workflow-heading p{ font-size:12px; }
+      .workflow-number{ width:34px; height:34px; flex-basis:34px; }
+      .workflow-card-body{ padding:16px; }
+      .step-state-badge{ display:none; }
+      .review-topline{ align-items:stretch; }
+      .advanced-toggle{ width:100%; justify-content:center; }
+      .export-summary-grid{ grid-template-columns:1fr 1fr; }
+      .export-actions .btn{ width:100%; }
+    }
   </style>
 </head>
 <body>
@@ -1069,7 +1498,7 @@
           <p class="subtitle">找出相似與低清晰度照片，全程在你的電腦上完成；原始照片不會被刪除。</p>
           <div class="hero-chip-row">
             <div class="chip">本機處理</div>
-            <div class="chip">人工覆核後再匯出</div>
+          <div class="chip">分析後可直接匯出</div>
           </div>
         </div>
         <div class="hero-side">
@@ -1086,10 +1515,10 @@
     </section>
 
     <nav class="workflow-steps" aria-label="處理步驟">
-      <div class="workflow-step" id="stepImport" aria-current="step">1　匯入照片</div>
-      <div class="workflow-step" id="stepAnalyze">2　分析設定</div>
-      <div class="workflow-step" id="stepReview">3　覆核結果</div>
-      <div class="workflow-step" id="stepExport">4　匯出照片</div>
+      <button type="button" class="workflow-step" id="stepImport" data-workflow="import" aria-current="step"><span>1　匯入照片</span><span class="workflow-step-status">目前步驟</span></button>
+      <button type="button" class="workflow-step" id="stepAnalyze" data-workflow="analyze"><span>2　分析設定</span><span class="workflow-step-status">尚未開始</span></button>
+      <button type="button" class="workflow-step" id="stepReview" data-workflow="review"><span>3　覆核結果</span><span class="workflow-step-status">尚未開始</span></button>
+      <button type="button" class="workflow-step" id="stepExport" data-workflow="export"><span>4　匯出照片</span><span class="workflow-step-status">尚未開始</span></button>
     </nav>
 
     <div class="layout">
@@ -1139,7 +1568,7 @@
 
           <div class="dragArea" id="dragDropZone" tabindex="0" role="button" aria-label="拖曳圖片或資料夾到這裡">
             <div class="dragIcon">🖼️</div>
-            <div class="dragTitle"><h3>拖曳圖片或資料夾到這裡</h3><h4>或按上方按鈕選擇來源資料夾</h4></div>
+            <div class="dragTitle"><h3>拖曳圖片或資料夾到這裡</h3><h4>或點擊此區選擇來源資料夾</h4></div>
             <div class="dragText">支援 JPG、PNG、WEBP 與可由目前瀏覽器讀取的 HEIC／GIF 圖片。</div>
             <div class="dragMeta">
               <span class="pill">📷 圖片檔</span>
@@ -1148,6 +1577,13 @@
               <span class="pill">⚠️ 不會上傳雲端</span>
             </div>
             <div class="dragStatus" id="dragStatus">尚未匯入，拖曳圖片或資料夾後會在這裡顯示成功狀態。</div>
+            <div class="folderReadProgress" id="folderReadProgress" role="status" aria-live="polite" hidden>
+              <div class="folderReadProgressText">
+                <span>正在掃描資料夾並讀取圖片資訊…</span>
+                <small id="folderReadElapsed">已等待 0 秒</small>
+              </div>
+              <div class="folderReadTrack" aria-hidden="true"></div>
+            </div>
           </div>
 
           <div class="field stage-export stage-conditional">
@@ -1235,6 +1671,7 @@
           <div class="field">
             <div class="input-row">
               <button class="btn good stage-ready stage-conditional" id="analyzeBtn">
+                <span class="analyze-button-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3l-2.5 6.2L4 12l6.5 2.8L13 21l2.5-6.2L22 12l-6.5-2.8L13 3z"/></svg></span>
                 <span>開始分析</span>
               </button>
               <button class="btn secondary" id="cancelAnalyzeBtn" type="button">取消分析</button>
@@ -1326,8 +1763,8 @@
         <section class="panel">
           <div class="section-title">
             <div>
-              <h2>模糊照片優先覆核</h2>
-              <p>先確認疑似模糊照片，再檢查相似分群與系統建議。</p>
+            <h2>照片分析結果</h2>
+            <p>系統已整理疑似模糊照片與相似群組；需要時可自行查看詳細結果。</p>
             </div>
           </div>
           <div class="review-queue" id="lowClarityQueue" hidden></div>
@@ -1348,9 +1785,9 @@
               <div class="s">僅輸出保留或手動確認的照片</div>
             </div>
             <div class="metric">
-              <div class="k">人工覆核</div>
-              <div class="v" id="restoreState">尚未覆核</div>
-              <div class="s">可保留低清晰度照片或取消群組</div>
+              <div class="k">疑似模糊照片</div>
+              <div class="v" id="restoreState">尚未分析</div>
+              <div class="s">系統預設不輸出，可自行選擇保留</div>
             </div>
             <div class="metric">
               <div class="k">輸出位置</div>
@@ -1418,6 +1855,8 @@
     blurPage: 0,
     lastFocused: null,
     exportPreset: 'archive',
+    reviewAdvanced: false,
+    exportCompleted: false,
     logs: [],
     stats: {
       total: 0,
@@ -1488,6 +1927,220 @@
     }
   };
 
+  function createWorkflowCard(key, number, title, description) {
+    const section = document.createElement('section');
+    section.className = 'panel workflow-card';
+    section.id = `workflow${key[0].toUpperCase()}${key.slice(1)}`;
+    section.dataset.workflow = key;
+    section.dataset.advanced = key === 'review' ? 'false' : 'true';
+    section.innerHTML = `
+      <div class="workflow-card-head">
+        <div class="workflow-heading">
+          <span class="workflow-number" aria-hidden="true">${number}</span>
+          <div><h2>${title}</h2><p>${description}</p></div>
+        </div>
+        <div class="workflow-head-actions">
+          <span class="step-state-badge" id="${key}StateBadge">尚未開始</span>
+        </div>
+      </div>
+      <div class="workflow-card-body"></div>`;
+    return {
+      section,
+      body: section.querySelector('.workflow-card-body'),
+      headActions: section.querySelector('.workflow-head-actions'),
+      badge: section.querySelector('.step-state-badge')
+    };
+  }
+
+  function setReviewAdvanced(enabled) {
+    state.reviewAdvanced = !!enabled;
+    const card = els.workflowCards?.review;
+    const button = els.reviewAdvancedToggle;
+    if (card) card.dataset.advanced = String(state.reviewAdvanced);
+    if (button) {
+      button.setAttribute('aria-expanded', String(state.reviewAdvanced));
+      const text = button.querySelector('.advanced-toggle-state');
+      if (text) text.textContent = state.reviewAdvanced ? '開啟' : '關閉';
+    }
+  }
+
+  function buildSimplifiedWorkflow() {
+    if (document.querySelector('.workflow-flow')) return;
+    const layout = document.querySelector('.layout');
+    const workspace = layout?.querySelector('.workspace');
+    if (!layout || !workspace) return;
+
+    const flow = document.createElement('main');
+    flow.className = 'workflow-flow';
+    flow.id = 'workflowFlow';
+    flow.setAttribute('aria-label', '照片處理流程');
+    layout.parentElement.insertBefore(flow, layout);
+
+    const importCard = createWorkflowCard('import', '1', '匯入照片', '拖曳照片或選擇來源資料夾，原始照片不會被修改。');
+    const analyzeCard = createWorkflowCard('analyze', '2', '分析設定', '選擇簡單的分析方案，系統會自動找出模糊與相似照片。');
+    const reviewCard = createWorkflowCard('review', '3', '覆核結果', '系統已整理分析結果；需要時可開啟進階功能查看詳細資訊。');
+    const exportCard = createWorkflowCard('export', '4', '匯出照片', '選擇輸出方案，確認數量後再開始匯出。');
+    [importCard, analyzeCard, reviewCard, exportCard].forEach(card => flow.appendChild(card.section));
+
+    els.workflowCards = {
+      import: importCard.section,
+      analyze: analyzeCard.section,
+      review: reviewCard.section,
+      export: exportCard.section
+    };
+    els.workflowBadges = {
+      import: importCard.badge,
+      analyze: analyzeCard.badge,
+      review: reviewCard.badge,
+      export: exportCard.badge
+    };
+
+    const recursiveField = els.sourceRecursiveToggle?.closest('.field');
+    const importStack = document.createElement('div');
+    importStack.className = 'stack';
+    if (els.sourceFolderInput) importStack.appendChild(els.sourceFolderInput);
+    els.pickSourceBtn?.closest('.field')?.remove();
+    if (els.dragDropZone) importStack.appendChild(els.dragDropZone);
+    if (recursiveField) {
+      const recursiveDetails = document.createElement('details');
+      recursiveDetails.className = 'advanced-disclosure';
+      recursiveDetails.innerHTML = '<summary>進階：掃描子資料夾</summary><div class="advanced-disclosure-body"></div>';
+      recursiveDetails.querySelector('.advanced-disclosure-body').appendChild(recursiveField);
+      importStack.appendChild(recursiveDetails);
+    }
+    const resetRow = document.createElement('div');
+    resetRow.className = 'import-actions';
+    if (els.resetBtn) resetRow.appendChild(els.resetBtn);
+    const sourceSummary = document.createElement('div');
+    sourceSummary.className = 'source-summary';
+    sourceSummary.textContent = '尚未匯入照片。完成後會在這裡顯示匯入數量。';
+    sourceSummary.id = 'sourceSummary';
+    resetRow.appendChild(sourceSummary);
+    importStack.appendChild(resetRow);
+    importCard.body.appendChild(importStack);
+
+    const similarityField = els.similarity?.closest('.field');
+    const similarityDetails = els.similarity?.closest('details');
+    const progressField = els.progressBar?.closest('.field');
+    if (similarityDetails) {
+      similarityDetails.setAttribute('open', '');
+      similarityDetails.classList.add('advanced-disclosure');
+    }
+    const analysisLayout = document.createElement('div');
+    analysisLayout.className = 'analysis-layout';
+    if (similarityField) analysisLayout.appendChild(similarityField);
+    const analysisActions = document.createElement('div');
+    analysisActions.className = 'analysis-actions';
+    if (progressField) analysisActions.appendChild(progressField);
+    const analyzeActionField = document.createElement('div');
+    analyzeActionField.className = 'field';
+    const analyzeButtons = document.createElement('div');
+    analyzeButtons.className = 'primary-action-row';
+    if (els.analyzeBtn) analyzeButtons.appendChild(els.analyzeBtn);
+    if (els.cancelAnalyzeBtn) analyzeButtons.appendChild(els.cancelAnalyzeBtn);
+    analyzeActionField.appendChild(analyzeButtons);
+    analyzeActionField.insertAdjacentHTML('beforeend', '<div class="compact-note">第一次使用建議選擇「平衡」；分析完成後可直接匯出，或開啟進階功能查看結果。</div>');
+    analysisActions.appendChild(analyzeActionField);
+    analysisLayout.appendChild(analysisActions);
+    analyzeCard.body.appendChild(analysisLayout);
+
+    const statusPanel = els.totalCount?.closest('section.panel');
+    const statusGrid = statusPanel?.querySelector('.meta-grid');
+    const rejectMetric = els.rejectCount?.closest('.metric');
+    if (rejectMetric) {
+      const label = rejectMetric.querySelector('.k');
+      const help = rejectMetric.querySelector('.s');
+      if (label) label.textContent = '疑似模糊照片';
+      if (help) help.textContent = '系統預設不輸出的照片';
+    }
+    if (els.privacyBadge) reviewCard.headActions.insertBefore(els.privacyBadge, reviewCard.badge);
+    const reviewToggle = document.createElement('button');
+    reviewToggle.type = 'button';
+    reviewToggle.className = 'advanced-toggle';
+    reviewToggle.id = 'reviewAdvancedToggle';
+    reviewToggle.setAttribute('aria-expanded', 'false');
+    reviewToggle.setAttribute('aria-controls', 'reviewAdvancedContent');
+    reviewToggle.innerHTML = '<span>進階功能</span><span class="advanced-toggle-track" aria-hidden="true"><span class="advanced-toggle-knob"></span></span><span class="advanced-toggle-state">關閉</span>';
+    reviewCard.headActions.appendChild(reviewToggle);
+    els.reviewAdvancedToggle = reviewToggle;
+    reviewToggle.addEventListener('click', () => setReviewAdvanced(!state.reviewAdvanced));
+
+    if (statusGrid) reviewCard.body.appendChild(statusGrid);
+    const noticePanel = els.noticeBox?.closest('section.panel');
+    if (els.noticeBox) reviewCard.body.appendChild(els.noticeBox);
+    const emptyHint = document.createElement('div');
+    emptyHint.className = 'review-empty-hint';
+    emptyHint.id = 'reviewEmptyHint';
+    emptyHint.textContent = '完成分析後，可開啟進階功能查看疑似模糊照片與相似群組。';
+    reviewCard.body.appendChild(emptyHint);
+    const advancedReview = document.createElement('div');
+    advancedReview.id = 'reviewAdvancedContent';
+    advancedReview.className = 'advanced-only';
+    const reviewCore = document.createElement('div');
+    reviewCore.className = 'review-core';
+    if (els.lowClarityQueue) reviewCore.appendChild(els.lowClarityQueue);
+    if (els.groups) reviewCore.appendChild(els.groups);
+    advancedReview.appendChild(reviewCore);
+    if (noticePanel) {
+      noticePanel.classList.add('advanced-only');
+      noticePanel.querySelector('.divider')?.remove();
+      if (noticePanel.textContent.trim()) advancedReview.appendChild(noticePanel);
+    }
+    const previewPanel = els.previewHero?.closest('section.panel');
+    if (previewPanel) {
+      previewPanel.classList.add('advanced-only', 'review-preview-panel');
+      advancedReview.appendChild(previewPanel);
+    }
+    reviewCard.body.appendChild(advancedReview);
+
+    const exportPresetField = document.querySelector('[data-export-preset]')?.closest('.field');
+    const outputPermissionField = els.pickOutputBtn?.closest('.field');
+    const convertField = els.convertJpg?.closest('.field');
+    const resizeField = els.resizeToggle?.closest('.field');
+    const qualityField = els.quality?.closest('.field');
+    const processPanel = els.exportState?.closest('section.panel');
+    const processGrid = processPanel?.querySelector('.meta-grid');
+    const exportLayout = document.createElement('div');
+    exportLayout.className = 'export-layout';
+    if (exportPresetField) exportLayout.appendChild(exportPresetField);
+    if (processGrid) {
+      processGrid.classList.add('export-summary-grid');
+      exportLayout.appendChild(processGrid);
+    }
+    const exportActions = document.createElement('div');
+    exportActions.className = 'export-actions';
+    exportActions.insertAdjacentHTML('beforeend', '<div class="compact-note">只會輸出建議保留或你手動確認的照片；原始照片不會刪除。</div>');
+    const exportButtons = document.createElement('div');
+    exportButtons.className = 'primary-action-row';
+    if (els.exportBtn) exportButtons.appendChild(els.exportBtn);
+    if (els.openStandaloneBtn) exportButtons.appendChild(els.openStandaloneBtn);
+    exportActions.appendChild(exportButtons);
+    exportLayout.appendChild(exportActions);
+
+    const exportAdvanced = document.createElement('details');
+    exportAdvanced.className = 'advanced-disclosure';
+    exportAdvanced.innerHTML = '<summary>進階：輸出格式、尺寸與權限</summary><div class="advanced-disclosure-body"></div>';
+    const exportAdvancedBody = exportAdvanced.querySelector('.advanced-disclosure-body');
+    [outputPermissionField, convertField, resizeField, qualityField].filter(Boolean).forEach(field => exportAdvancedBody.appendChild(field));
+    exportLayout.appendChild(exportAdvanced);
+    exportCard.body.appendChild(exportLayout);
+
+    const footer = workspace.querySelector('.footer');
+    if (footer) {
+      footer.classList.add('workflow-footer');
+      flow.appendChild(footer);
+    }
+    layout.remove();
+
+    Object.entries(els.steps).forEach(([key, step]) => {
+      if (!step) return;
+      step.addEventListener('click', () => {
+        els.workflowCards?.[key]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    setReviewAdvanced(false);
+  }
+
   function iconSvg(name, size=18) {
     const icons = {
       folder: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>`,
@@ -1538,7 +2191,7 @@
       : `<h3 id="helpDialogTitle">所有項目：新手快速說明</h3>
           <h4>這裡會顯示什麼？</h4><p>系統把相似照片放在同一個群組，並從每組挑出一張較清楚、較適合保留的照片。使用左右按鈕可一次查看一個群組，不會讓所有卡片塞滿畫面。</p>
           <h4>簡易範例</h4><p>你連拍 5 張同一個人站在舞台上：系統可能把這 5 張放成一組，預設保留其中最清楚的一張。若你偏好別張，直接點選下方縮圖，再按「保留這張」。</p>
-          <h4>注意事項</h4><ul><li>系統的分群是建議，重要照片請在匯出前快速覆核。</li><li>按「取消群組」只會取消相似判定；疑似模糊照片仍須逐張確認後才能輸出。</li><li>未被分組的單張照片仍會先通過嚴格模糊審核。</li></ul>`;
+          <h4>注意事項</h4><ul><li>系統會為每組相似照片選出建議保留的照片，可直接匯出。</li><li>按「取消群組」只會取消相似判定；疑似模糊照片仍維持預設不輸出，除非你自行保留。</li><li>未被分組的單張照片也會套用相同的清晰度判定。</li></ul>`;
     els.helpDialogContent.innerHTML = content;
     els.helpModal.hidden = false;
     els.helpModal.setAttribute('aria-hidden', 'false');
@@ -1627,6 +2280,10 @@
     }
   }
 
+  function countPendingReviews() {
+    return state.images.filter(img => !img.blurReviewed && !img.manual && isPriorityBlur(img)).length;
+  }
+
   function syncWorkflowStage() {
     const stage = state.exporting ? 'exporting'
       : state.analyzing ? 'analyzing'
@@ -1635,32 +2292,72 @@
       : 'import';
     els.app.dataset.stage = stage;
     els.app.dataset.embedded = String(isEmbeddedContext());
-    const active = stage === 'import' ? 'import' : stage === 'ready' || stage === 'analyzing' ? 'analyze' : stage === 'exporting' ? 'export' : 'review';
+    const pendingReviews = countPendingReviews();
+    const active = state.exporting || state.exportCompleted
+      ? 'export'
+      : state.sourceLoaded
+        ? 'review'
+        : state.sourceFiles.length
+          ? 'analyze'
+          : 'import';
+    const statuses = {
+      import: state.sourceFiles.length ? 'complete' : 'active',
+      analyze: state.sourceLoaded ? 'complete' : state.sourceFiles.length ? 'active' : 'locked',
+      review: state.exportCompleted ? 'complete' : state.sourceLoaded ? 'active' : 'locked',
+      export: state.exportCompleted ? 'complete' : state.exporting ? 'active' : state.sourceLoaded ? 'ready' : 'locked'
+    };
+    const badgeText = {
+      import: state.sourceFiles.length ? `已匯入 ${state.sourceFiles.length} 張` : '等待匯入',
+      analyze: state.sourceLoaded ? '分析完成' : state.analyzing ? '分析中' : state.sourceFiles.length ? '可開始分析' : '先匯入照片',
+      review: state.sourceLoaded ? (pendingReviews ? `${pendingReviews} 張疑似模糊` : '可查看結果') : '等待分析',
+      export: state.exportCompleted ? '已完成匯出' : state.exporting ? '匯出中' : state.sourceLoaded ? '可匯出' : '等待分析'
+    };
     Object.entries(els.steps).forEach(([name, element]) => {
       if (!element) return;
+      const status = statuses[name];
       if (name === active) element.setAttribute('aria-current', 'step');
       else element.removeAttribute('aria-current');
+      element.dataset.status = status;
+      element.setAttribute('aria-disabled', String(status === 'locked'));
+      const statusText = element.querySelector('.workflow-step-status');
+      if (statusText) statusText.textContent = status === 'complete' ? '已完成' : status === 'active' ? '目前步驟' : status === 'ready' ? '可前往' : '尚未開始';
+      const card = els.workflowCards?.[name];
+      if (card) {
+        card.classList.toggle('is-active', status === 'active');
+        card.classList.toggle('is-complete', status === 'complete');
+        card.classList.toggle('is-locked', status === 'locked');
+        card.toggleAttribute('inert', status === 'locked');
+        card.setAttribute('aria-disabled', String(status === 'locked'));
+      }
+      if (els.workflowBadges?.[name]) els.workflowBadges[name].textContent = badgeText[name];
     });
+    const emptyHint = $('reviewEmptyHint');
+    if (emptyHint) emptyHint.hidden = state.sourceLoaded;
   }
 
   function updateStats() {
+    const pendingReviews = countPendingReviews();
     els.totalCount.textContent = state.stats.total;
     els.groupCount.textContent = state.stats.groups;
     els.keepCount.textContent = state.stats.keep;
-    els.rejectCount.textContent = state.stats.reject;
+    els.rejectCount.textContent = pendingReviews;
     els.exportBtn.disabled = !state.images.length || state.analyzing || state.exporting;
     const exportLabel = !state.images.length
       ? '匯出篩選照片'
       : (state.groups.length ? '匯出不同的照片' : '匯出全部照片');
     const exportLabelEl = els.exportBtn?.querySelector('span:last-child');
     if (exportLabelEl) exportLabelEl.textContent = exportLabel;
-    els.heroStatus.textContent = state.exporting ? '匯出中' : state.analyzing ? '分析中' : state.sourceLoaded ? '等待覆核' : (state.sourceFiles.length ? '可開始分析' : '等待匯入照片');
+    els.heroStatus.textContent = state.exporting ? '匯出中' : state.exportCompleted ? '匯出完成' : state.analyzing ? '分析中' : state.sourceLoaded ? (pendingReviews ? `${pendingReviews} 張疑似模糊` : '可匯出') : (state.sourceFiles.length ? '可開始分析' : '等待匯入照片');
     els.sourceBadge.textContent = '來源：' + state.sourceName;
     els.scanBadge.textContent = state.stats.total ? `已掃描 ${state.stats.total} 張` : '尚未掃描';
     els.privacyBadge.textContent = state.exporting ? '本機匯出中' : '本機處理';
-    els.exportState.textContent = state.exporting ? '匯出中' : (state.stats.keep ? '可匯出' : '尚未匯出');
-    els.restoreState.textContent = state.stats.reject ? `${state.stats.reject} 張待確認` : (state.sourceLoaded ? '已完成覆核' : '尚未覆核');
+    els.exportState.textContent = state.exporting ? '匯出中' : state.exportCompleted ? '已完成' : (state.stats.keep ? '可匯出' : '尚未匯出');
+    els.restoreState.textContent = pendingReviews ? `${pendingReviews} 張預設不輸出` : (state.sourceLoaded ? '沒有疑似模糊照片' : '尚未分析');
     els.outputLocation.textContent = state.outputLocation;
+    const sourceSummary = $('sourceSummary');
+    if (sourceSummary) sourceSummary.textContent = state.sourceFiles.length
+      ? `已匯入 ${state.sourceFiles.length} 張照片${state.includeSubfolders ? '｜包含子資料夾' : ''}`
+      : '尚未匯入照片。完成後會在這裡顯示匯入數量。';
     syncWorkflowStage();
   }
 
@@ -1931,6 +2628,7 @@
   }
 
   function resetAll(quiet=false) {
+    if (typeof stopFolderReadFeedback === 'function') stopFolderReadFeedback();
     state.sourceFiles = [];
     state.images = [];
     state.groups = [];
@@ -1951,6 +2649,9 @@
     state.blurPage = 0;
     state.lastFocused = null;
     state.exportPreset = 'archive';
+    state.reviewAdvanced = false;
+    state.exportCompleted = false;
+    setReviewAdvanced(false);
     if (typeof selectExportPreset === 'function') selectExportPreset('archive');
     state.logs = [];
     state.stats = { total: 0, groups: 0, keep: 0, reject: 0 };
@@ -2832,7 +3533,7 @@
       if (!img.keep) return false;
       return !isPriorityBlur(img);
     }
-    // 單張疑似模糊照片會優先進入待確認區，除非手動保留，否則不自動輸出。
+    // 單張疑似模糊照片預設不輸出；使用者可在進階功能中手動保留。
     return !isPriorityBlur(img);
   }
 
@@ -2884,13 +3585,13 @@
     els.lowClarityQueue.innerHTML = `
       <div class="card">
         <div class="group-top">
-          <div class="group-title"><h3>優先覆核：疑似模糊照片</h3><small>第 ${state.blurPage + 1} / ${items.length} 張。已先暫停輸出，必須由你決定是否保留。</small></div>
+          <div class="group-title"><h3>疑似模糊照片</h3><small>第 ${state.blurPage + 1} / ${items.length} 張。系統預設不輸出；若要保留，可自行選擇。</small></div>
           <span class="tag bad">模糊風險 ${Math.round(img.metrics.blurRisk)}% · 信心 ${Math.round(img.metrics.blurConfidence ?? img.metrics.blurRisk)}%</span>
         </div>
         <div class="thumb-main">
           <button type="button" class="thumb" data-low-action="preview" aria-label="預覽 ${escapeHtml(img.name)}"><img src="${img.url}" alt="${escapeHtml(img.name)}"><div class="overlay">${escapeHtml(img.name)}</div></button>
           <div class="details">
-            <div class="details-grid">
+            <div class="details-grid advanced-only">
               <div class="detail"><div class="k">解析度</div><div class="v">${img.metrics.width} × ${img.metrics.height}</div></div>
               <div class="detail"><div class="k">清晰度</div><div class="v">${Math.round(img.metrics.focusScore)}</div></div>
               <div class="detail"><div class="k">跨尺度／區域核對</div><div class="v">尺度 ${img.metrics.blurProfile?.crossCheckVotes ?? 0} / 3 · 區域 ${img.metrics.blurProfile?.regionalHits ?? 0} / 4</div></div>
@@ -2944,7 +3645,7 @@
     state.groupPage = Math.max(0, Math.min(state.groupPage, state.groups.length - 1));
     els.groups.innerHTML = `
       <div class="group-navigator" aria-label="分群切換">
-        <div class="group-nav-title"><strong>所有項目</strong><button type="button" class="more-link" data-help="all-items" aria-haspopup="dialog">(+更多)</button></div>
+        <div class="group-nav-title"><strong>相似群組結果</strong><button type="button" class="more-link advanced-only" data-help="all-items" aria-haspopup="dialog">操作說明</button></div>
         <div class="group-page-controls">
           <button type="button" class="group-page-btn" data-group-page="prev" aria-label="上一個群組" ${state.groupPage === 0 ? 'disabled' : ''}>‹</button>
           <span class="group-page-indicator">第 ${state.groupPage + 1} / ${state.groups.length} 組</span>
@@ -2969,7 +3670,7 @@
         <div class="group-top">
           <div class="group-title">
             <h3>${group.label}</h3>
-            <small>${group.note} · 系統建議保留 ${escapeHtml(sys.name)}</small>
+            <small>${group.samples.length} 張相似照片 · 系統建議保留 ${escapeHtml(sys.name)}</small>
           </div>
           <div class="tag-row">
             <span class="tag good">${iconSvg('check', 14)} 系統建議保留</span>
@@ -2988,13 +3689,13 @@
           </button>
 
           <div class="details">
-            <div class="details-grid">
+            <div class="details-grid advanced-only">
               <div class="detail"><div class="k">目前保留</div><div class="v">${escapeHtml(selected.name)}</div></div>
               <div class="detail"><div class="k">檔案大小</div><div class="v">${humanSize(selected.size)}</div></div>
               <div class="detail"><div class="k">目前評分</div><div class="v">${selected.score} / 100</div></div>
               <div class="detail"><div class="k">模糊風險</div><div class="v">${Math.round(selected.metrics.blurRisk ?? 0)} / 100</div></div>
             </div>
-            <div class="tag-row">
+            <div class="tag-row advanced-only">
               <span class="tag ${isPriorityBlur(selected) ? 'bad' : selected.metrics.blurRisk >= 38 ? 'warn' : 'good'}">模糊風險 ${Math.round(selected.metrics.blurRisk ?? 0)}%</span>
               <span class="tag">清晰度 ${Math.min(100, Math.round(selected.metrics.focusScore ?? selected.metrics.sharpness)).toFixed(0)}</span>
               <span class="tag">曝光 ${Math.round(selected.metrics.exposureBalance * 100)}%</span>
@@ -3002,11 +3703,11 @@
             </div>
             <div class="actions">
               <button class="btn small good" data-action="keep">保留這張</button>
-              <button class="btn small secondary" data-action="preview">查看預覽</button>
-              <button class="btn small warn" data-action="cancel">取消群組</button>
+              <button class="btn small secondary advanced-only" data-action="preview">查看完整資訊</button>
+              <button class="btn small warn advanced-only" data-action="cancel">取消群組</button>
             </div>
-            <div class="help">查看預覽的照片，在上方「照片預覽」區域。</div>
-            <div class="help">操作說明：點選「保留這張」可改選主照片；「取消群組」代表這組都不視為重複。系統會優先保留較清晰的照片。</div>
+            <div class="help advanced-only">完整檔名、路徑、解析度與評分會顯示在本步驟下方的進階預覽區。</div>
+            <div class="help advanced-only">「取消群組」代表這組都不視為重複；疑似模糊照片仍維持預設不輸出，除非你自行保留。</div>
           </div>
         </div>
 
@@ -3061,7 +3762,7 @@
         renderGroups();
         renderPreview(group.samples[0], group);
         updateStats();
-        setToast(group.canceled ? '已取消相似群組；疑似模糊照片仍須逐張確認。' : '已恢復群組分辨。', 'info', 2000);
+        setToast(group.canceled ? '已取消相似群組；疑似模糊照片仍維持預設不輸出。' : '已恢復群組分辨。', 'info', 2000);
       });
       els.groups.appendChild(card);
     }
@@ -3083,6 +3784,7 @@
     state.analyzing = true;
     state.cancelRequested = false;
     state.sourceLoaded = false;
+    state.exportCompleted = false;
     if (els.cancelAnalyzeBtn) els.cancelAnalyzeBtn.disabled = false;
     state.images.forEach(img => URL.revokeObjectURL(img.url));
     state.images = [];
@@ -3121,7 +3823,7 @@
         : '';
       const priorityBlurCount = images.filter(isPriorityBlur).length;
       const blurHint = priorityBlurCount
-        ? `<strong>已優先挑出 ${priorityBlurCount} 張疑似模糊照片，並暫停自動輸出，請先覆核。</strong>`
+        ? `<strong>已找出 ${priorityBlurCount} 張疑似模糊照片，系統預設不輸出；需要時可在下方開啟進階功能查看或保留。</strong>`
         : '<strong>多尺度、多區域嚴格核對後，未發現明顯模糊照片。</strong>';
       if (!groups.length) {
         els.noticeBox.className = 'notice';
@@ -3129,7 +3831,7 @@
         els.noticeBox.innerHTML = `${iconSvg('check', 16)} ${blurHint}<br>沒有找到明顯相似的照片群組。${excluded ? `目前共有 ${excluded} 張照片不會自動輸出。` : '其餘照片可直接匯出。'} ${failedHint}`;
       } else {
         els.noticeBox.className = 'notice';
-        els.noticeBox.innerHTML = `${iconSvg('check', 16)} ${blurHint}<br>已完成相似分群；請先處理上方模糊照片，再覆核群組。${failedHint}`;
+        els.noticeBox.innerHTML = `${iconSvg('check', 16)} ${blurHint}<br>已完成相似分群；系統已為每組選出建議保留的照片，可直接匯出。${failedHint}`;
       }
       state.sourceLoaded = true;
       computeStats();
@@ -3139,7 +3841,7 @@
       state.analyzing = false;
       els.exportBtn.disabled = !state.groups.length && !state.images.length;
       els.scanBadge.textContent = `已掃描 ${state.stats.total} 張`;
-      setToast(`分析完成：優先挑出 ${priorityBlurCount} 張疑似模糊照片。`, 'info', 3200);
+      setToast(`分析完成：已找出 ${priorityBlurCount} 張疑似模糊照片。`, 'info', 3200);
     } catch (err) {
       console.error(err);
       state.analyzing = false;
@@ -3369,6 +4071,7 @@
 
         state.logs.push({ at: new Date(), action: 'export', detail: '完成匯出不同的照片' });
         state.outputLocation = `Output／${state.outputFolderName}`;
+        state.exportCompleted = true;
         els.exportState.textContent = '已匯出';
         els.noticeBox.className = 'notice';
         els.noticeBox.innerHTML = `${iconSvg('check', 16)} 匯出完成。已輸出 ${written} 張照片至 Output／${escapeHtml(state.outputFolderName)}，並保留原本的子資料夾結構。`;
@@ -3407,6 +4110,7 @@
 
       state.logs.push({ at: new Date(), action: 'export', detail: '無法直寫資料夾，已下載 zip 備援' });
       state.outputLocation = `ZIP 下載／${state.outputFolderName}`;
+      state.exportCompleted = true;
       els.exportState.textContent = '已下載 zip';
       setProgress(100, 'zip 已下載');
       setToast('已下載 zip 備援檔。', 'info', 1800);
@@ -3622,6 +4326,31 @@
     els.dragDropZone.classList.toggle('drag', !!active);
   };
 
+  let folderReadTimer = null;
+  let folderReadStartedAt = 0;
+
+  const stopFolderReadFeedback = () => {
+    if (folderReadTimer) window.clearInterval(folderReadTimer);
+    folderReadTimer = null;
+    const progress = $('folderReadProgress');
+    if (progress) progress.hidden = true;
+    els.dragDropZone?.removeAttribute('aria-busy');
+  };
+
+  const startFolderReadFeedback = () => {
+    stopFolderReadFeedback();
+    const progress = $('folderReadProgress');
+    const elapsed = $('folderReadElapsed');
+    folderReadStartedAt = Date.now();
+    if (progress) progress.hidden = false;
+    if (elapsed) elapsed.textContent = '已等待 0 秒';
+    els.dragDropZone?.setAttribute('aria-busy', 'true');
+    folderReadTimer = window.setInterval(() => {
+      const seconds = Math.max(1, Math.floor((Date.now() - folderReadStartedAt) / 1000));
+      if (elapsed) elapsed.textContent = `已等待 ${seconds} 秒`;
+    }, 1000);
+  };
+
   const setDragFeedback = (kind = 'idle', title = '', detail = '') => {
     if (!els.dragDropZone) return;
     els.dragDropZone.classList.remove('success', 'error');
@@ -3660,7 +4389,24 @@
       return;
     }
     setDragFeedback('idle', '正在讀取拖入內容…', '正在確認圖片格式、重複檔案與資料夾結構，請稍候。');
-    const dropped = await getDroppedFiles(dt);
+    startFolderReadFeedback();
+    els.sourceHint.textContent = '正在掃描拖入的資料夾並讀取圖片資訊，請稍候。';
+    // DataTransfer 只能在 drop 事件仍有效時讀取；必須先立即啟動檔案擷取，
+    // 再讓瀏覽器繪製進度訊息，否則等待一個畫面影格後資料可能已被保護而變成空清單。
+    const droppedTask = getDroppedFiles(dt).then(
+      value => ({ value, error: null }),
+      error => ({ value: null, error })
+    );
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    let dropped;
+    try {
+      const result = await droppedTask;
+      if (result.error) throw result.error;
+      dropped = result.value;
+    } finally {
+      stopFolderReadFeedback();
+    }
     const files = Array.isArray(dropped) ? dropped : (dropped.files || []);
     const sourceHandle = Array.isArray(dropped) ? null : (dropped.sourceHandle || null);
     const sourceName = Array.isArray(dropped) ? '' : (dropped.sourceName || '');
@@ -3685,7 +4431,7 @@
     updateStats();
   };
 
-  els.pickSourceBtn.addEventListener('click', async () => {
+  async function openSourcePicker() {
     const includeSubfolders = !!els.sourceRecursiveToggle?.checked;
     if ('showDirectoryPicker' in window) {
       try {
@@ -3710,7 +4456,8 @@
       }
     }
     els.sourceFolderInput.click();
-  });
+  }
+  els.pickSourceBtn.addEventListener('click', openSourcePicker);
   els.sourceFolderInput.addEventListener('change', async (e) => {
     const files = e.target.files;
     await loadSelectedFolder(files, null, !!els.sourceRecursiveToggle?.checked);
@@ -3755,11 +4502,11 @@
         setBanner(prettyError(err), 'error', true);
       }
     }, false);
-    els.dragDropZone.addEventListener('click', () => els.pickSourceBtn.click());
+    els.dragDropZone.addEventListener('click', openSourcePicker);
     els.dragDropZone.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        els.pickSourceBtn.click();
+        openSourcePicker();
       }
     });
   }
@@ -3789,6 +4536,10 @@
 
   els.similarity.addEventListener('input', () => {
     els.similarityValue.textContent = els.similarity.value + '%';
+    const min = Number(els.similarity.min);
+    const max = Number(els.similarity.max);
+    const progress = ((Number(els.similarity.value) - min) / (max - min)) * 100;
+    els.similarity.style.setProperty('--similarity-progress', `${progress}%`);
     document.querySelectorAll('[data-similarity-preset]').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.similarityPreset) === Number(els.similarity.value))));
   });
   els.quality.addEventListener('input', () => {
@@ -3859,13 +4610,9 @@
   });
 
   // Initial state
-  els.similarityValue.textContent = els.similarity.value + '%';
+  buildSimplifiedWorkflow();
+  els.similarity.dispatchEvent(new Event('input'));
   els.qualityValue.textContent = els.quality.value + '%';
-  const exportPresetField = document.querySelector('[data-export-preset]')?.closest('.field');
-  const outputPermissionField = els.pickOutputBtn?.closest('.field');
-  if (exportPresetField && outputPermissionField) outputPermissionField.parentElement.insertBefore(exportPresetField, outputPermissionField);
-  const controlItems = Array.from(document.querySelector('.control-panel .stack')?.children || []);
-  controlItems.slice(0, 3).forEach(item => item.classList.add('stage-import'));
   decorateInterfaceIcons();
   if (els.sourceRecursiveToggle) els.sourceRecursiveToggle.checked = false;
   resetAll(true);
