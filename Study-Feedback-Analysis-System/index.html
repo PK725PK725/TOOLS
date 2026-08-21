@@ -90,14 +90,30 @@ body{
    按鈕
 ===================================================== */
 .main-btn{
-  background:linear-gradient(135deg,#ff758f,#ff9a8b);
-  transition:.25s;
+  position:relative;
+  min-height:72px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  overflow:hidden;
+  background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 42%,#db2777 100%);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 14px 30px rgba(124,58,237,.42),0 0 0 5px rgba(192,132,252,.2);
+  letter-spacing:.04em;
+  transition:box-shadow .2s ease,filter .2s ease;
 }
 
 .main-btn:hover{
-  transform:translateY(-3px) scale(1.02);
-  box-shadow:0 12px 30px rgba(255,117,143,.35);
+  transform:none;
+  filter:brightness(1.08);
+  box-shadow:0 16px 34px rgba(124,58,237,.5),0 0 0 6px rgba(192,132,252,.24);
 }
+
+.main-btn__label{font-size:1.25rem;font-weight:900;line-height:1.2;}
+.main-btn__title{color:#fef08a;text-shadow:0 1px 1px rgba(76,29,149,.65);}
+.main-btn__hint{font-size:.75rem;font-weight:700;letter-spacing:.02em;opacity:.88;}
 
 .clear-btn{
   background:linear-gradient(135deg,#36d1dc,#5b86e5);
@@ -151,13 +167,29 @@ body{
   margin:auto;
   display:grid;
   place-items:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
   border-radius:50%;
   background:conic-gradient(#22c55e 0%,#22c55e 0%,#e5e7eb 0%,#e5e7eb 100%);
-  box-shadow:0 12px 28px rgba(34,197,94,.2);
+  box-shadow:0 14px 30px rgba(37,99,235,.24),0 0 0 6px rgba(96,165,250,.12);
   transition:background .55s ease;
 }
 
+.overall-chart::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:-58%;
+  background:linear-gradient(135deg,transparent 42%,rgba(255,255,255,.05) 48%,rgba(255,255,255,.62) 50%,rgba(255,255,255,.08) 53%,transparent 59%);
+  transform:translate(-52%,-52%);
+  animation:overall-chart-shine 2.5s linear infinite;
+  pointer-events:none;
+}
+
 .overall-chart__center{
+  position:relative;
+  z-index:1;
   width:68%;
   aspect-ratio:1;
   display:flex;
@@ -167,6 +199,13 @@ body{
   text-align:center;
   border-radius:50%;
   background:#fff;
+}
+
+@keyframes overall-chart-shine{
+  0%,36%,100%{transform:translate(-52%,-52%);opacity:0;}
+  37%{opacity:1;}
+  97%{transform:translate(52%,52%);opacity:.92;}
+  98%{transform:translate(52%,52%);opacity:0;}
 }
 
 .overall-chart__score{
@@ -188,6 +227,10 @@ body{
     grid-template-columns:1fr;
     gap:1.25rem;
   }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .overall-chart::after{animation:none;opacity:0;}
 }
 
 /* =====================================================
@@ -485,8 +528,8 @@ body{
           onclick="analyzeData()"
           class="main-btn w-full p-4 rounded-2xl text-white text-xl font-black"
         >
-          <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
-          開始分析
+          <span class="main-btn__label"><i class="fa-solid fa-wand-magic-sparkles mr-2" aria-hidden="true"></i><span class="main-btn__title">開始分析</span></span>
+          <span class="main-btn__hint">讀取檔案並產生分析報告</span>
         </button>
 
         <button
@@ -854,36 +897,346 @@ fileDropZone.addEventListener("drop",event=>{
 });
 
 /* =====================================================
-   第一區：成效分類
+   匯入欄位名稱
 ===================================================== */
-const effectKeywords = [
-  {title:"提升 AI 與數位工具應用能力",keywords:["AI","人工智慧","數位","工具"]},
-  {title:"課程內容具有高度實用性",keywords:["實用","有幫助","好用"]},
-  {title:"增加教學與行政應用能力",keywords:["教學","行政","應用"]},
-  {title:"提升資訊科技操作能力",keywords:["操作","練習","使用"]},
-  {title:"講師解說清楚易懂",keywords:["清楚","易懂","講解"]},
-  {title:"增加創新教學想法",keywords:["創新","創意","互動"]},
-  {title:"實作活動有助於理解內容",keywords:["實作","操作","體驗"]},
-  {title:"課程內容豐富且具啟發性",keywords:["豐富","精彩","收穫"]},
-  {title:"有助提升工作效率",keywords:["效率","快速","方便"]},
-  {title:"學員對整體課程反應良好",keywords:["滿意","很好","優秀"]}
+const importedColumnAliases = {
+  usefulness:["課程實用性"],
+  opinion:["研習的意見"],
+  future:["未來課程建議"],
+  other:["其他"],
+  goal:["研習課程目標"],
+  content:["研習課程內容","研習課程內"],
+  teacher:["講座授課方式"]
+};
+
+/* =====================================================
+   第一區：成效分類
+   僅分析「課程實用性、研習的意見、其他」。
+   每位填答者在同一主題最多計算一次。
+===================================================== */
+const effectRules = [
+  {
+    title:"提升 AI 與數位工具應用能力",
+    fields:["usefulness","opinion","other"],
+    include:[
+      /(學到|學會|了解|認識|加深|提升|運用|使用|接觸).{0,18}(ai|人工智慧|數位|工具)/,
+      /(ai|人工智慧|數位|工具).{0,18}(學到|學會|了解|認識|加深|提升|運用|使用|接觸)/
+    ]
+  },
+  {
+    title:"課程內容具有高度實用性",
+    fields:["usefulness","opinion","other"],
+    include:[/實用|好用|有幫助|派上用場|得力小幫手/]
+  },
+  {
+    title:"可運用於教學與行政工作",
+    fields:["usefulness","opinion","other"],
+    include:[
+      /(運用|應用|用於|幫助).{0,16}(教學|行政|文書|教案|資料整理|園所工作)/,
+      /(教學|行政|文書|教案|資料整理|園所工作).{0,16}(運用|應用|幫助|便利|效率)/
+    ]
+  },
+  {
+    title:"提升資訊科技操作能力",
+    fields:["usefulness","opinion","other"],
+    include:[/學會.{0,12}操作|能夠?.{0,12}操作|實際操作|操作示範|使用.{0,12}(工具|程式)/],
+    exclude:[/無法.{0,10}操作|操作.{0,10}(困難|不夠|不足|太快|太慢)|來不及.{0,10}操作|跟不上/]
+  },
+  {
+    title:"講師解說清楚易懂",
+    fields:["opinion","other"],
+    include:[/清楚|易懂|手把手|講解.{0,8}(好|清楚)|說明.{0,8}清楚/]
+  },
+  {
+    title:"增加創新教學想法",
+    fields:["usefulness","opinion","other"],
+    include:[/創新|創意|新想法|多元可能|教學靈感/]
+  },
+  {
+    title:"實作活動有助於理解內容",
+    fields:["usefulness","opinion","other"],
+    include:[
+      /實際操作.{0,16}(收穫|理解|學會|幫助)/,
+      /操作示範.{0,16}(理解|幫助|學會)/,
+      /體驗.{0,12}(收穫|理解|幫助)/
+    ],
+    exclude:[/無法|困難|不夠|不足|跟不上|來不及/]
+  },
+  {
+    title:"課程內容豐富且具啟發性",
+    fields:["usefulness","opinion","other"],
+    include:[/內容.{0,8}豐富|豐富.{0,8}內容|精彩|收穫(很多|滿滿)|受益良多|啟發/]
+  },
+  {
+    title:"有助提升工作效率",
+    fields:["usefulness","opinion","other"],
+    include:[
+      /提升.{0,8}效率|增加.{0,8}效率|節省.{0,8}時間|縮短.{0,10}(工作|文書)|快速完成|減輕.{0,10}行政|簡便.{0,10}處理/,
+      /有效率.{0,10}(整理|處理|完成)|加速.{0,10}(文書|工作|處理)|(文書|工作|行政).{0,10}(效率|省時|便利|方便)/
+    ],
+    exclude:[/無法快速|來不及|跟不上|時間過趕/]
+  },
+  {
+    title:"學員對整體課程反應良好",
+    fields:["opinion","other"],
+    include:[/非常滿意|很滿意|整體.{0,8}(很好|很棒|優秀)|課程.{0,8}(很好|很棒|優秀)/]
+  }
 ];
 
 /* =====================================================
-   第一區：建議分類
+   第一區：問題檢討與建議分類
+   需有明確的需求、問題或改善語句，避免只靠單一名詞判斷。
 ===================================================== */
-const suggestKeywords = [
-  {title:"建議增加更多實作操作時間",keywords:["時間不夠","實作","操作"]},
-  {title:"希望開設進階相關課程",keywords:["進階","深入","高階"]},
-  {title:"建議增加 AI 應用主題",keywords:["AI","人工智慧"]},
-  {title:"希望增加更多教學案例分享",keywords:["案例","分享","範例"]},
-  {title:"建議放慢課程進行速度",keywords:["太快","速度"]},
-  {title:"希望延長研習時間",keywords:["延長","更多時間"]},
-  {title:"建議增加基礎課程內容",keywords:["基礎","初學"]},
-  {title:"希望提供講義與教材下載",keywords:["講義","教材","下載"]},
-  {title:"建議改善設備與網路環境",keywords:["設備","網路"]},
-  {title:"希望增加互動與討論時間",keywords:["互動","討論"]}
+const suggestRules = [
+  {
+    title:"建議增加更多實作操作時間",
+    fields:["opinion","future","other"],
+    include:[
+      /(操作|實作|練習).{0,8}時間.{0,8}(不夠|不足|太短|很短|多一點|多一些|增加)/,
+      /時間.{0,8}(不夠|不足|太短|很短|多一點|多一些|增加).{0,10}(操作|實作|練習)/,
+      /給.{0,6}時間.{0,6}(操作|實作|練習)/,
+      /(多一點|多一些|增加).{0,6}(操作|實作|練習)時間/,
+      /(操作|實作|練習).{0,12}(多給|增加|再多).{0,8}時間/,
+      /時間.{0,6}(太趕|過趕).{0,12}(操作|實作|練習)/
+    ]
+  },
+  {
+    title:"希望開設進階相關課程",
+    fields:["opinion","future","other"],
+    include:[/進階|高階|深入.{0,8}(課程|主題)/]
+  },
+  {
+    title:"建議增加 AI 應用主題",
+    fields:["opinion","future","other"],
+    include:[
+      /(希望|建議|可以|可|再|多|增加|開設|辦理).{0,16}(ai|人工智慧).{0,10}(課程|主題|研習)/,
+      /(ai|人工智慧).{0,10}(課程|主題|研習).{0,12}(多|再|增加|開|辦)/
+    ]
+  },
+  {
+    title:"希望增加更多教學案例分享",
+    fields:["opinion","future","other"],
+    include:[
+      /(希望|建議|增加|更多|提供).{0,12}(案例|範例|實例)/,
+      /(案例|範例|實例).{0,10}(分享|增加|更多)/
+    ]
+  },
+  {
+    title:"建議放慢課程進行速度",
+    fields:["opinion","future","other"],
+    include:[/太快|速度.{0,6}快|進度.{0,6}快|節奏.{0,6}快|講解.{0,6}快|放慢|跟不上|來不及|一直在趕|速度慢一點|時間.{0,6}(太趕|過趕|有限)/]
+  },
+  {
+    title:"希望延長或分段安排研習時間",
+    fields:["opinion","future","other"],
+    include:[/延長|更多時間|多一點時間|多一些時間|時間.{0,8}(再多|增加)|分.{0,8}[二兩三23]天|各一天|設計成.{0,6}天|多分幾次|單一天.{0,10}不夠|課程時間.{0,10}(不夠|不足|有限|太短)/]
+  },
+  {
+    title:"建議依程度區分初階與進階課程",
+    fields:["opinion","future","other"],
+    include:[/分.{0,6}(入門|初階|中級|進階)|(入門|初階|中級|進階).{0,10}(分級|區分|區別)|(基礎|初階).{0,10}進階/]
+  },
+  {
+    title:"建議增加基礎或入門課程內容",
+    fields:["opinion","future","other"],
+    include:[/基礎|初學|入門|初階/]
+  },
+  {
+    title:"希望提供講義、教材或課程資料",
+    fields:["opinion","future","other"],
+    include:[
+      /(提供|需要|希望|建議).{0,10}(講義|教材|課程資料)/,
+      /(講義|教材|課程資料).{0,10}(下載|提供)/
+    ]
+  },
+  {
+    title:"建議改善設備與網路環境",
+    fields:["opinion","future","other"],
+    include:[
+      /(設備|網路|連線).{0,10}(改善|問題|不穩|不足|故障)/,
+      /(改善|建議).{0,10}(設備|網路|連線)/
+    ]
+  },
+  {
+    title:"希望增加課程互動與討論時間",
+    fields:["opinion","future","other"],
+    include:[
+      /(增加|更多|希望|建議).{0,10}(互動|討論)/,
+      /(互動|討論).{0,8}時間/
+    ]
+  },
+  {
+    title:"建議增加場次或持續辦理相關研習",
+    fields:["opinion","future","other"],
+    include:[/多開|再開|繼續開|增加場次|多舉辦|再辦理|持續.{0,10}(課程|研習)|多一些.{0,10}(課程|研習)|更多.{0,10}(課程|研習)/]
+  },
+  {
+    title:"建議提供課前準備與操作支援",
+    fields:["opinion","future","other"],
+    include:[/帳號|密碼|課前.{0,8}(準備|素材)|素材.{0,8}(先|預先)|電腦能力|手機.{0,8}操作|行動裝置|模擬器|操作.{0,8}困難/]
+  }
 ];
+
+function normalizeHeaderName(value){
+
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/\s+/g,"")
+    .replace(/[（(]必填[)）]/g,"")
+    .trim();
+}
+
+function normalizeFeedbackText(value){
+
+  return String(value || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function prepareImportedData(jsonData){
+
+  const headers = Object.keys(jsonData[0] || {});
+  const normalizedHeaders = new Map();
+
+  headers.forEach(header=>{
+
+    const normalized = normalizeHeaderName(header);
+
+    if(!normalizedHeaders.has(normalized)){
+      normalizedHeaders.set(normalized,header);
+    }
+  });
+
+  const canonicalColumns = {};
+
+  Object.entries(importedColumnAliases).forEach(([field,aliases])=>{
+
+    canonicalColumns[field] = aliases
+      .map(alias=>normalizedHeaders.get(normalizeHeaderName(alias)))
+      .find(Boolean);
+  });
+
+  const missingFields = Object.entries(canonicalColumns)
+    .filter(([,header])=>!header)
+    .map(([field])=>importedColumnAliases[field][0]);
+
+  const normalizedData = jsonData.map(row=>{
+
+    const normalizedRow = {...row};
+
+    Object.entries(canonicalColumns).forEach(([field,header])=>{
+
+      if(header){
+        normalizedRow[importedColumnAliases[field][0]] = row[header];
+      }
+    });
+
+    return normalizedRow;
+  });
+
+  return {
+    data:normalizedData,
+    missingFields
+  };
+}
+
+function ruleMatches(text,rule){
+
+  if(!text){
+    return false;
+  }
+
+  const excluded = (rule.exclude || []).some(pattern=>pattern.test(text));
+
+  if(excluded){
+    return false;
+  }
+
+  return rule.include.some(pattern=>pattern.test(text));
+}
+
+function aggregateFeedbackRules(data,rules){
+
+  const rows = data.map((row,index)=>({
+    rowNumber:index + 2,
+    fields:{
+      usefulness:normalizeFeedbackText(row["課程實用性"]),
+      opinion:normalizeFeedbackText(row["研習的意見"]),
+      future:normalizeFeedbackText(row["未來課程建議"]),
+      other:normalizeFeedbackText(row["其他"])
+    },
+    originalFields:{
+      usefulness:String(row["課程實用性"] || "").trim(),
+      opinion:String(row["研習的意見"] || "").trim(),
+      future:String(row["未來課程建議"] || "").trim(),
+      other:String(row["其他"] || "").trim()
+    }
+  }));
+
+  return rules
+    .map((rule,order)=>{
+
+      const matchedRows = [];
+
+      rows.forEach(row=>{
+
+        const matchedField = rule.fields.find(field=>ruleMatches(row.fields[field],rule));
+
+        if(matchedField){
+          matchedRows.push({
+            rowNumber:row.rowNumber,
+            text:row.originalFields[matchedField]
+          });
+        }
+      });
+
+      return {
+        title:rule.title,
+        count:matchedRows.length,
+        sample:matchedRows[0]?.text || "",
+        order
+      };
+    })
+    .filter(item=>item.count > 0)
+    .sort((a,b)=>b.count - a.count || a.order - b.order)
+    .slice(0,10);
+}
+
+function renderFeedbackResults(listId,results,icon,emptyText){
+
+  const list = document.getElementById(listId);
+
+  list.innerHTML = "";
+
+  if(results.length===0){
+
+    const emptyItem = document.createElement("li");
+
+    emptyItem.textContent = emptyText;
+    emptyItem.dataset.copyText = emptyText;
+
+    list.appendChild(emptyItem);
+
+    return;
+  }
+
+  results.forEach(item=>{
+
+    const listItem = document.createElement("li");
+    const resultText = item.title;
+
+    listItem.textContent = icon + " " + resultText;
+    listItem.dataset.copyText = resultText;
+
+    if(item.sample){
+      listItem.title = "代表回饋：" + item.sample;
+    }
+
+    list.appendChild(listItem);
+  });
+}
 
 /* =====================================================
    複製分析文字
@@ -957,32 +1310,65 @@ function analyzeData(){
 
   reader.onload = function(e){
 
-    const data = new Uint8Array(e.target.result);
+    try{
 
-    const workbook = XLSX.read(data,{type:'array'});
+      const data = new Uint8Array(e.target.result);
 
-    const sheetName = workbook.SheetNames[0];
+      const workbook = XLSX.read(data,{type:"array"});
 
-    const worksheet = workbook.Sheets[sheetName];
+      if(workbook.SheetNames.length===0){
 
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        alert("檔案中找不到可分析的工作表！");
+        return;
+      }
 
-    if(jsonData.length===0){
+      const sheetName = workbook.SheetNames[0];
 
-      alert("檔案沒有資料！");
-      return;
+      const worksheet = workbook.Sheets[sheetName];
+
+      const jsonData = XLSX.utils.sheet_to_json(worksheet,{defval:""});
+
+      if(jsonData.length===0){
+
+        alert("檔案沒有資料！");
+        return;
+      }
+
+      const imported = prepareImportedData(jsonData);
+
+      if(imported.missingFields.length > 0){
+
+        alert(
+          "找不到必要欄位：\n" +
+          imported.missingFields.join("、") +
+          "\n\n請確認第一列欄位名稱後再重新分析。"
+        );
+
+        return;
+      }
+
+      analyzeFeedback(imported.data);
+
+      analyzeSatisfaction(imported.data);
+
+      document.getElementById("resultArea").classList.remove("hidden");
+
+      playSuccessSound();
 
     }
+    catch(error){
 
-    analyzeFeedback(jsonData);
+      console.error(error);
 
-    analyzeSatisfaction(jsonData);
-
-    document.getElementById("resultArea").classList.remove("hidden");
-
-    playSuccessSound();
+      alert("檔案讀取失敗，請確認檔案未損毀且格式為 XLSX 或 XLS。");
+    }
 
   }
+
+  reader.onerror = function(){
+
+    alert("無法讀取檔案，請重新選擇後再試一次。");
+  };
 
   reader.readAsArrayBuffer(file);
 }
@@ -992,102 +1378,43 @@ function analyzeData(){
 ===================================================== */
 function analyzeFeedback(data){
 
-  let allText = "";
+  const effectResults = aggregateFeedbackRules(data,effectRules);
 
-  data.forEach(row=>{
-
-    allText += `
-      ${row["課程實用性"] || ""}
-      ${row["研習的意見"] || ""}
-      ${row["未來課程建議"] || ""}
-      ${row["其他"] || ""}
-    `;
-
-  });
-
-  const effectResults = [];
-
-  effectKeywords.forEach(item=>{
-
-    let found = false;
-
-    item.keywords.forEach(keyword=>{
-
-      if(allText.includes(keyword)){
-
-        found = true;
-
-      }
-
-    });
-
-    if(found){
-
-      effectResults.push(item.title);
-
-    }
-
-  });
-
-  const suggestResults = [];
-
-  suggestKeywords.forEach(item=>{
-
-    let found = false;
-
-    item.keywords.forEach(keyword=>{
-
-      if(allText.includes(keyword)){
-
-        found = true;
-
-      }
-
-    });
-
-    if(found){
-
-      suggestResults.push(item.title);
-
-    }
-
-  });
+  const suggestResults = aggregateFeedbackRules(data,suggestRules);
 
   while(effectResults.length < 5){
 
-    effectResults.push("學員普遍表示本次研習具有學習收穫");
-
+    effectResults.push({
+      title:"學員普遍表示本次研習具有學習收穫",
+      count:0,
+      sample:"",
+      order:effectRules.length
+    });
   }
 
   while(suggestResults.length < 5){
 
-    suggestResults.push("建議持續辦理相關研習課程");
-
+    suggestResults.push({
+      title:"建議持續辦理相關研習課程",
+      count:0,
+      sample:"",
+      order:suggestRules.length
+    });
   }
 
-  const effectDom = document.getElementById("effectList");
+  renderFeedbackResults(
+    "effectList",
+    effectResults,
+    "✅",
+    "目前沒有足夠文字可明確歸納研習成效。"
+  );
 
-  effectDom.innerHTML = "";
-
-  effectResults.slice(0,10).forEach(item=>{
-
-    effectDom.innerHTML += `
-      <li data-copy-text="${item}">✅ ${item}</li>
-    `;
-
-  });
-
-  const suggestDom = document.getElementById("suggestList");
-
-  suggestDom.innerHTML = "";
-
-  suggestResults.slice(0,10).forEach(item=>{
-
-    suggestDom.innerHTML += `
-      <li data-copy-text="${item}">📌 ${item}</li>
-    `;
-
-  });
+  renderFeedbackResults(
+    "suggestList",
+    suggestResults,
+    "📌",
+    "目前沒有足夠文字可明確歸納問題與建議。"
+  );
 
 }
 
@@ -1220,10 +1547,12 @@ function updateOverallSatisfaction(goal,content,teacher){
 
   const displayScore = overall.toFixed(1);
   const chart = document.getElementById("overallChart");
+  const gradientMidOne = (overall * .42).toFixed(1);
+  const gradientMidTwo = (overall * .76).toFixed(1);
 
   document.getElementById("overallScore").innerText = displayScore + "%";
 
-  chart.style.background = `conic-gradient(#22c55e 0% ${displayScore}%,#e5e7eb ${displayScore}% 100%)`;
+  chart.style.background = `conic-gradient(from -90deg,#22c55e 0%,#34d399 ${gradientMidOne}%,#38bdf8 ${gradientMidTwo}%,#2563eb ${displayScore}%,#e5e7eb ${displayScore}% 100%)`;
 
   chart.setAttribute(
     "aria-label",
