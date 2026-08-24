@@ -73,6 +73,13 @@
     .photo-settings,.brand-action-row{align-items:start}.photo-settings>button{margin-top:21px}.brand-action-row>.clear-logo-field{padding-top:21px}.photo-settings>.media-size-control,.brand-action-row>.media-size-control{grid-column:1/-1;width:100%}.media-size-control{grid-template-columns:auto minmax(80px,calc(50% - 155px)) 52px auto minmax(0,1fr);gap:8px}.media-size-control input[type=number]{width:52px}.media-size-presets{display:flex;justify-content:flex-end;align-items:center;gap:5px;flex-wrap:wrap}.media-size-preset{min-height:29px;padding:4px 8px;border:1px solid #b7c4d6;border-radius:7px;background:#fff;color:#294263;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}.media-size-preset:hover,.media-size-preset:focus-visible{border-color:var(--brand);background:#eff6ff;color:#1d4ed8}
     @media(max-width:620px){.media-size-control{grid-template-columns:auto minmax(70px,1fr) 54px auto}.media-size-control input[type=number]{width:54px}.media-size-presets{grid-column:1/-1;justify-content:flex-start}.photo-settings>button{margin-top:0}.brand-action-row>.clear-logo-field{padding-top:0}}
   </style>
+  <style>
+    /* 列印卡片的白底規則會覆蓋滿版版型；在列印層明確恢復其主題背景。 */
+    @media print{
+      .print-item.tpl-bold{background:var(--accent-bg)}
+      .print-no-background .print-item.tpl-bold{background:#fff!important;color:#000!important}
+    }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#workspace">跳至主要內容</a>
