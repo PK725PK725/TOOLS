@@ -121,11 +121,12 @@
     const localFontOptions=[['sans','微軟正黑體／系統黑體'],['serif','新細明體／系統明體'],['kai','標楷體／系統楷體']];
     const onlineFontGroups=[
       ['黑體／無襯線', [['notoSans','Noto Sans TC（思源黑體）'],['ibmPlexSansTC','IBM Plex Sans TC'],['lineSeedTW','LINE Seed TW'],['chironHeiHK','Chiron Hei HK（昭源黑體）'],['childFunSansTC','Child Fun Sans TC（遊趣體 繁）']]],
-      ['明體／宋體', [['notoSerif','Noto Serif TC（思源宋體）'],['chironSungHK','Chiron Sung HK（昭源宋體）'],['qiji','Qiji（齊伋體）'],['xiangcuiKesong','Xiangcui Kesong（香萃刻宋）']]],
+      ['明體／宋體', [['notoSerif','Noto Serif TC（思源宋體）'],['chironSungHK','Chiron Sung HK（昭源宋體）'],['qiji','Qiji（齊伋體）'],['xiangcuiKesong','Xiangcui Kesong（香萃刻宋）'],['b2Hana','B2 Hana（B2花園）'],['hanaMeatball','Hana Meatball（花園肉丸）']]],
       ['楷體', [['wenkai','LXGW WenKai TC（霞鶩文楷 TC）']]],
-      ['圓體', [['huninn','Huninn（jf open 粉圓）'],['chironGoRoundTC','Chiron GoRound TC（昭源環方）'],['kurewaGothic','Kurewa Gothic（苦累蛙圓體）'],['popGothic','Pop Gothic（大波浪圓體）'],['zenMaru','Zen Maru Gothic（圓體）']]],
+      ['圓體', [['huninn','Huninn（jf open 粉圓）'],['chironGoRoundTC','Chiron GoRound TC（昭源環方）'],['kurewaGothic','Kurewa Gothic（苦累蛙圓體）'],['popGothic','Pop Gothic（大波浪圓體）'],['marukoGothic','Maruko Gothic（馬路口圓體）'],['yuPearl','Yu Pearl（俊羽圓體）'],['zenMaru','Zen Maru Gothic（圓體）']]],
       ['等寬／程式設計', [['sarasaGothic','Sarasa Gothic（更紗黑體）'],['cilantroCodeMono','Cilantro Code Mono（香菜碼等寬）']]],
       ['手寫體', [['naikaiFont','NaikaiFont（內海字體）'],['chenYuLuoYan','ChenYuLuoYan（辰宇落雁體）'],['naniFont','NaniFont（何某手寫體）'],['toneozTsuipita','ToneOZ Tsuipita（曉聲通秋茄體）'],['jasonHandwriting','JasonHandwriting（清松手寫體）']]],
+      ['毛筆／書法', [['bakudaiFont','Bakudai Font（莫大毛筆字體）'],['masaFont','Masa Font（正風毛筆字體）']]],
       ['像素／點陣', [['cubic11','Cubic 11（俐方體 11 號）'],['boutiqueBitmap','Boutique Bitmap（精品點陣體）'],['fashionBitmap16','FashionBitmap16（流行點陣體 16）']]],
       ['展示字型', [['lxgwMarkerGothic','LXGW Marker Gothic（霞鶩漫黑）'],['mantouSans','Mantou Sans（饅頭黑體）'],['thenKhung','ThenKhung（宇文天穹）'],['lubrifont','WD-XL Lubrifont（WD-XL 滑油字）']]],
       ['特殊用途', [['chiuKongGothic','ChiuKong Gothic（秋空黑體／IVS）']]]
@@ -150,9 +151,9 @@
     const fonts={
       sans:'Microsoft JhengHei,PingFang TC,system-ui,sans-serif',serif:'PMingLiU,Songti TC,serif',kai:'DFKai-SB,BiauKai,serif',
       notoSans:'Noto Sans TC,Microsoft JhengHei,sans-serif',ibmPlexSansTC:'WL IBM Plex Sans TC,Microsoft JhengHei,sans-serif',lineSeedTW:'LINE Seed TW,Microsoft JhengHei,sans-serif',chironHeiHK:'WL Chiron Hei HK,Microsoft JhengHei,sans-serif',childFunSansTC:'WL Child Fun Sans TC,Microsoft JhengHei,sans-serif',
-      notoSerif:'Noto Serif TC,PMingLiU,serif',chironSungHK:'WL Chiron Sung HK,PMingLiU,serif',qiji:'QIJIFALLBACK,Noto Serif TC,serif',xiangcuiKesong:'WL Xiangcui Kesong,PMingLiU,serif',wenkai:'LXGW WenKai TC,DFKai-SB,serif',
-      huninn:'WL Huninn,Microsoft JhengHei,sans-serif',chironGoRoundTC:'WL Chiron GoRound TC,Microsoft JhengHei,sans-serif',kurewaGothic:'WL Kurewa Gothic,Microsoft JhengHei,sans-serif',popGothic:'WL Pop Gothic,Microsoft JhengHei,sans-serif',zenMaru:'Zen Maru Gothic,Microsoft JhengHei,sans-serif',
-      sarasaGothic:'WL Sarasa Gothic,Microsoft JhengHei,monospace',cilantroCodeMono:'WL Cilantro Code Mono,Microsoft JhengHei,monospace',naikaiFont:'WL NaikaiFont,DFKai-SB,serif',chenYuLuoYan:'WL ChenYuLuoYan,DFKai-SB,serif',naniFont:'WL NaniFont,DFKai-SB,serif',toneozTsuipita:'WL ToneOZ Tsuipita,DFKai-SB,serif',jasonHandwriting:'WL JasonHandwriting,DFKai-SB,serif',
+      notoSerif:'Noto Serif TC,PMingLiU,serif',chironSungHK:'WL Chiron Sung HK,PMingLiU,serif',qiji:'QIJIFALLBACK,Noto Serif TC,serif',xiangcuiKesong:'WL Xiangcui Kesong,PMingLiU,serif',b2Hana:'WL B2 Hana,PMingLiU,serif',hanaMeatball:'WL Hana Meatball,PMingLiU,serif',wenkai:'LXGW WenKai TC,DFKai-SB,serif',
+      huninn:'WL Huninn,Microsoft JhengHei,sans-serif',chironGoRoundTC:'WL Chiron GoRound TC,Microsoft JhengHei,sans-serif',kurewaGothic:'WL Kurewa Gothic,Microsoft JhengHei,sans-serif',popGothic:'WL Pop Gothic,Microsoft JhengHei,sans-serif',marukoGothic:'WL Maruko Gothic,Microsoft JhengHei,sans-serif',yuPearl:'WL Yu Pearl,Microsoft JhengHei,sans-serif',zenMaru:'Zen Maru Gothic,Microsoft JhengHei,sans-serif',
+      sarasaGothic:'WL Sarasa Gothic,Microsoft JhengHei,monospace',cilantroCodeMono:'WL Cilantro Code Mono,Microsoft JhengHei,monospace',naikaiFont:'WL NaikaiFont,DFKai-SB,serif',chenYuLuoYan:'WL ChenYuLuoYan,DFKai-SB,serif',naniFont:'WL NaniFont,DFKai-SB,serif',toneozTsuipita:'WL ToneOZ Tsuipita,DFKai-SB,serif',jasonHandwriting:'WL JasonHandwriting,DFKai-SB,serif',bakudaiFont:'WL Bakudai Font,DFKai-SB,serif',masaFont:'WL Masa Font,DFKai-SB,serif',
       cubic11:'WL Cubic 11,Microsoft JhengHei,sans-serif',boutiqueBitmap:'WL Boutique Bitmap,Microsoft JhengHei,sans-serif',fashionBitmap16:'WL FashionBitmap16,Microsoft JhengHei,sans-serif',lxgwMarkerGothic:'WL LXGW Marker Gothic,Microsoft JhengHei,sans-serif',mantouSans:'WL Mantou Sans,Microsoft JhengHei,sans-serif',thenKhung:'WL ThenKhung,PMingLiU,serif',lubrifont:'WL Lubrifont,DFKai-SB,sans-serif',chiuKongGothic:'ChiuKong Gothic MN,Microsoft JhengHei,sans-serif'
     };
     const googleFontKeys=new Set(['notoSans','notoSerif','zenMaru','wenkai']);
@@ -164,10 +165,14 @@
       chironSungHK:{family:'WL Chiron Sung HK',url:'https://raw.githubusercontent.com/chiron-fonts/chiron-sung-hk/HEAD/VAR_OTF/ChironSungHKVF.otf',weight:'200 900'},
       qiji:{family:'QIJIFALLBACK',css:'https://fontsapi.zeoseven.com/742/main/result.css'},
       xiangcuiKesong:{family:'WL Xiangcui Kesong',url:'https://raw.githubusercontent.com/Miiiller/Xiangcui-Kesong/HEAD/%E9%A6%99%E8%90%83%E5%88%BB%E5%AE%8B%EF%BC%88%E7%9B%AE%E5%89%8D%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89.ttf'},
+      b2Hana:{family:'WL B2 Hana',url:'https://cdn.jsdelivr.net/gh/max32002/max-hana@1.1/webfont/B2Hana-Regular.woff2'},
+      hanaMeatball:{family:'WL Hana Meatball',url:'https://cdn.jsdelivr.net/gh/max32002/max-hana@1.1/webfont/HanaMeatball-Regular.woff2'},
       huninn:{family:'WL Huninn',url:'https://cdn.jsdelivr.net/gh/marsnow/open-huninn-font@1.1/font/jf-openhuninn.woff'},
       chironGoRoundTC:{family:'WL Chiron GoRound TC',url:'https://raw.githubusercontent.com/chiron-fonts/chiron-go-round-tc/HEAD/VAR_OTF/ChironGoRoundTCVF.otf',weight:'200 900'},
       kurewaGothic:{family:'WL Kurewa Gothic',url:'https://raw.githubusercontent.com/max32002/kurewa-gothic/HEAD/webfont/CJK%20TC/KurewaGothicCjkTc-Regular.woff2'},
       popGothic:{family:'WL Pop Gothic',url:'https://raw.githubusercontent.com/max32002/pop-gothic/HEAD/webfont/CJK%20TC/PopGothicCjkTc-Regular.woff2'},
+      marukoGothic:{family:'WL Maruko Gothic',url:'https://cdn.jsdelivr.net/gh/max32002/maruko-gothic@1.015/webfont/CJK%20TC/MarukoGothicCJKtc-Regular.woff2'},
+      yuPearl:{family:'WL Yu Pearl',url:'https://cdn.jsdelivr.net/gh/max32002/YuPearl@1.011/webfont/YuPearl-Regular.woff2'},
       sarasaGothic:{family:'WL Sarasa Gothic',url:'https://picaq.github.io/sarasa/fonts/Sarasa-Mono-J-Regular.woff2'},
       cilantroCodeMono:{family:'WL Cilantro Code Mono',url:'https://raw.githubusercontent.com/DraftingDreamer/FontCilantroCode/HEAD/CilantroCodeMono-Regular.ttf'},
       naikaiFont:{family:'WL NaikaiFont',url:'https://raw.githubusercontent.com/max32002/naikaifont/HEAD/webfont/NaikaiFont-Regular.woff2'},
@@ -175,6 +180,8 @@
       naniFont:{family:'WL NaniFont',url:'https://raw.githubusercontent.com/max32002/nanifont/HEAD/webfont/NaniFont-Regular.woff2'},
       toneozTsuipita:{family:'WL ToneOZ Tsuipita',url:'https://raw.githubusercontent.com/jeffreyxuan/toneoz-font-tsuipita/HEAD/fonts/ttf/ToneOZ-Tsuipita-TC.ttf'},
       jasonHandwriting:{family:'WL JasonHandwriting',url:'https://raw.githubusercontent.com/jasonhandwriting/JasonHandwriting/HEAD/JasonHandwriting1.ttf'},
+      bakudaiFont:{family:'WL Bakudai Font',url:'https://cdn.jsdelivr.net/gh/max32002/bakudaifont@1.48/webfont/Bakudai-Regular.woff2'},
+      masaFont:{family:'WL Masa Font',url:'https://cdn.jsdelivr.net/gh/max32002/masafont@2.1/webfont/MasaFont-Regular.woff2'},
       cubic11:{family:'WL Cubic 11',url:'https://raw.githubusercontent.com/ACh-K/Cubic-11/HEAD/fonts/web/Cubic_11.woff2'},
       boutiqueBitmap:{family:'WL Boutique Bitmap',url:'https://raw.githubusercontent.com/scott0107000/BoutiqueBitmap9x9/HEAD/BoutiqueBitmap9x9_1.93.ttf'},
       fashionBitmap16:{family:'WL FashionBitmap16',url:'https://raw.githubusercontent.com/scott0107000/FashionBitmap16/HEAD/FashionBitmap16_0.092.ttf'},
