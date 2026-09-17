@@ -91,6 +91,8 @@
     @media print{
       .print-item .event-label{margin-bottom:var(--print-text-gap,1.5mm)}.print-item .person-role{margin-top:var(--print-text-gap,2mm)}.print-item .person-org{margin-top:var(--print-text-gap,1mm)}
       .print-tent .tent-face{padding:5.8mm 12mm;row-gap:var(--print-text-gap,6mm)}
+      .print-tent .tent-fold{border:0}
+      .print-tent::after{content:"";position:absolute;left:0;right:0;top:50%;border-top:.3mm dashed #64748b;z-index:5;pointer-events:none}
     }
   </style>
 </head>
