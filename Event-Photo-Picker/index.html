@@ -1094,17 +1094,20 @@
     .yellow-label{ color:#fde047 !important; font-weight:900; }
     .compact-note{ margin-top:8px; color:var(--muted); font-size:12px; line-height:1.5; }
     .similarity-guide{ margin-top:8px; color:#fde047; font-size:12px; font-weight:800; line-height:1.7; }
-    .export-complete{ position:fixed; z-index:1200; inset:0; display:grid; place-items:center; padding:20px; background:rgba(2,8,23,.58); backdrop-filter:blur(6px); }
+    .export-complete{ position:fixed; z-index:1200; inset:0; display:grid; place-items:center; width:100%; height:100%; max-width:none; max-height:none; margin:0; border:0; padding:20px; overflow:auto; background:rgba(2,8,23,.58); backdrop-filter:blur(6px); }
+    .export-complete::backdrop{ background:transparent; }
     .export-complete[hidden]{ display:none; }
-    .export-complete-card{ display:flex; align-items:flex-start; gap:14px; width:min(560px,100%); padding:22px; border:1px solid #86efac; border-radius:20px; background:linear-gradient(135deg, #14532d, #0f766e); color:#f0fdf4; box-shadow:0 24px 60px rgba(2,8,23,.56); animation:completePop .35s ease both; }
+    .export-complete-card{ display:flex; align-items:flex-start; gap:14px; width:min(560px,100%); max-height:100%; overflow:auto; padding:22px; border:1px solid #86efac; border-radius:20px; background:linear-gradient(135deg, #14532d, #0f766e); color:#f0fdf4; box-shadow:0 24px 60px rgba(2,8,23,.56); animation:completePop .35s ease both; }
     .export-complete-icon{ display:grid; place-items:center; width:48px; height:48px; flex:0 0 auto; border-radius:50%; background:linear-gradient(135deg, #bef264, #22c55e); color:#12351f; font-size:28px; font-weight:900; }
     .export-complete-body{ min-width:0; flex:1; }
     .export-complete-card strong{ display:block; color:#fff; font-size:22px; }
     .export-complete-card p{ margin:4px 0 0; color:#dcfce7; font-size:14px; line-height:1.5; }
     .export-complete-close{ margin-left:auto; align-self:flex-start; width:44px; height:44px; flex:0 0 44px; border:1px solid rgba(255,255,255,.38); border-radius:12px; background:rgba(255,255,255,.12); color:#fff; cursor:pointer; font-size:24px; line-height:1; }
     .export-complete-close:hover,.export-complete-close:focus-visible{ background:rgba(255,255,255,.22); outline:3px solid rgba(255,255,255,.68); outline-offset:3px; }
-    .export-complete-card .export-path-link{ display:flex; align-items:center; gap:10px; width:100%; height:auto; min-height:52px; margin:15px 0 0; padding:11px 13px; border:1px solid #99f6e4; border-radius:12px; background:rgba(2,44,52,.64); color:#fef3c7; cursor:pointer; text-align:left; font:inherit; font-size:14px; font-weight:800; line-height:1.5; }
-    .export-path-link:hover,.export-path-link:focus-visible{ background:rgba(13,148,136,.54) !important; border-color:#fef08a !important; outline:3px solid rgba(253,224,71,.65); outline-offset:3px; }
+    .export-complete-card .export-path-link{ display:flex; align-items:center; gap:10px; width:100%; min-height:52px; margin:15px 0 0; padding:11px 13px; border:1px solid #99f6e4; border-radius:12px; background:rgba(2,44,52,.64); color:#fef3c7; cursor:text; text-align:left; font-size:14px; font-weight:800; line-height:1.5; user-select:text; }
+    .export-complete-summary{ display:grid; grid-template-columns:1fr auto; gap:6px 12px; margin:14px 0 0; font-size:14px; }
+    .export-complete-summary dt,.export-complete-summary dd{ margin:0; }
+    .export-complete-summary dd{ font-weight:800; }
     .export-path-link[hidden]{ display:none; }
     .export-path-link .path-icon{ display:grid; place-items:center; flex:0 0 24px; }
     .export-path-link .path-text{ display:block; min-width:0; flex:1; white-space:normal; overflow-wrap:anywhere; }
@@ -1880,13 +1883,13 @@
     <div class="toast" id="toast" role="status" aria-live="polite"><div class="spinner"></div><div id="toastText">處理中…</div></div>
   </div>
 
-  <div class="export-complete" id="exportCompleteNotice" hidden role="dialog" aria-modal="true" aria-labelledby="exportCompleteTitle">
+  <dialog class="export-complete" id="exportCompleteNotice" hidden aria-labelledby="exportCompleteTitle" aria-describedby="exportCompleteText">
     <div class="export-complete-card">
       <div class="export-complete-icon">✓</div>
-      <div class="export-complete-body"><strong id="exportCompleteTitle">處理完成</strong><p id="exportCompleteText">照片已完成輸出。</p><button type="button" class="export-path-link" id="exportCompletePath" hidden aria-label="查看輸出檔案"><span class="path-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span class="path-text" id="exportCompletePathText"></span></button></div>
+      <div class="export-complete-body"><strong id="exportCompleteTitle">處理完成</strong><p id="exportCompleteText">照片已完成輸出。</p><dl class="export-complete-summary" id="exportCompleteSummary"></dl><div class="export-path-link" id="exportCompletePath" hidden><span class="path-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span class="path-text" id="exportCompletePathText"></span></div></div>
       <button type="button" class="export-complete-close" id="closeExportComplete" aria-label="關閉完成通知">×</button>
     </div>
-  </div>
+  </dialog>
 
   <div class="help-modal" id="helpModal" hidden aria-hidden="true">
     <section class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle">
@@ -1898,6 +1901,8 @@
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
+  // 保留尚未重排的原始文件，供「獨立模式」從乾淨畫面重新初始化。
+  const standaloneSource = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 
   const state = {
     sourceFiles: [],
@@ -1908,6 +1913,7 @@
     sourceDirHandle: null,
     outputDirHandle: null,
     sourceLoaded: false,
+    importing: false,
     analyzing: false,
     exporting: false,
     selectedPreview: null,
@@ -1922,6 +1928,9 @@
     exportPreset: 'archive',
     reviewAdvanced: false,
     exportCompleted: false,
+    outputDirty: false,
+    analysisDirty: false,
+    lastAnalyzedSimilarity: null,
     logs: [],
     stats: {
       total: 0,
@@ -2115,8 +2124,8 @@
     if (rejectMetric) {
       const label = rejectMetric.querySelector('.k');
       const help = rejectMetric.querySelector('.s');
-      if (label) label.textContent = '疑似模糊照片';
-      if (help) help.textContent = '系統預設不輸出的照片';
+      if (label) label.textContent = '待覆核照片';
+      if (help) help.textContent = '尚未人工確認的疑似模糊照片';
     }
     if (els.privacyBadge) reviewCard.headActions.insertBefore(els.privacyBadge, reviewCard.badge);
     const reviewToggle = document.createElement('button');
@@ -2287,43 +2296,32 @@
     return err.message || '無法完成這項操作。';
   }
 
-  function showExportComplete(message, path = '') {
+  function showExportComplete(message, path = '', exportedCount = 0, zip = false) {
     if (!els.exportCompleteNotice) return;
-    state.lastFocused = document.activeElement;
+    state.lastFocused = els.exportBtn;
     els.exportCompleteText.textContent = message;
+    $('exportCompleteTitle').textContent = zip ? '照片處理完成' : '匯出完成';
+    const rows = [
+      ['匯入照片', state.sourceFiles.length],
+      ['讀取失敗', state.failures.length],
+      ['本次輸出', exportedCount],
+      ['未輸出', Math.max(0, state.images.length - exportedCount)]
+    ];
+    $('exportCompleteSummary').innerHTML = rows.map(([label, count]) => `<dt>${label}</dt><dd>${count} 張</dd>`).join('');
     if (els.exportCompletePath) {
       els.exportCompletePath.hidden = !path;
-      const actionLabel = state.outputDirHandle ? '查看輸出檔案' : '複製 ZIP 下載位置';
-      els.exportCompletePathText.textContent = path ? `${actionLabel}：${path}` : '';
-      els.exportCompletePath.setAttribute('aria-label', path ? `${actionLabel}：${path}` : actionLabel);
+      els.exportCompletePathText.textContent = path ? `輸出位置：${path}` : '';
     }
     els.exportCompleteNotice.hidden = false;
-    setTimeout(() => (path ? els.exportCompletePath : els.closeExportComplete)?.focus(), 0);
+    if (!els.exportCompleteNotice.open) els.exportCompleteNotice.showModal();
+    els.closeExportComplete.focus();
   }
 
-  async function openExportOutputPath() {
-    const displayPath = state.outputLocation;
-    if (!displayPath || displayPath === '尚未設定') return;
-    try {
-      if (state.outputDirHandle && 'showOpenFilePicker' in window) {
-        // 資料夾選擇器只顯示子資料夾，會讓含有照片的資料夾看似空白；
-        // 改用檔案選擇器，並從剛完成輸出的結果資料夾開始，讓照片實際顯示。
-        const selectedFiles = await window.showOpenFilePicker({
-          startIn: state.outputDirHandle,
-          multiple: true
-        });
-        if (selectedFiles.length) setToast(`已選取 ${selectedFiles.length} 個輸出檔案。`, 'info', 1800);
-        return;
-      }
-      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(displayPath);
-      setToast('此瀏覽器將 ZIP 存入下載位置；已複製輸出位置。', 'info', 2600);
-    } catch (err) {
-      if (err?.name !== 'AbortError') {
-        console.warn('無法開啟輸出資料夾', err);
-        try { await navigator.clipboard?.writeText?.(displayPath); } catch {}
-        setToast('無法直接開啟，已複製輸出位置。', 'info', 2400);
-      }
-    }
+  function closeExportComplete() {
+    els.exportCompleteNotice.close();
+    els.exportCompleteNotice.hidden = true;
+    state.lastFocused?.focus?.();
+    state.lastFocused = null;
   }
 
   function setBanner(message, kind='info') {
@@ -2347,6 +2345,15 @@
 
   function countPendingReviews() {
     return state.images.filter(img => !img.blurReviewed && !img.manual && isPriorityBlur(img)).length;
+  }
+
+  function markExportChanged() {
+    if (state.exportCompleted || state.outputDirty) {
+      state.outputDirty = true;
+      els.noticeBox.className = 'notice warn';
+      els.noticeBox.textContent = '覆核或輸出設定已變更，請重新匯出；上次輸出的檔案仍保留。';
+    }
+    state.exportCompleted = false;
   }
 
   function syncWorkflowStage() {
@@ -2375,7 +2382,7 @@
       import: state.sourceFiles.length ? `已匯入 ${state.sourceFiles.length} 張` : '等待匯入',
       analyze: state.sourceLoaded ? '分析完成' : state.analyzing ? '分析中' : state.sourceFiles.length ? '可開始分析' : '先匯入照片',
       review: state.sourceLoaded ? (pendingReviews ? `${pendingReviews} 張疑似模糊` : '可查看結果') : '等待分析',
-      export: state.exportCompleted ? '已完成匯出' : state.exporting ? '匯出中' : state.sourceLoaded ? '可匯出' : '等待分析'
+      export: state.exportCompleted ? '已完成匯出' : state.exporting ? '匯出中' : state.analysisDirty ? '請重新分析' : state.outputDirty ? '請重新匯出' : state.sourceLoaded ? '可匯出' : '等待分析'
     };
     Object.entries(els.steps).forEach(([name, element]) => {
       if (!element) return;
@@ -2391,7 +2398,7 @@
         card.classList.toggle('is-active', status === 'active');
         card.classList.toggle('is-complete', status === 'complete');
         card.classList.toggle('is-locked', status === 'locked');
-        card.toggleAttribute('inert', status === 'locked');
+        card.toggleAttribute('inert', status === 'locked' || (name === 'review' && (state.importing || state.analyzing || state.exporting)));
         card.setAttribute('aria-disabled', String(status === 'locked'));
       }
       if (els.workflowBadges?.[name]) els.workflowBadges[name].textContent = badgeText[name];
@@ -2406,19 +2413,24 @@
     els.groupCount.textContent = state.stats.groups;
     els.keepCount.textContent = state.stats.keep;
     els.rejectCount.textContent = pendingReviews;
-    els.exportBtn.disabled = !state.images.length || state.analyzing || state.exporting;
+    els.exportBtn.disabled = !state.sourceLoaded || !state.images.length || state.analysisDirty || state.importing || state.analyzing || state.exporting;
+    const busy = state.importing || state.analyzing || state.exporting;
+    [els.pickSourceBtn, els.pickOutputBtn, els.sourceRecursiveToggle, els.resetBtn, els.analyzeBtn].forEach(button => { if (button) button.disabled = busy; });
+    els.dragDropZone?.setAttribute('aria-disabled', String(busy));
+    document.querySelectorAll('#workflowAnalyze input, #workflowAnalyze [data-similarity-preset], #workflowExport input, #workflowExport [data-export-preset]').forEach(control => { control.disabled = busy; });
     const exportLabel = !state.images.length
       ? '匯出篩選照片'
-      : (state.groups.length ? '匯出不同的照片' : '匯出全部照片');
+      : (state.analysisDirty ? '請先重新分析' : '匯出保留照片');
     const exportLabelEl = els.exportBtn?.querySelector('span:last-child');
     if (exportLabelEl) exportLabelEl.textContent = exportLabel;
     els.heroStatus.textContent = state.exporting ? '匯出中' : state.exportCompleted ? '匯出完成' : state.analyzing ? '分析中' : state.sourceLoaded ? (pendingReviews ? `${pendingReviews} 張疑似模糊` : '可匯出') : (state.sourceFiles.length ? '可開始分析' : '等待匯入照片');
     els.sourceBadge.textContent = '來源：' + state.sourceName;
     els.scanBadge.textContent = state.stats.total ? `已掃描 ${state.stats.total} 張` : '尚未掃描';
     els.privacyBadge.textContent = state.exporting ? '本機匯出中' : '本機處理';
-    els.exportState.textContent = state.exporting ? '匯出中' : state.exportCompleted ? '已完成' : (state.stats.keep ? '可匯出' : '尚未匯出');
-    els.restoreState.textContent = pendingReviews ? `${pendingReviews} 張預設不輸出` : (state.sourceLoaded ? '沒有疑似模糊照片' : '尚未分析');
-    els.outputLocation.textContent = state.outputLocation;
+    els.exportState.textContent = state.exporting ? '匯出中' : state.analysisDirty ? '請重新分析' : state.outputDirty ? '結果已變更，請重新匯出' : state.exportCompleted ? '已完成' : (state.stats.keep ? '可匯出' : '尚未匯出');
+    const blurred = state.images.filter(isPriorityBlur).length;
+    els.restoreState.textContent = pendingReviews ? `${pendingReviews} 張待覆核` : (state.sourceLoaded ? (blurred ? `${blurred} 張已覆核` : '沒有疑似模糊照片') : '尚未分析');
+    els.outputLocation.textContent = (state.outputDirty && state.outputLocation !== '尚未設定' ? '上次輸出：' : '') + state.outputLocation;
     const sourceSummary = $('sourceSummary');
     if (sourceSummary) sourceSummary.textContent = state.sourceFiles.length
       ? `已匯入 ${state.sourceFiles.length} 張照片${state.includeSubfolders ? '｜包含子資料夾' : ''}`
@@ -2440,7 +2452,7 @@
 
   function isSupportedFile(file) {
     const ext = fileExt(file.name);
-    const supported = ['jpg','jpeg','png','heic','webp','gif'];
+    const supported = ['jpg','jpeg','png','heic','heif','webp','gif'];
     if (supported.includes(ext)) return true;
     return /image\/(jpeg|png|gif|webp|heic|heif)/i.test(file.type);
   }
@@ -2451,6 +2463,7 @@
       const rel = String(file?.webkitRelativePath || file?.displayPath || file?.path || file?.name || '');
       if (!rel) continue;
       const first = rel.split('/').filter(Boolean)[0];
+      if (rel.split('/').filter(Boolean).length < 2) return '';
       if (first) roots.add(first);
       if (roots.size > 1) return '';
     }
@@ -2475,219 +2488,139 @@
     return file;
   }
 
-  async function readFilesFromDirectoryHandle(dirHandle, prefix = '', includeSubfolders = false) {
+  // 所有來源路徑統一為「來源名稱/子資料夾/檔名」。Output 是本工具的輸出目錄，不再匯入。
+  async function readFilesFromDirectoryHandle(dirHandle, prefix = dirHandle.name, includeSubfolders = false) {
     const out = [];
     for await (const [name, handle] of dirHandle.entries()) {
-      const rel = prefix ? `${prefix}/${name}` : name;
+      const rel = `${prefix}/${name}`;
       if (handle.kind === 'file') {
+        if (!isSupportedFile({ name, type: '' })) continue;
         const file = await handle.getFile();
-        if (isSupportedFile(file)) {
-          Object.defineProperty(file, 'webkitRelativePath', {
-            value: rel,
-            configurable: true
-          });
-          out.push(file);
-        }
-      } else if (handle.kind === 'directory' && includeSubfolders) {
-        const nested = await readFilesFromDirectoryHandle(handle, rel, includeSubfolders);
-        out.push(...nested);
+        attachDropMeta(file, { relativePath: rel });
+        out.push(file);
+      } else if (includeSubfolders && name.toLowerCase() !== 'output') {
+        out.push(...await readFilesFromDirectoryHandle(handle, rel, true));
       }
     }
     return out;
   }
 
-  async function traverseEntry(entry, path = '', rootHandle = null) {
+  async function traverseEntry(entry, path = '', includeSubfolders = false) {
     if (entry.isFile) {
-      return await new Promise(resolve => {
-        entry.file(file => {
-          resolve([{
-            file,
-            relativePath: path ? `${path}/${file.name}` : file.name,
-            displayPath: path ? `${path}/${file.name}` : file.name,
-            rootHandle,
-            rootName: rootHandle ? rootHandle.name : ''
-          }]);
-        });
-      });
+      if (!isSupportedFile({ name: entry.name, type: '' })) return [];
+      const file = await new Promise((resolve, reject) => entry.file(resolve, reject));
+      attachDropMeta(file, { relativePath: path ? `${path}/${file.name}` : file.name });
+      return [file];
     }
-    if (entry.isDirectory) {
-      const reader = entry.createReader();
-      const all = [];
-      while (true) {
-        const batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
-        if (!batch.length) break;
-        all.push(...batch);
+    if (!entry.isDirectory) return [];
+    const reader = entry.createReader();
+    const files = [];
+    const nextPath = path ? `${path}/${entry.name}` : entry.name;
+    // readEntries 一次通常只回傳一批，必須讀到空陣列為止。
+    while (true) {
+      const batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+      if (!batch.length) break;
+      for (const child of batch) {
+        if (child.isDirectory && (!includeSubfolders || child.name.toLowerCase() === 'output')) continue;
+        files.push(...await traverseEntry(child, nextPath, includeSubfolders));
       }
-      const nextPath = path ? `${path}/${entry.name}` : entry.name;
-      const nested = await Promise.all(all.map(child => traverseEntry(child, nextPath, rootHandle)));
-      return nested.flat();
     }
-    return [];
+    return files;
   }
 
-  async function traverseHandle(handle, rootHandle = null, relPath = '') {
-    const root = rootHandle || handle;
-    const list = [];
-    if (handle.kind === 'file') {
-      const file = await handle.getFile();
-      list.push({
-        file,
-        relativePath: relPath ? `${relPath}/${file.name}` : file.name,
-        displayPath: relPath ? `${root.name}/${relPath}/${file.name}` : `${root.name}/${file.name}`,
-        rootHandle: root,
-        rootName: root.name
-      });
-      return list;
+  async function getDroppedFiles(dt, includeSubfolders = false) {
+    // 先在 drop 的同步事件內取得所有 API 的快照，不能等現代 API 失敗後才呼叫舊 API。
+    const looseFiles = Array.from(dt?.files || []);
+    const snapshots = Array.from(dt?.items || []).filter(item => item.kind === 'file').map(item => {
+      let handleTask = Promise.resolve(null), entry = null, file = null;
+      try { if (item.getAsFileSystemHandle) handleTask = Promise.resolve(item.getAsFileSystemHandle()).catch(() => null); } catch {}
+      try { entry = item.webkitGetAsEntry?.() || null; } catch {}
+      try { file = item.getAsFile?.() || null; } catch {}
+      return { handleTask, entry, file };
+    });
+    const resolved = await Promise.all(snapshots.map(async item => ({ ...item, handle: await item.handleTask })));
+    const directories = resolved.filter(item => item.handle?.kind === 'directory' || item.entry?.isDirectory);
+    if (directories.length && (directories.length !== 1 || resolved.length !== 1)) {
+      throw new Error('請一次拖入一個完整資料夾，讓系統能正確使用它作為來源及 Output 的建立位置。');
     }
-    for await (const child of handle.values()) {
-      const nextPath = relPath ? `${relPath}/${handle.name}` : handle.name;
-      const sub = await traverseHandle(child, root, nextPath);
-      list.push(...sub);
+    if (directories.length) {
+      const item = directories[0];
+      const sourceHandle = item.handle?.kind === 'directory' ? item.handle : null;
+      const sourceName = sourceHandle?.name || item.entry.name;
+      const files = sourceHandle
+        ? await readFilesFromDirectoryHandle(sourceHandle, sourceName, includeSubfolders)
+        : await traverseEntry(item.entry, '', includeSubfolders);
+      return { files, sourceHandle, sourceName };
     }
-    return list;
-  }
-
-
-  async function getDroppedFiles(dt) {
     const out = [];
-    const seen = new Set();
-    let sourceHandle = null;
-    let sourceName = '';
-
-    const addFile = (file, meta = {}) => {
-      if (!file || !isSupportedFile(file)) return;
-      const rel = meta.relativePath || file.webkitRelativePath || file.name || '';
-      const key = `${rel}|${file.size}|${file.lastModified || 0}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-      attachDropMeta(file, {
-        relativePath: rel,
-        displayPath: meta.displayPath || rel,
-        rootHandle: meta.rootHandle || null,
-        rootName: meta.rootName || ''
-      });
-      out.push(file);
-      if (!sourceHandle && meta.rootHandle) {
-        sourceHandle = meta.rootHandle;
-        sourceName = meta.rootName || meta.rootHandle.name || sourceName;
-      }
-    };
-
-    const addBatch = (files, meta = {}) => {
-      for (const file of Array.from(files || [])) {
-        addFile(file, {
-          relativePath: file.webkitRelativePath || file.name,
-          displayPath: file.webkitRelativePath || file.name,
-          ...meta
-        });
-      }
-    };
-
-    // 先完整讀取 dt.files，避免某些拖曳情境只處理到第一個 item。
-    addBatch(dt?.files);
-
-    if (dt?.items && dt.items.length) {
-      const batches = await Promise.all(Array.from(dt.items).map(async (item) => {
-        if (!item || item.kind !== 'file') return [];
-
-        if (typeof item.getAsFileSystemHandle === 'function') {
-          try {
-            const handle = await item.getAsFileSystemHandle();
-            if (handle?.kind === 'directory') {
-              sourceHandle = sourceHandle || handle;
-              sourceName = sourceName || handle.name || '';
-              return await traverseHandle(handle, handle, '');
-            }
-            if (handle?.kind === 'file') {
-              const file = await handle.getFile();
-              return [{
-                file,
-                relativePath: file.name,
-                displayPath: file.name,
-                rootHandle: null,
-                rootName: ''
-              }];
-            }
-          } catch (_) {}
-        }
-
-        if (typeof item.webkitGetAsEntry === 'function') {
-          try {
-            const entry = item.webkitGetAsEntry();
-            if (entry) {
-              if (entry.isDirectory) {
-                sourceName = sourceName || entry.name || '';
-              }
-              return await traverseEntry(entry, '', null);
-            }
-          } catch (_) {}
-        }
-
-        const file = typeof item.getAsFile === 'function' ? item.getAsFile() : null;
-        return file ? [{
-          file,
-          relativePath: file.webkitRelativePath || file.name,
-          displayPath: file.webkitRelativePath || file.name,
-          rootHandle: null,
-          rootName: ''
-        }] : [];
-      }));
-
-      for (const batch of batches) {
-        for (const entry of batch || []) {
-          addFile(entry.file, {
-            relativePath: entry.relativePath || entry.displayPath || entry.file?.name,
-            displayPath: entry.displayPath || entry.relativePath || entry.file?.name,
-            rootHandle: entry.rootHandle || null,
-            rootName: entry.rootName || sourceName || ''
-          });
-        }
-      }
+    for (const item of resolved) {
+      // 一個拖放項目代表一個檔案；不能僅憑同名、大小及時間就認定內容相同。
+      if (item.file && isSupportedFile(item.file)) out.push(item.file);
+      else if (item.handle?.kind === 'file') {
+        const file = await item.handle.getFile();
+        if (isSupportedFile(file)) out.push(file);
+      } else if (item.entry?.isFile) out.push(...await traverseEntry(item.entry));
     }
-
-    if (!sourceHandle) {
-      sourceName = sourceName || inferCommonRootName(out) || '';
+    const keyFor = file => `${file.webkitRelativePath || file.name}|${file.size}|${file.lastModified}`;
+    const remaining = new Map();
+    out.forEach(file => { const key = keyFor(file); remaining.set(key, (remaining.get(key) || 0) + 1); });
+    // files 與 items 是同一批拖入資料的兩種表示；按數量抵銷，避免雙算，也不遺失同名檔。
+    for (const file of looseFiles.filter(isSupportedFile)) {
+      const key = keyFor(file), count = remaining.get(key) || 0;
+      if (count) remaining.set(key, count - 1);
+      else out.push(file);
     }
-
-    return { files: out, sourceHandle, sourceName };
+    return { files: out, sourceHandle: null, sourceName: inferCommonRootName(out) };
   }
 
-  async function loadSelectedFolder(files, sourceHandle = null, includeSubfolders = false) {
+  function clearAnalysisResults() {
+    state.images.forEach(img => URL.revokeObjectURL(img.url));
+    state.images = [];
+    state.groups = [];
+    state.sourceLoaded = false;
+    state.selectedPreview = null;
+    state.groupPage = 0;
+    state.blurPage = 0;
+    state.failures = [];
+    state.logs = [];
+    state.outputDirHandle = null;
+    state.outputFolderName = '';
+    state.outputLocation = '尚未設定';
+    state.exportCompleted = false;
+    state.outputDirty = false;
+    state.analysisDirty = false;
+    state.lastAnalyzedSimilarity = null;
+    state.stats = { total: 0, groups: 0, keep: 0, reject: 0 };
+    if (els.exportCompleteNotice.open) closeExportComplete();
+    els.groups.innerHTML = '';
+    els.lowClarityQueue.innerHTML = '';
+    els.previewHero.innerHTML = '<div class="empty">尚未選擇任何照片</div>';
+    els.previewMeta.innerHTML = '';
+    setProgress(0, '尚未開始');
+  }
 
-    const allFiles = Array.from(files || []).filter(isSupportedFile);
+  async function loadSelectedFolder(files, sourceHandle = null, includeSubfolders = false, sourceName = '') {
+    const rootName = sourceHandle?.name || sourceName || inferCommonRootName(files) || '';
+    const allFiles = Array.from(files || []).filter(isSupportedFile).filter(file => {
+      const parts = String(file.webkitRelativePath || file.name).split('/').filter(Boolean);
+      // 有根目錄名稱時，只排除其下的 Output，不排除來源本身恰好叫 Output 的情況。
+      return !parts.slice(1, -1).some(part => part.toLowerCase() === 'output');
+    });
+    clearAnalysisResults();
     state.includeSubfolders = !!includeSubfolders;
-
-    const inferredHandle = sourceHandle || allFiles.find(file => file?.rootHandle)?.rootHandle || null;
-    const inferredRootName =
-      (inferredHandle?.name || '') ||
-      allFiles.find(file => file?.rootName)?.rootName ||
-      inferCommonRootName(allFiles) ||
-      (allFiles.length ? '已選擇來源' : '未選擇');
-
-    state.sourceFiles = state.includeSubfolders
-      ? allFiles
-      : allFiles.filter(file => {
-          const rel = file.webkitRelativePath || file.displayPath || file.name || '';
-          return rel.split('/').length <= 2;
-        });
-
-    state.sourceDirHandle = inferredHandle || null;
-    state.sourceName = inferredRootName;
-
-    els.sourceHint.textContent = state.sourceFiles.length
-      ? `已匯入 ${state.sourceFiles.length} 張圖片，按下「開始分析」即可分群。${state.includeSubfolders ? '目前包含子資料夾。' : '目前不包含子資料夾。'}`
-      : '此資料夾沒有可辨識的圖片檔。';
-
+    state.sourceFiles = state.includeSubfolders ? allFiles : allFiles.filter(file => {
+      return String(file.webkitRelativePath || file.name).split('/').filter(Boolean).length <= 2;
+    });
+    state.sourceDirHandle = sourceHandle;
+    state.sourceName = rootName || (allFiles.length ? '已選擇圖片' : '未選擇');
+    els.outputStatus.textContent = sourceHandle ? '匯出時詢問' : 'ZIP 備援可用';
     if (state.sourceFiles.length) {
-      if (state.sourceDirHandle) {
-        setDragFeedback('success', `已成功匯入 ${state.sourceFiles.length} 張圖片。`, `來源資料夾已辨識：${state.sourceName}。匯出時才會要求寫入權限。`);
-      } else {
-        setDragFeedback('error', `已匯入 ${state.sourceFiles.length} 張圖片，但尚未取得來源資料夾權限。`, `匯出時可重新選擇來源資料夾，或改用 ZIP 備援下載。`);
-      }
+      setDragFeedback('success', `已成功匯入 ${state.sourceFiles.length} 張圖片。`, sourceHandle
+        ? `來源資料夾已辨識：${escapeHtml(state.sourceName)}。匯出時將在裡面建立 Output。`
+        : '目前只有讀取權限；匯出時可授權同一個來源資料夾，或下載 ZIP。');
     } else {
-      setDragFeedback('error', '⚠️ 沒有找到可匯入的圖片。', '請拖曳圖片或資料夾，或改用「選擇來源資料夾」。');
+      setDragFeedback('error', '沒有找到可匯入的圖片。', '請確認最上層有圖片，或開啟「包含子資料夾」後重新匯入。Output 會自動略過。');
     }
-
     els.sourceFolderInput.value = '';
     updateStats();
   }
@@ -2713,9 +2646,14 @@
     state.cancelRequested = false;
     state.blurPage = 0;
     state.lastFocused = null;
+    if (els.exportCompleteNotice.open) closeExportComplete();
+    els.exportCompleteNotice.hidden = true;
     state.exportPreset = 'archive';
     state.reviewAdvanced = false;
     state.exportCompleted = false;
+    state.outputDirty = false;
+    state.analysisDirty = false;
+    state.lastAnalyzedSimilarity = null;
     setReviewAdvanced(false);
     if (typeof selectExportPreset === 'function') selectExportPreset('archive');
     state.logs = [];
@@ -3319,8 +3257,10 @@
     for (let i = 0; i < list.length; i++) {
       if (state.cancelRequested) break;
       const file = list[i];
+      let loadedUrl = null;
       try {
         const { img, url } = await fileToImage(file);
+        loadedUrl = url;
         const metrics = measureImageMetrics(img);
         images.push({
           id: crypto.randomUUID(),
@@ -3343,6 +3283,7 @@
         setProgress(5 + ((i + 1) / Math.max(1, list.length)) * 55, `多尺度、多區域嚴格核對模糊照片… ${i + 1} / ${list.length}`);
         if (i % 4 === 0) await new Promise(resolve => setTimeout(resolve, 0));
       } catch (err) {
+        if (loadedUrl) URL.revokeObjectURL(loadedUrl);
         console.warn('無法讀取圖片', file.name, err);
         const ext = fileExt(file.name).toUpperCase();
         state.failures.push({
@@ -3674,6 +3615,7 @@
       button.addEventListener('click', () => {
         const action = button.dataset.lowAction;
         if (action === 'preview') return renderPreview(img, state.groups.find(group => group.id === img.groupId));
+        if (state.importing || state.analyzing || state.exporting) return;
         if (action === 'keep') {
           img.manual = true;
           img.blurReviewed = true;
@@ -3685,6 +3627,7 @@
           setToast('維持不輸出。', 'info', 1200);
         }
         if (action === 'next' || action === 'keep' || action === 'skip') {
+          if (action !== 'next') markExportChanged();
           if (action === 'next') state.blurPage = Math.min(state.blurPage + 1, Math.max(0, items.length - 1));
           computeStats();
           updateStats();
@@ -3740,7 +3683,7 @@
           <div class="tag-row">
             <span class="tag good">${iconSvg('check', 14)} 系統建議保留</span>
             <span class="tag">${group.samples.length} 張</span>
-            <span class="tag">${selected === sys ? '目前一致' : '已手動改選'}</span>
+            <span class="tag">${group.canceled ? '已取消群組' : selected === sys ? '目前一致' : '已手動改選'}</span>
           </div>
         </div>
 
@@ -3748,14 +3691,14 @@
           <button type="button" class="thumb" data-preview="${selected.id}" aria-label="預覽目前保留照片 ${escapeHtml(selected.name)}">
             <img src="${selected.url}" alt="${escapeHtml(selected.name)}">
             <div class="thumb-badge ${selected.id === sys.id ? 'system' : 'manual'}">
-              ${selected.id === sys.id ? '系統保留' : '手動保留'}
+              ${group.canceled ? '參考照片' : shouldExportImage(selected) ? (selected.manual ? '手動保留' : '系統保留') : '預設不輸出'}
             </div>
             <div class="overlay">${selected.score} 分 · ${selected.metrics.width}×${selected.metrics.height} · ${selected.metrics.blurLabel || '模糊'}</div>
           </button>
 
           <div class="details">
             <div class="details-grid advanced-only">
-              <div class="detail"><div class="k">目前保留</div><div class="v">${escapeHtml(selected.name)}</div></div>
+              <div class="detail"><div class="k">${group.canceled ? '目前參考' : shouldExportImage(selected) ? '目前保留' : '待確認照片'}</div><div class="v">${escapeHtml(selected.name)}</div></div>
               <div class="detail"><div class="k">檔案大小</div><div class="v">${humanSize(selected.size)}</div></div>
               <div class="detail"><div class="k">目前評分</div><div class="v">${selected.score} / 100</div></div>
               <div class="detail"><div class="k">模糊風險</div><div class="v">${Math.round(selected.metrics.blurRisk ?? 0)} / 100</div></div>
@@ -3769,7 +3712,7 @@
             <div class="actions">
               <button class="btn small good" data-action="keep">保留這張</button>
               <button class="btn small secondary advanced-only" data-action="preview">查看完整資訊</button>
-              <button class="btn small warn advanced-only" data-action="cancel">取消群組</button>
+              <button class="btn small warn advanced-only" data-action="cancel">${group.canceled ? '恢復群組' : '取消群組'}</button>
             </div>
             <div class="help advanced-only">完整檔名、路徑、解析度與評分會顯示在本步驟下方的進階預覽區。</div>
             <div class="help advanced-only">「取消群組」代表這組都不視為重複；疑似模糊照片仍維持預設不輸出，除非你自行保留。</div>
@@ -3790,11 +3733,14 @@
       card.querySelector('.thumb').addEventListener('click', () => renderPreview(selected, group));
       card.querySelectorAll('[data-thumb]').forEach(el => {
         el.addEventListener('click', () => {
+          if (state.importing || state.analyzing || state.exporting) return;
           const img = group.samples.find(x => x.id === el.dataset.thumb);
           if (img) {
+            group.canceled = false;
             group.selectedId = img.id;
             group.samples.forEach(x => x.keep = (x.id === img.id));
             group.samples.forEach(x => x.manual = (x.id === img.id));
+            markExportChanged();
             computeStats();
             renderGroups();
             renderPreview(img, group);
@@ -3804,9 +3750,12 @@
         });
       });
       card.querySelector('[data-action="keep"]').addEventListener('click', () => {
+        if (state.importing || state.analyzing || state.exporting) return;
+        group.canceled = false;
         group.selectedId = selected.id;
         group.samples.forEach(x => x.keep = (x.id === selected.id));
         group.samples.forEach(x => x.manual = (x.id === selected.id));
+        markExportChanged();
         computeStats();
         renderGroups();
         renderPreview(selected, group);
@@ -3815,14 +3764,20 @@
       });
       card.querySelector('[data-action="preview"]').addEventListener('click', () => renderPreview(selected, group));
       card.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+        if (state.importing || state.analyzing || state.exporting) return;
         group.canceled = !group.canceled;
         if (group.canceled) {
           group.samples.forEach(x => { x.keep = true; });
           group.selectedId = null;
         } else {
           group.selectedId = group.systemSelectedId;
-          group.samples.forEach(x => x.keep = (x.id === group.systemSelectedId));
+          group.samples.forEach(x => {
+            x.keep = x.id === group.systemSelectedId;
+            x.manual = false;
+            x.blurReviewed = false;
+          });
         }
+        markExportChanged();
         computeStats();
         renderGroups();
         renderPreview(group.samples[0], group);
@@ -3840,13 +3795,14 @@
   }
 
   async function analyze() {
-    if (state.analyzing || state.exporting) return;
+    if (state.importing || state.analyzing || state.exporting) return;
     if (!state.sourceFiles.length) {
       setToast('請先選擇來源資料夾。', 'loading', 1800);
       return;
     }
 
     state.analyzing = true;
+    clearAnalysisResults();
     state.cancelRequested = false;
     state.sourceLoaded = false;
     state.exportCompleted = false;
@@ -3866,6 +3822,12 @@
       const images = await processFiles(state.sourceFiles);
       state.images = images;
       state.stats.total = images.length;
+      if (!images.length && !state.cancelRequested) {
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.textContent = `沒有可分析的照片，${state.failures.length} 張圖片無法讀取。請確認檔案格式及內容，或先轉成 JPG／PNG 後重新匯入。`;
+        setProgress(0, '沒有可分析的照片');
+        return;
+      }
       setProgress(68, `已分析 ${images.length} 張，開始分群…`);
 
       const sim = Number(els.similarity.value);
@@ -3899,6 +3861,8 @@
         els.noticeBox.innerHTML = `${iconSvg('check', 16)} ${blurHint}<br>已完成相似分群；系統已為每組選出建議保留的照片，可直接匯出。${failedHint}`;
       }
       state.sourceLoaded = true;
+      state.lastAnalyzedSimilarity = sim;
+      state.analysisDirty = false;
       computeStats();
       renderGroups();
       updateStats();
@@ -3909,12 +3873,22 @@
       setToast(`分析完成：已找出 ${priorityBlurCount} 張疑似模糊照片。`, 'info', 3200);
     } catch (err) {
       console.error(err);
+      state.images.forEach(img => URL.revokeObjectURL(img.url));
+      state.images = [];
+      state.groups = [];
+      state.sourceLoaded = false;
+      state.selectedPreview = null;
+      els.groups.innerHTML = '';
+      els.lowClarityQueue.innerHTML = '';
+      renderPreview(null);
       state.analyzing = false;
       els.noticeBox.className = 'notice warn';
       els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 分析時發生錯誤。請確認瀏覽器是否可讀取圖片，或嘗試換一個資料夾。`;
       setToast('分析失敗，請稍後重試。', 'info', 2400);
       setProgress(0, '分析失敗');
     } finally {
+      state.analyzing = false;
+      computeStats();
       updateStats();
     }
   }
@@ -3926,53 +3900,69 @@
   async function transformImage(file, opts) {
     const { convertJpg, resize, quality } = opts;
     const ext = fileExt(file.name);
-    // 重新繪製 GIF 只會留下單一影格；預設完整保留動畫檔。
-    if (ext === 'gif') {
-      return { blob: file.slice(0, file.size, file.type || 'image/gif'), fileName: file.name, preservedOriginal: true };
+    const mimeByExt = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', heic: 'image/heic', heif: 'image/heif' };
+    const sourceMime = file.type || mimeByExt[ext] || 'image/png';
+    // 原檔無須解碼。重新繪製 GIF 會遺失動畫，因此一律完整保留。
+    if ((!convertJpg && !resize) || ext === 'gif' || sourceMime === 'image/gif') {
+      return { blob: file.slice(0, file.size, sourceMime), fileName: file.name, preservedOriginal: true };
     }
-    const bitmap = await createImageBitmap(file);
-    const srcW = bitmap.width;
-    const srcH = bitmap.height;
-    const maxSide = opts.maxSide || 1980;
-    let targetW = srcW;
-    let targetH = srcH;
-    if (resize) {
-      const ratio = Math.min(1, maxSide / Math.max(srcW, srcH));
-      targetW = Math.round(srcW * ratio);
-      targetH = Math.round(srcH * ratio);
+    let drawable, objectUrl = null;
+    try {
+      try { drawable = await createImageBitmap(file); }
+      catch {
+        const loaded = await fileToImage(file);
+        drawable = loaded.img;
+        objectUrl = loaded.url;
+      }
+      const srcW = drawable.naturalWidth || drawable.width;
+      const srcH = drawable.naturalHeight || drawable.height;
+      if (!srcW || !srcH) throw new Error('圖片尺寸無效。');
+      const ratio = resize ? Math.min(1, Math.max(1, opts.maxSide || 1980) / Math.max(srcW, srcH)) : 1;
+      const targetW = Math.max(1, Math.round(srcW * ratio));
+      const targetH = Math.max(1, Math.round(srcH * ratio));
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('瀏覽器無法建立圖片畫布。');
+      const mime = convertJpg ? 'image/jpeg' : sourceMime;
+      if (mime === 'image/jpeg') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, targetW, targetH);
+      }
+      ctx.drawImage(drawable, 0, 0, targetW, targetH);
+      const blob = await canvasToBlob(canvas, mime, quality);
+      if (!blob) throw new Error('無法建立轉換後的圖片檔。');
+      const extension = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[blob.type];
+      if (!extension) throw new Error('瀏覽器回傳了不支援的圖片格式。');
+      // Canvas 不支援要求的格式時會回退成 PNG，副檔名須以實際編碼為準。
+      const fileName = !convertJpg && blob.type === sourceMime && mimeByExt[ext] === blob.type
+        ? file.name : `${file.name.replace(/\.[^.]+$/, '') || 'photo'}.${extension}`;
+      return { blob, fileName };
+    } finally {
+      drawable?.close?.();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     }
-    const canvas = document.createElement('canvas');
-    canvas.width = targetW;
-    canvas.height = targetH;
-    const ctx = canvas.getContext('2d');
-    if (convertJpg) {
-      // JPG 不支援透明度；先鋪白底，避免透明 PNG 轉出黑底。
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, targetW, targetH);
-    }
-    ctx.drawImage(bitmap, 0, 0, targetW, targetH);
-    bitmap.close?.();
-
-    let mime = file.type || 'image/jpeg';
-    if (convertJpg) {
-      mime = 'image/jpeg';
-    }
-
-    const blob = convertJpg || resize ? await canvasToBlob(canvas, mime, quality) : file.slice(0, file.size, file.type || mime);
-    if (!blob) throw new Error('無法建立轉換後的圖片檔。');
-    const fileName = convertJpg ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : file.name;
-    return { blob, fileName };
   }
 
   function timestampLabel() {
-    return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}-${String(d.getMilliseconds()).padStart(3, '0')}`;
   }
 
   function safePathPart(name, fallback = '未命名') {
-    return String(name || fallback)
+    let safe = String(name || fallback)
       .replace(/[\\/:*?"<>|\u0000-\u001F]/g, '_')
-      .replace(/^\.+$/, fallback)
-      .slice(0, 120) || fallback;
+      .replace(/[. ]+$/g, '');
+    if (!safe || /^\.+$/.test(safe)) safe = fallback;
+    if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(safe)) safe = '_' + safe;
+    if (safe.length > 120) {
+      const dot = safe.lastIndexOf('.');
+      const extension = dot > 0 && safe.length - dot <= 12 ? safe.slice(dot) : '';
+      safe = safe.slice(0, 120 - extension.length).replace(/[. ]+$/g, '') + extension;
+    }
+    return safe;
   }
 
   function exportRelativePath(img, fileName) {
@@ -3982,6 +3972,54 @@
       .filter(Boolean);
     const folders = parts.length > 2 ? parts.slice(1, -1).map(part => safePathPart(part)) : [];
     return [...folders, safePathPart(fileName, 'photo.jpg')];
+  }
+
+  function uniqueExportPath(img, fileName, usedPaths, folderMappings = new Map()) {
+    const sourceParts = String(img.path || img.name || '').replace(/\\/g, '/').split('/').filter(Boolean);
+    const folders = sourceParts.length > 2 ? sourceParts.slice(1, -1) : [];
+    const parts = [];
+    for (let index = 0; index < folders.length; index++) {
+      const key = JSON.stringify(folders.slice(0, index + 1));
+      let mapped = folderMappings.get(key);
+      if (!mapped) {
+        const base = safePathPart(folders[index]);
+        mapped = base;
+        let suffix = 1;
+        const occupied = name => {
+          const path = [...parts, name].join('/').toLowerCase();
+          return usedPaths.has(path) || usedPaths.has(path + '/');
+        };
+        while (occupied(mapped)) mapped = `${base}_${++suffix}`;
+        folderMappings.set(key, mapped);
+        usedPaths.add([...parts, mapped].join('/').toLowerCase() + '/');
+      }
+      parts.push(mapped);
+    }
+    parts.push(safePathPart(fileName, 'photo.jpg'));
+    const original = parts[parts.length - 1];
+    const dot = original.lastIndexOf('.');
+    const stem = dot > 0 ? original.slice(0, dot) : original;
+    const ext = dot > 0 ? original.slice(dot) : '';
+    let suffix = 1;
+    while (usedPaths.has(parts.join('/').toLowerCase()) || usedPaths.has(parts.join('/').toLowerCase() + '/')) {
+      parts[parts.length - 1] = `${stem}_${++suffix}${ext}`;
+    }
+    usedPaths.add(parts.join('/').toLowerCase());
+    return parts;
+  }
+
+  async function createResultDirectory(outputRoot) {
+    const baseName = `結果_${timestampLabel()}`;
+    for (let suffix = 0; ; suffix++) {
+      const name = suffix ? `${baseName}_${suffix + 1}` : baseName;
+      try { await outputRoot.getDirectoryHandle(name); }
+      catch (err) {
+        if (err?.name !== 'NotFoundError') throw err;
+        const handle = await outputRoot.getDirectoryHandle(name, { create: true });
+        state.outputFolderName = name;
+        return handle;
+      }
+    }
   }
 
   async function ensureSourceWritePermission(handle, prompt = false) {
@@ -4002,58 +4040,56 @@
     return false;
   }
 
-  async function ensureWritableSourceHandle() {
-    const embedded = isEmbeddedContext();
-    state.permissionCanceled = false;
+  async function matchesImportedSource(handle) {
+    if (!state.sourceFiles.length) return false;
+    // 相同名稱的資料夾可能位於不同磁碟；逐一比對相對路徑、檔案大小與修改時間。
+    for (const file of state.sourceFiles) {
+      const parts = String(file.webkitRelativePath || file.name).split('/').filter(Boolean);
+      if (parts.length > 1 && parts.shift() !== handle.name) return false;
+      try {
+        let dir = handle;
+        for (const name of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(name);
+        const existing = await (await dir.getFileHandle(parts[parts.length - 1])).getFile();
+        if (existing.size !== file.size || existing.lastModified !== file.lastModified) return false;
+      } catch { return false; }
+    }
+    return true;
+  }
 
+  async function ensureWritableSourceHandle() {
+    state.permissionCanceled = false;
     if (state.sourceDirHandle) {
-      const granted = await ensureSourceWritePermission(state.sourceDirHandle, true);
-      if (granted) {
-        state.outputDirHandle = null;
+      // 已辨識拖入的來源就直接使用它，不能另選其他資料夾導致來源被悄悄置換。
+      if (await ensureSourceWritePermission(state.sourceDirHandle, true)) {
         els.outputStatus.textContent = 'Output / 已授權';
         return state.sourceDirHandle;
       }
+      els.outputStatus.textContent = '未授權／ZIP 備援';
+      return null;
     }
-
-    if ('showDirectoryPicker' in window) {
-      try {
-        els.noticeBox.className = 'notice warn';
-        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前尚未取得可直接寫入的來源資料夾權限。請重新選擇來源資料夾並允許存取，系統會直接在原資料夾內建立 Output 資料夾。${embedded ? '<br><strong>目前是在 Google 協作平台內嵌環境中執行，若權限視窗沒有正常跳出，請改按「開啟獨立模式」。</strong>' : ''}`;
-        setToast('請重新選擇來源資料夾並允許權限。', 'info', 2200);
-
-        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
-        state.sourceDirHandle = handle;
-        state.outputDirHandle = null;
-
-        const granted = await ensureSourceWritePermission(handle, true);
-        if (granted) {
-          els.outputStatus.textContent = 'Output / 已授權';
-          els.noticeBox.className = 'notice';
-          els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已確認來源資料夾可寫入。匯出時會直接在原資料夾內建立 Output 資料夾。`;
-          return handle;
-        }
-
-        els.noticeBox.className = 'notice warn';
-        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 已開啟資料夾，但尚未取得寫入權限。請再次確認瀏覽器權限是否允許，或重新選擇來源資料夾。`;
-        setToast('尚未取得寫入權限。', 'info', 1800);
-        return null;
-      } catch (err) {
-        if (err?.name === 'AbortError') {
-          state.permissionCanceled = true;
-          setToast('已取消來源資料夾選擇。', 'info', 1200);
-        } else {
-          console.error(err);
-          els.noticeBox.className = 'notice warn';
-          els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 無法直接取得來源資料夾寫入權限。${embedded ? '這通常是 Google 協作平台內嵌限制造成的。請按「開啟獨立模式」在新視窗完成授權。' : '請確認瀏覽器是否允許資料夾存取。'}`;
-          setToast('無法確認來源資料夾權限。', 'info', 1800);
-        }
+    if (typeof window.showDirectoryPicker !== 'function') return null;
+    try {
+      setToast('請選擇匯入照片的原始來源資料夾並允許寫入。', 'info', 2600);
+      const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      // 此驗證可能耗時；選取視窗本身已要求寫入，不在驗證後另開權限提示。
+      if (!await matchesImportedSource(handle)) {
+        state.permissionCanceled = true;
+        setBanner('選取的資料夾與匯入照片不符，已停止匯出。請選擇原本的來源資料夾。', 'error');
         return null;
       }
+      state.sourceDirHandle = handle;
+      state.sourceName = handle.name;
+      els.outputStatus.textContent = 'Output / 已授權';
+      return handle;
+    } catch (err) {
+      if (err?.name === 'AbortError') {
+        state.permissionCanceled = true;
+        setBanner('已取消來源資料夾選擇；尚未建立或下載任何輸出檔。');
+      } else {
+        console.warn('無法取得來源資料夾寫入權限', err);
+      }
+      return null;
     }
-
-    els.noticeBox.className = 'notice warn';
-    els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 目前瀏覽器不支援直接寫入資料夾。${embedded ? '若你是在 Google 協作平台內嵌模式中使用，請按「開啟獨立模式」後再匯出。' : '請改用支援 File System Access API 的瀏覽器。'}`;
-    return null;
   }
 
   async function writeFileInDir(dirHandle, pathParts, blob) {
@@ -4063,8 +4099,13 @@
     }
     const fileHandle = await dir.getFileHandle(pathParts[pathParts.length - 1], { create: true });
     const writable = await fileHandle.createWritable();
-    await writable.write(blob);
-    await writable.close();
+    try {
+      await writable.write(blob);
+      await writable.close();
+    } catch (err) {
+      try { await writable.abort(); } catch {}
+      throw err;
+    }
   }
 
   function getExportOptions() {
@@ -4082,7 +4123,11 @@
   }
 
   async function exportResults() {
-    if (state.exporting || !state.images.length) return;
+    if (state.importing || state.analyzing || state.exporting || !state.sourceLoaded || !state.images.length) return;
+    if (state.analysisDirty) {
+      setBanner('相似度設定已變更，請重新分析後再匯出。', 'error');
+      return;
+    }
     // 匯出進度位於頁首；開始處理時立即回到最上方，避免使用者錯過狀態與進度。
     try {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -4091,7 +4136,11 @@
       document.body.scrollTop = 0;
     }
     state.exporting = true;
+    state.exportCompleted = false;
+    state.outputDirty = false;
     state.outputDirHandle = null;
+    state.outputLocation = '尚未設定';
+    state.outputFolderName = '';
     updateStats();
     setProgress(0, '準備匯出…');
     setToast('開始匯出不同的照片。', 'loading', 1200);
@@ -4099,6 +4148,9 @@
     const opts = getExportOptions();
 
     const exportItems = [];
+    const usedPaths = new Set();
+    const folderMappings = new Map();
+    let written = 0;
     const seen = new Set();
     const addItem = (img) => {
       if (!img || seen.has(img.id)) return;
@@ -4121,35 +4173,31 @@
       const baseDir = await ensureWritableSourceHandle();
       if (baseDir) {
         const outputRoot = await baseDir.getDirectoryHandle('Output', { create: true });
-        state.outputFolderName = `結果_${timestampLabel()}`;
-        const outputDir = await outputRoot.getDirectoryHandle(state.outputFolderName, { create: true });
+        const outputDir = await createResultDirectory(outputRoot);
         state.outputDirHandle = outputDir;
+        state.outputLocation = `${baseDir.name}／Output／${state.outputFolderName}`;
 
-        let written = 0;
         for (const img of exportItems) {
           const { blob, fileName } = await transformImage(img.file, opts);
-          await writeFileInDir(outputDir, exportRelativePath(img, fileName), blob);
+          await writeFileInDir(outputDir, uniqueExportPath(img, fileName, usedPaths, folderMappings), blob);
           written++;
           setProgress((written / Math.max(1, totalToWrite)) * 100, `匯出不同的照片… ${written} / ${totalToWrite}`);
           await new Promise(r => setTimeout(r, 0));
         }
 
         state.logs.push({ at: new Date(), action: 'export', detail: '完成匯出不同的照片' });
-        state.outputLocation = `Output／${state.outputFolderName}`;
         state.exportCompleted = true;
         els.exportState.textContent = '已匯出';
         els.noticeBox.className = 'notice';
         els.noticeBox.innerHTML = `${iconSvg('check', 16)} 匯出完成。已輸出 ${written} 張照片至 Output／${escapeHtml(state.outputFolderName)}，並保留原本的子資料夾結構。`;
         setProgress(100, '匯出完成');
         setToast('匯出完成。', 'info', 1800);
-        showExportComplete(`已完成 ${written} 張照片輸出。點擊下方按鈕可在系統視窗查看輸出檔案。`, state.outputLocation);
+        showExportComplete(`已完成 ${written} 張照片輸出。照片已寫入來源資料夾內的 Output，並保留子資料夾結構。`, state.outputLocation, written);
         return;
       }
 
       if (state.permissionCanceled) {
-        els.noticeBox.className = 'notice warn';
-        els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 已取消資料夾授權；尚未建立或下載任何輸出檔。`;
-        setProgress(0, '已取消匯出');
+        setProgress(0, '已停止匯出');
         return;
       }
 
@@ -4167,24 +4215,28 @@
       const zipEntries = [];
       for (const img of fallbackItems) {
         const { blob, fileName } = await transformImage(img.file, opts);
-        zipEntries.push({ name: `${label}/${state.outputFolderName}/${exportRelativePath(img, fileName).join('/')}`, blob });
+        zipEntries.push({ name: `${label}/${state.outputFolderName}/${uniqueExportPath(img, fileName, usedPaths, folderMappings).join('/')}`, blob });
+        setProgress((zipEntries.length / fallbackItems.length) * 90, `準備 ZIP… ${zipEntries.length} / ${fallbackItems.length}`);
+        await new Promise(resolve => setTimeout(resolve, 0));
       }
       const zipBlob = await buildZipBlob(zipEntries);
       const stamp = timestampLabel();
-      downloadBlob(`${label}_${stamp}.zip`, zipBlob);
+      const zipName = `${label}_${stamp}.zip`;
+      downloadBlob(zipName, zipBlob);
 
       state.logs.push({ at: new Date(), action: 'export', detail: '無法直寫資料夾，已下載 zip 備援' });
-      state.outputLocation = `ZIP 下載／${state.outputFolderName}`;
+      state.outputLocation = `瀏覽器下載位置／${zipName}（解壓縮後：Output／${state.outputFolderName}）`;
       state.exportCompleted = true;
       els.exportState.textContent = '已下載 zip';
-      setProgress(100, 'zip 已下載');
-      setToast('已下載 zip 備援檔。', 'info', 1800);
-      showExportComplete(`已完成 ${fallbackItems.length} 張照片處理，ZIP 檔案已開始下載。`, state.outputLocation);
+      setProgress(100, 'ZIP 已建立，已啟動下載');
+      setToast('ZIP 已建立，請確認瀏覽器下載狀態。', 'info', 2200);
+      showExportComplete(`已完成 ${fallbackItems.length} 張照片處理，ZIP 已建立並啟動下載。實際儲存位置依瀏覽器設定；請確認下載完成後再解壓縮。`, state.outputLocation, fallbackItems.length, true);
     } catch (err) {
       console.error(err);
-      setToast('匯出失敗，請檢查瀏覽器權限或改用獨立模式。', 'info', 2400);
+      setProgress(0, `匯出中止，已寫入 ${written} 張`);
+      setToast('匯出中止，請查看錯誤訊息。', 'info', 2400);
       els.noticeBox.className = 'notice warn';
-      els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 匯出失敗。請確認已授權來源資料夾寫入權限；若在 Google 協作平台內嵌執行，建議先按「開啟獨立模式」再匯出。`;
+      els.noticeBox.textContent = `匯出中止：${prettyError(err)}。${state.outputDirHandle ? `已寫入 ${written} 張，位置：${state.outputLocation}；可能含有未完成的檔案，請檢查後重新匯出。` : '尚未完成輸出，請確認來源資料夾權限或可用空間。'}`;
     } finally {
       state.exporting = false;
       updateStats();
@@ -4210,7 +4262,7 @@
   }
 
   function makeStandaloneHtml() {
-    return '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    return standaloneSource;
   }
 
   function openStandaloneCopy(reason = '') {
@@ -4218,8 +4270,9 @@
       const html = makeStandaloneHtml();
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      const win = window.open(url, '_blank', 'noopener');
-      if (!win) throw new Error('popup_blocked');
+      const win = window.open(url, '_blank');
+      if (!win) { URL.revokeObjectURL(url); throw new Error('popup_blocked'); }
+      win.opener = null;
       setTimeout(() => URL.revokeObjectURL(url), 60000);
       if (reason) {
         setToast(reason, 'info', 1800);
@@ -4289,6 +4342,18 @@
 
   async function buildZipBlob(entries) {
     const encoder = new TextEncoder();
+    // 此單檔工具使用 ZIP32。先檢查欄位上限，避免溢位後輸出無法解壓縮的檔案。
+    if (entries.length >= 0xFFFF) throw new Error('ZIP 備援的檔案數量過多，請分批處理或授權來源資料夾直接輸出。');
+    let estimatedSize = 22;
+    for (const entry of entries) {
+      const nameSize = encoder.encode(String(entry.name).replace(/\\/g, '/')).length;
+      if (nameSize > 0xFFFF) throw new Error('ZIP 檔案路徑過長，請縮短資料夾或檔名。');
+      if (!Number.isSafeInteger(entry.blob.size) || entry.blob.size < 0 || entry.blob.size >= 0xFFFFFFFF) {
+        throw new Error('ZIP 備援的單一檔案大小超過 4 GiB 限制，請授權資料夾直接輸出。');
+      }
+      estimatedSize += 76 + nameSize * 2 + entry.blob.size;
+      if (estimatedSize >= 0xFFFFFFFF) throw new Error('ZIP 備援總大小超過 4 GiB 限制，請分批處理或授權資料夾直接輸出。');
+    }
     const localParts = [];
     const centralParts = [];
     let offset = 0;
@@ -4313,10 +4378,9 @@
         u32le(size),
         u16le(nameBytes.length),
         u16le(0),
-        nameBytes,
-        data
+        nameBytes
       ]);
-      localParts.push(localHeader);
+      localParts.push(localHeader, data);
 
       const centralHeader = concatBytes([
         u32le(0x02014b50),
@@ -4339,7 +4403,8 @@
         nameBytes
       ]);
       centralParts.push(centralHeader);
-      offset += localHeader.length;
+      offset += localHeader.length + data.length;
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
@@ -4372,8 +4437,8 @@
   // Events
   const refreshSourceHint = () => {
     const hint = els.sourceRecursiveToggle?.checked
-      ? '已設定：包含子資料夾。拖拉或選取時會一併掃描子資料夾。'
-      : '已設定：不包含子資料夾。拖拉或選取時只掃描最上層照片。';
+      ? '下次匯入設定：包含子資料夾，略過 Output。變更後請重新匯入。'
+      : '下次匯入設定：只掃描最上層照片。變更後請重新匯入。';
     els.sourceHint.textContent = state.sourceFiles.length
       ? `目前已匯入 ${state.sourceFiles.length} 張圖片。${hint}`
       : `尚未選擇。${hint}`;
@@ -4448,93 +4513,70 @@
     if (e.dataTransfer && hasDroppedFiles(e.dataTransfer)) e.dataTransfer.dropEffect = 'copy';
   };
 
+  const sourceBusy = () => state.importing || state.analyzing || state.exporting;
+
   const ingestDropped = async (dt) => {
-    if (!hasDroppedFiles(dt)) {
-      setDragFeedback('error', '拖入的內容不是圖片或資料夾。', '請拖曳圖片檔、一次多張圖片，或完整資料夾。');
-      return;
-    }
-    setDragFeedback('idle', '正在讀取拖入內容…', '正在確認圖片格式、重複檔案與資料夾結構，請稍候。');
-    startFolderReadFeedback();
-    els.sourceHint.textContent = '正在掃描拖入的資料夾並讀取圖片資訊，請稍候。';
-    // DataTransfer 只能在 drop 事件仍有效時讀取；必須先立即啟動檔案擷取，
-    // 再讓瀏覽器繪製進度訊息，否則等待一個畫面影格後資料可能已被保護而變成空清單。
-    const droppedTask = getDroppedFiles(dt).then(
-      value => ({ value, error: null }),
-      error => ({ value: null, error })
-    );
-    await new Promise(resolve => requestAnimationFrame(resolve));
-
-    let dropped;
-    try {
-      const result = await droppedTask;
-      if (result.error) throw result.error;
-      dropped = result.value;
-    } finally {
-      stopFolderReadFeedback();
-    }
-    const files = Array.isArray(dropped) ? dropped : (dropped.files || []);
-    const sourceHandle = Array.isArray(dropped) ? null : (dropped.sourceHandle || null);
-    const sourceName = Array.isArray(dropped) ? '' : (dropped.sourceName || '');
-
-    if (!files.length) {
-      setDragFeedback('error', '拖拉後沒有取得可匯入的圖片或資料夾。', '請改用「選擇來源資料夾」按鈕，或確認瀏覽器允許拖放。');
-      setBanner('拖拉後沒有取得可匯入的圖片或資料夾。請改用「選擇來源資料夾」按鈕，或確認瀏覽器允許拖放。', 'error', true);
-      return;
-    }
-    await loadSelectedFolder(files, sourceHandle, !!els.sourceRecursiveToggle?.checked);
-    if (state.sourceFiles.length) {
-      setToast(`已拖拉匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
-      els.noticeBox.className = state.sourceDirHandle ? 'notice' : 'notice warn';
-      els.noticeBox.className = 'notice';
-      els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已匯入 ${state.sourceFiles.length} 張圖片。請選擇相似度預設後開始分析；寫入權限會在匯出時才詢問。`;
-      els.outputStatus.textContent = sourceHandle ? '匯出時詢問' : 'ZIP 備援可用';
-    } else {
-      setDragFeedback('error', '拖拉後沒有可辨識的圖片檔。', '請確認拖入的是圖片或資料夾。');
-      setBanner('拖拉後沒有可辨識的圖片檔。請確認拖入的是圖片或資料夾。', 'error', true);
-    }
-    refreshSourceHint();
+    if (sourceBusy()) { setToast('請等待目前的處理完成。'); return; }
+    if (!hasDroppedFiles(dt)) { setBanner('請拖曳圖片檔或一個完整資料夾。', 'error'); return; }
+    state.importing = true;
     updateStats();
+    startFolderReadFeedback();
+    setDragFeedback('idle', '正在讀取拖入內容…');
+    try {
+      // 不可在取得 DataTransfer 快照前等待影格或其他非同步操作。
+      const dropped = await getDroppedFiles(dt, !!els.sourceRecursiveToggle?.checked);
+      await loadSelectedFolder(dropped.files, dropped.sourceHandle, !!els.sourceRecursiveToggle?.checked, dropped.sourceName);
+      els.noticeBox.className = 'notice';
+      els.noticeBox.textContent = state.sourceFiles.length
+        ? `已匯入 ${state.sourceFiles.length} 張圖片。${dropped.sourceHandle ? '已自動使用拖入資料夾作為來源，匯出時會要求寫入權限並建立 Output。' : '目前瀏覽器未提供可寫入的來源資料夾；可在匯出時授權或下載 ZIP。'}`
+        : '來源資料夾沒有可匯入的圖片；可調整「包含子資料夾」後重新匯入。';
+    } finally {
+      state.importing = false;
+      stopFolderReadFeedback();
+      refreshSourceHint();
+      updateStats();
+    }
   };
 
   async function openSourcePicker() {
+    if (sourceBusy()) return;
     const includeSubfolders = !!els.sourceRecursiveToggle?.checked;
-    if ('showDirectoryPicker' in window) {
-      try {
-        // 匯入階段只需讀取；寫入權限延後到真正匯出時才詢問。
-        const handle = await window.showDirectoryPicker();
-        const files = await readFilesFromDirectoryHandle(handle, '', includeSubfolders);
-        await loadSelectedFolder(files, handle, includeSubfolders);
-        if (state.sourceFiles.length) {
-          setToast(`已匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
-          els.noticeBox.className = 'notice';
-          els.noticeBox.innerHTML = `${iconSvg('check', 16)} 已選擇來源資料夾，共 ${state.sourceFiles.length} 張圖片。現在可開始分析；寫入權限會在匯出時才詢問。`;
-          els.outputStatus.textContent = '匯出時詢問';
-        }
-        refreshSourceHint();
-        updateStats();
-        return;
-      } catch (err) {
-        if (err?.name !== 'AbortError') {
-          console.error(err);
-          setToast('選擇來源資料夾失敗，改用檔案選取。', 'info', 1600);
-        }
+    if (typeof window.showDirectoryPicker !== 'function') { els.sourceFolderInput.click(); return; }
+    state.importing = true;
+    updateStats();
+    try {
+      const handle = await window.showDirectoryPicker({ mode: 'read' });
+      startFolderReadFeedback();
+      const files = await readFilesFromDirectoryHandle(handle, handle.name, includeSubfolders);
+      await loadSelectedFolder(files, handle, includeSubfolders);
+      els.noticeBox.className = 'notice';
+      els.noticeBox.textContent = state.sourceFiles.length
+        ? `已選擇來源資料夾，共 ${state.sourceFiles.length} 張圖片。現在可開始分析；匯出時會要求寫入權限並建立 Output。`
+        : '來源資料夾沒有可匯入的圖片；可調整「包含子資料夾」後重新匯入。';
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        console.error(err);
+        // SecurityError 表示這個瀏覽器環境無法使用現代選取器，保留唯讀匯入與 ZIP 備援。
+        if (err?.name === 'SecurityError') els.sourceFolderInput.click();
+        else setBanner(prettyError(err), 'error');
       }
+    } finally {
+      state.importing = false;
+      stopFolderReadFeedback();
+      refreshSourceHint();
+      updateStats();
     }
-    els.sourceFolderInput.click();
   }
   els.pickSourceBtn.addEventListener('click', openSourcePicker);
   els.sourceFolderInput.addEventListener('change', async (e) => {
-    const files = e.target.files;
-    await loadSelectedFolder(files, null, !!els.sourceRecursiveToggle?.checked);
-    if (state.sourceFiles.length) {
-      setToast(`已匯入 ${state.sourceFiles.length} 張圖片。`, 'info', 1800);
-      els.noticeBox.className = 'notice warn';
-      els.noticeBox.innerHTML = `${iconSvg('warn', 16)} 已選取圖片，但目前沒有來源資料夾句柄，因此無法直接在原資料夾內建立 Output。<br>請改用「選擇來源資料夾」重新授權，之後就能直接輸出到 Output 資料夾。`;
-      els.outputStatus.textContent = '待授權';
-    }
+    if (sourceBusy() || !e.target.files?.length) return;
+    await loadSelectedFolder(e.target.files, null, !!els.sourceRecursiveToggle?.checked);
+    els.noticeBox.className = 'notice warn';
+    els.noticeBox.textContent = '已匯入照片。瀏覽器目前只提供讀取權限；匯出時可選擇同一個來源資料夾並授權寫入，或使用 ZIP 備援。';
     refreshSourceHint();
     updateStats();
   });
+
 
   if (els.sourceRecursiveToggle) {
     els.sourceRecursiveToggle.addEventListener('change', () => {
@@ -4581,6 +4623,9 @@
   document.body.addEventListener('dragover', dropGuard, false);
 
   els.pickOutputBtn.addEventListener('click', async () => {
+    if (sourceBusy()) return;
+    state.importing = true;
+    updateStats();
     try {
       const handle = await ensureWritableSourceHandle();
       if (handle) {
@@ -4590,6 +4635,9 @@
     } catch (err) {
       console.error(err);
       setToast('確認來源資料夾權限失敗。', 'info', 1600);
+    } finally {
+      state.importing = false;
+      updateStats();
     }
   });
 
@@ -4606,6 +4654,18 @@
     const progress = ((Number(els.similarity.value) - min) / (max - min)) * 100;
     els.similarity.style.setProperty('--similarity-progress', `${progress}%`);
     document.querySelectorAll('[data-similarity-preset]').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.similarityPreset) === Number(els.similarity.value))));
+    if (state.sourceLoaded) {
+      state.analysisDirty = Number(els.similarity.value) !== state.lastAnalyzedSimilarity;
+      if (state.analysisDirty) {
+        markExportChanged();
+        els.noticeBox.className = 'notice warn';
+        els.noticeBox.textContent = '相似度設定已變更，請重新分析後再匯出；目前顯示的是上次分析結果。';
+      } else {
+        els.noticeBox.className = 'notice';
+        els.noticeBox.textContent = '已恢復上次分析使用的相似度設定，可以覆核並匯出保留照片。';
+      }
+      updateStats();
+    }
   });
   els.quality.addEventListener('input', () => {
     els.qualityValue.textContent = els.quality.value + '%';
@@ -4617,6 +4677,7 @@
     });
   });
   function selectExportPreset(preset) {
+    if (state.exportPreset !== preset) markExportChanged();
     state.exportPreset = preset;
     document.querySelectorAll('[data-export-preset]').forEach(item => {
       item.setAttribute('aria-pressed', String(item.dataset.exportPreset === preset));
@@ -4629,13 +4690,17 @@
     }[preset];
     const hintEl = $('exportPresetHint');
     if (hintEl) hintEl.textContent = hint;
+    updateStats();
   }
 
   document.querySelectorAll('[data-export-preset]').forEach(button => {
     button.addEventListener('click', () => selectExportPreset(button.dataset.exportPreset));
   });
   [els.convertJpg, els.resizeToggle, els.quality].forEach(control => {
-    control?.addEventListener('change', () => selectExportPreset('custom'));
+    control?.addEventListener('change', () => {
+      markExportChanged();
+      selectExportPreset('custom');
+    });
   });
 
   document.addEventListener('click', (event) => {
@@ -4647,11 +4712,14 @@
     if (event.target === els.helpModal || event.target.closest('#helpCloseBtn')) closeHelpDialog();
   });
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Tab' && !els.exportCompleteNotice.hidden) {
+      // 摘要只有一個可操作按鈕；避免 Tab 將焦點帶到瀏覽器工具列。
+      event.preventDefault();
+      els.closeExportComplete.focus();
+    }
     if (event.key === 'Escape' && !els.helpModal.hidden) closeHelpDialog();
     if (event.key === 'Escape' && !els.exportCompleteNotice.hidden) {
-      els.exportCompleteNotice.hidden = true;
-      state.lastFocused?.focus?.();
-      state.lastFocused = null;
+      closeExportComplete();
     }
   });
 
@@ -4662,12 +4730,13 @@
     setToast('正在停止分析…', 'loading', 1600);
   });
   els.exportBtn.addEventListener('click', exportResults);
-  els.closeExportComplete?.addEventListener('click', () => {
-    els.exportCompleteNotice.hidden = true;
-    state.lastFocused?.focus?.();
-    state.lastFocused = null;
+  els.closeExportComplete?.addEventListener('click', closeExportComplete);
+  els.exportCompleteNotice.addEventListener('cancel', event => {
+    event.preventDefault();
+    closeExportComplete();
   });
-  els.exportCompletePath?.addEventListener('click', openExportOutputPath);
+  // 輸出位置為純文字，刻意不綁定 click、檔案選取器或剪貼簿動作。
+
   els.resetBtn.addEventListener('click', () => {
     if (state.images.length && !window.confirm('重新選擇來源會清除目前的分析與覆核結果，確定要繼續嗎？')) return;
     state.images.forEach(img => URL.revokeObjectURL(img.url));
