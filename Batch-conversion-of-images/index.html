@@ -470,7 +470,9 @@
         <div class="settingPanel">
           <h3 class="panelTitle">儲存位置</h3><p class="panelHelp">優先寫入所選資料夾內的 Output；無法寫入時自動下載 ZIP。</p>
           <div class="saveActions"><button class="btn" id="pickOutputBtn" type="button">選擇輸出資料夾</button></div>
-          <p class="controlHelp" style="margin-top:10px">若嵌入頁面阻擋資料夾權限，可使用頁首的「開啟獨立模式」。</p>
+          <p class="controlHelp" id="sourceFolderStatus" style="margin-top:10px;overflow-wrap:anywhere"></p>
+          <p class="controlHelp" id="outputLocationStatus" style="overflow-wrap:anywhere" aria-live="polite"></p>
+          <p class="controlHelp" style="margin-top:10px">直接開啟本 HTML 即可使用。取得資料夾並允許寫入後，開始轉換時會建立 Output；不支援或未允許寫入時改下載 ZIP。</p>
         </div>
       </div>
 
@@ -2069,7 +2071,36 @@ var HeicTo = (() => {
   const IMPORT_CONCURRENCY = 3;
   const SETTINGS_KEY = 'local-image-converter-v5-settings';
   const state = { items:[], outputFormat:'image/jpeg', resizeEnabled:true, resizeMode:'max', ratio:'1:1', customRatioW:1, customRatioH:1, width:1980, height:1980, compressionEnabled:true, quality:70, bgColor:'#ffffff', quickTouched:false, folderWriteEnabled:true, recursiveImport:false, outputHandle:null, importing:false, scanning:false, importProgress:{done:0,total:0,name:''}, processing:false, cancel:false, progress:{done:0,total:0,name:''}, result:null, importBanner:'', importBannerKind:'success' };
-  const outputDirCache = new WeakMap();
+  let outputDirCache = new WeakMap();
+  const sourceRootIds = new WeakMap();
+  let nextSourceRootId = 0;
+  const sourceKey = item => {
+    if (!item.rootHandle) return item.sourceIdentity || 'files';
+    if (!sourceRootIds.has(item.rootHandle)) sourceRootIds.set(item.rootHandle, ++nextSourceRootId);
+    return sourceRootIds.get(item.rootHandle);
+  };
+  async function canonicalSourceRoot(root, pending=[]){
+    for (const known of new Set([...state.items.map(item=>item.rootHandle),...pending].filter(Boolean))){
+      if (known === root) return known;
+      try { if (typeof root.isSameEntry === 'function' && await root.isSameEntry(known)) return known; } catch (_) {}
+    }
+    return root;
+  }
+  function conversionFolderName(){
+    const now=new Date(), pad=n=>String(n).padStart(2,'0');
+    return `Conversion_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}--T${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}-${String(now.getMilliseconds()).padStart(3,'0')}`;
+  }
+  function renderStorageLocation(){
+    const roots=[...new Set(state.items.map(item=>item.rootHandle).filter(Boolean))];
+    const readonlyNames=[...new Set(state.items.filter(item=>!item.rootHandle&&item.rootName).map(item=>item.rootName))];
+    const labels=[...roots.map(root=>root.name),...readonlyNames.map(name=>`${name}（僅讀取）`)];
+    const sourceLabel=labels.length ? labels.join('、') : '未取得來源資料夾（個別檔案匯入無法取得資料夾寫入權限）';
+    $('#sourceFolderStatus').textContent=`來源資料夾：${sourceLabel}`;
+    $('#outputLocationStatus').textContent=state.outputHandle
+      ? `預定輸出：${state.outputHandle.name} / Output / 本次批次資料夾`
+      : roots.length ? `預定輸出：各來源資料夾 / Output / 本次批次資料夾（開始時確認寫入權限）`
+      : '預定輸出：瀏覽器下載 ZIP；也可選擇輸出資料夾';
+  }
   const ORIGIN_HANDLE_ERROR = '目前未取得可寫入的原資料夾 handle。若是以「選擇圖片」匯入，瀏覽器無法自動建立原資料夾內的 Output；請改用「選擇資料夾」或拖曳整個資料夾，並確認原資料夾與 Output 的權限。';
   const ORIGIN_HANDLE_FALLBACK = '已改為壓縮檔作為最後備援。';
   const IS_EMBEDDED = (() => { try { return window.top !== window.self; } catch (_) { return true; } })();
@@ -2093,15 +2124,43 @@ var HeicTo = (() => {
     return msg || '轉換失敗，請稍後再試。';
   };
   const hasNestedPath = rel => String(rel).replace(/\\/g,'/').split('/').filter(Boolean).length > 2;
+  const isFolderInputPathAllowed = rel => !String(rel).replace(/\\/g,'/').split('/').slice(1,-1).some(part=>part.toLowerCase()==='output') && (state.recursiveImport||!hasNestedPath(rel));
   const handleIsDirectoryHandle = handle => !!handle && typeof handle.getDirectoryHandle === 'function';
-  const loadSavedSettings = () => { try{ const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null'); if(!saved||typeof saved!=='object') return; for(const key of ['outputFormat','resizeEnabled','resizeMode','ratio','customRatioW','customRatioH','width','height','compressionEnabled','quality','bgColor','recursiveImport']) if(Object.hasOwn(saved,key)) state[key]=saved[key]; }catch(_){} };
+  const loadSavedSettings = () => {
+    try{
+      const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');
+      if(!saved||typeof saved!=='object') return;
+      if(OUTPUT_FORMATS.some(format=>format.value===saved.outputFormat)) state.outputFormat=saved.outputFormat;
+      if(SIZE_MODES.some(mode=>mode.value===saved.resizeMode)) state.resizeMode=saved.resizeMode;
+      if(saved.ratio==='custom'||Object.hasOwn(QUICK_PRESETS,saved.ratio)) state.ratio=saved.ratio;
+      for(const key of ['resizeEnabled','compressionEnabled','recursiveImport']) if(typeof saved[key]==='boolean') state[key]=saved[key];
+      for(const key of ['width','height']) if(Number.isInteger(saved[key])&&saved[key]>=1&&saved[key]<=MAX_CANVAS_EDGE) state[key]=saved[key];
+      if(state.width*state.height>MAX_CANVAS_PIXELS){state.width=1980;state.height=1980;}
+      for(const key of ['customRatioW','customRatioH']) if(typeof saved[key]==='number'&&Number.isFinite(saved[key])&&saved[key]>=1&&saved[key]<=10000) state[key]=saved[key];
+      if(typeof saved.quality==='number'&&Number.isFinite(saved.quality)&&saved.quality>=1&&saved.quality<=100) state.quality=saved.quality;
+      if(typeof saved.bgColor==='string'&&/^#[0-9a-f]{6}$/i.test(saved.bgColor)) state.bgColor=saved.bgColor;
+    }catch(_){}
+  };
   const scheduleSaveSettings = () => { clearTimeout(settingsSaveTimer); settingsSaveTimer=setTimeout(()=>{ try{ const saved={}; for(const key of ['outputFormat','resizeEnabled','resizeMode','ratio','customRatioW','customRatioH','width','height','compressionEnabled','quality','bgColor','recursiveImport']) saved[key]=state[key]; localStorage.setItem(SETTINGS_KEY,JSON.stringify(saved)); }catch(_){} },150); };
   const finitePositive = value => Number.isFinite(Number(value)) && Number(value) > 0;
   const ratioValues = () => { if (state.ratio === 'custom') return [Number(state.customRatioW), Number(state.customRatioH)]; const [w,h] = String(state.ratio).split(':').map(Number); return [w,h]; };
-  const validateOutputSize = (w,h) => { if (!finitePositive(w) || !finitePositive(h)) throw new Error('寬度與高度必須是大於 0 的數字。'); const width=Math.round(Number(w)), height=Math.round(Number(h)); if (width>MAX_CANVAS_EDGE || height>MAX_CANVAS_EDGE) throw new Error(`單邊尺寸不可超過 ${MAX_CANVAS_EDGE}px。`); if (width*height>MAX_CANVAS_PIXELS) throw new Error(`輸出圖片不可超過 ${Math.round(MAX_CANVAS_PIXELS/1_000_000)} 百萬像素。`); return {width,height}; };
-  const validateConversionSettings = () => { if (!state.resizeEnabled || state.resizeMode==='original') return; validateOutputSize(state.width,state.height); if (state.resizeMode==='ratio'){ const [rw,rh]=ratioValues(); if (!finitePositive(rw)||!finitePositive(rh)) throw new Error('自訂比例的寬與高必須大於 0。'); } };
+  const validateOutputSize = (w,h) => {
+    const width=Number(w),height=Number(h);
+    if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1) throw new Error('寬度與高度必須是至少 1px 的正整數。');
+    if(width>MAX_CANVAS_EDGE||height>MAX_CANVAS_EDGE) throw new Error(`單邊尺寸不可超過 ${MAX_CANVAS_EDGE}px。`);
+    if(width*height>MAX_CANVAS_PIXELS) throw new Error(`輸出圖片不可超過 ${Math.round(MAX_CANVAS_PIXELS/1_000_000)} 百萬像素。`);
+    return {width,height};
+  };
+  const validateConversionSettings = () => {
+    if(!OUTPUT_FORMATS.some(format=>format.value===state.outputFormat)) throw new Error('請重新選擇有效的輸出格式。');
+    if(!SIZE_MODES.some(mode=>mode.value===state.resizeMode)) throw new Error('請重新選擇有效的尺寸模式。');
+    if(state.compressionEnabled&&(!Number.isFinite(state.quality)||state.quality<1||state.quality>100)) throw new Error('品質必須介於 1 到 100。');
+    if(!state.resizeEnabled||state.resizeMode==='original') return;
+    validateOutputSize(state.width,state.resizeMode==='autoWidth'?1:state.height);
+    if(state.resizeMode==='ratio'){const [rw,rh]=ratioValues();if(!finitePositive(rw)||!finitePositive(rh)) throw new Error('自訂比例的寬與高必須大於 0。');}
+  };
   const modeSummary = () => { if (!state.resizeEnabled) return '縮小：關閉'; switch(state.resizeMode){ case 'max': return '尺寸模式：最大寬高'; case 'original': return '尺寸模式：原尺寸輸出'; case 'autoWidth': return `尺寸模式：自動寬高（寬度 ${state.width}px）`; case 'fixed': return `尺寸模式：固定寬高（${state.width}×${state.height}）`; case 'ratio': return `尺寸模式：按比例縮放（${state.ratio==='custom' ? `${state.customRatioW}:${state.customRatioH}` : state.ratio}）`; default: return '尺寸模式：最大寬高'; } };
-  const targetForDims = (srcW, srcH) => { const source=validateOutputSize(srcW,srcH); if (!state.resizeEnabled || state.resizeMode==='original') return { w:source.width, h:source.height, ratioStr:ratioText(source.width,source.height) }; const bounds=validateOutputSize(state.width,state.height); if (state.resizeMode==='max'){ const scale=Math.min(bounds.width/source.width,bounds.height/source.height,1); const w=Math.max(1,Math.round(source.width*scale)), h=Math.max(1,Math.round(source.height*scale)); return {w,h,ratioStr:ratioText(w,h)}; } if (state.resizeMode==='autoWidth'){ const targetW=Math.min(bounds.width,source.width); const targetH=Math.max(1,Math.round(source.height*(targetW/source.width))); validateOutputSize(targetW,targetH); return {w:targetW,h:targetH,ratioStr:ratioText(targetW,targetH)}; } if (state.resizeMode==='fixed') return {w:bounds.width,h:bounds.height,ratioStr:ratioText(bounds.width,bounds.height)}; if (state.resizeMode==='ratio'){ const [rw,rh]=ratioValues(); if (!finitePositive(rw)||!finitePositive(rh)) throw new Error('自訂比例的寬與高必須大於 0。'); const maxW=Math.min(bounds.width,source.width), maxH=Math.min(bounds.height,source.height); const scale=Math.min(maxW/rw,maxH/rh); const w=Math.max(1,Math.round(rw*scale)), h=Math.max(1,Math.round(rh*scale)); validateOutputSize(w,h); return {w,h,ratioStr:ratioText(rw,rh)}; } return {w:source.width,h:source.height,ratioStr:ratioText(source.width,source.height)}; };
+  const targetForDims = (srcW, srcH) => { const source=validateOutputSize(srcW,srcH); if (!state.resizeEnabled || state.resizeMode==='original') return { w:source.width, h:source.height, ratioStr:ratioText(source.width,source.height) }; const bounds=validateOutputSize(state.width,state.resizeMode==='autoWidth'?1:state.height); if (state.resizeMode==='max'){ const scale=Math.min(bounds.width/source.width,bounds.height/source.height,1); const w=Math.max(1,Math.round(source.width*scale)), h=Math.max(1,Math.round(source.height*scale)); return {w,h,ratioStr:ratioText(w,h)}; } if (state.resizeMode==='autoWidth'){ const targetW=Math.min(bounds.width,source.width); const targetH=Math.max(1,Math.round(source.height*(targetW/source.width))); validateOutputSize(targetW,targetH); return {w:targetW,h:targetH,ratioStr:ratioText(targetW,targetH)}; } if (state.resizeMode==='fixed') return {w:bounds.width,h:bounds.height,ratioStr:ratioText(bounds.width,bounds.height)}; if (state.resizeMode==='ratio'){ const [rw,rh]=ratioValues(); if (!finitePositive(rw)||!finitePositive(rh)) throw new Error('自訂比例的寬與高必須大於 0。'); const maxW=Math.min(bounds.width,source.width), maxH=Math.min(bounds.height,source.height); const scale=Math.min(maxW/rw,maxH/rh); const w=Math.max(1,Math.round(rw*scale)), h=Math.max(1,Math.round(rh*scale)); validateOutputSize(w,h); return {w,h,ratioStr:ratioText(w,h)}; } return {w:source.width,h:source.height,ratioStr:ratioText(source.width,source.height)}; };
   async function readHeicDimensions(file){
     // 只讀取主影像的容器屬性；不讀取 mdat，也不解碼縮圖或完整像素。
     // pitm → ipma → ipco/ispe，並套用 irot。參考 libheif 的 box 解析格式。
@@ -2172,7 +2231,7 @@ var HeicTo = (() => {
   }
 
   async function loadImageInfo(file){ if(isHeic(file)) return await readHeicDimensions(file) || {width:null,height:null}; try{ if(typeof createImageBitmap==='function'){ const bmp=await createImageBitmap(file,{imageOrientation:'from-image'}); const info={width:bmp.width,height:bmp.height}; if(bmp.close) bmp.close(); return info; } }catch(_){} const url=URL.createObjectURL(file); try{ const img=await new Promise((resolve,reject)=>{ const el=new Image(); el.onload=()=>resolve(el); el.onerror=()=>reject(new Error('影像讀取失敗')); el.src=url; }); return {width:img.naturalWidth||img.width||null,height:img.naturalHeight||img.height||null}; }catch(_){ return {width:null,height:null}; }finally{ URL.revokeObjectURL(url); } }
-  function refreshTopStats(){ const total=state.items.reduce((n,i)=>n+(i.size||0),0); $('#statCount').textContent=`${state.items.length} 個檔案`; $('#statSize').textContent=humanFileSize(total); $('#statSetting').textContent=modeSummary(); $('#tagCount').textContent=`數量：${state.items.length}`; $('#tagSize').textContent=`總容量：${humanFileSize(total)}`; $('#tagOutput').textContent='輸出：原資料夾內 Output 優先'; }
+  function refreshTopStats(){ const total=state.items.reduce((n,i)=>n+(i.size||0),0); $('#statCount').textContent=`${state.items.length} 個檔案`; $('#statSize').textContent=humanFileSize(total); $('#statSetting').textContent=modeSummary(); $('#tagCount').textContent=`數量：${state.items.length}`; $('#tagSize').textContent=`總容量：${humanFileSize(total)}`; $('#tagOutput').textContent=state.outputHandle?`輸出：${state.outputHandle.name} / Output`:'輸出：來源資料夾內 Output 優先'; }
   function renderBanner(){ const box=$('#importBanner'); if (!box) return; if (!state.importBanner){ box.classList.add('hidden'); box.innerHTML=''; box.removeAttribute('role'); return; } const isError=state.importBannerKind==='error'; box.className=`noticeBar ${isError?'err':''}`; box.setAttribute('role',isError?'alert':'status'); box.innerHTML='<div style="display:flex;align-items:center;gap:12px;min-width:0"><div class="bannerIcon" aria-hidden="true"></div><div style="min-width:0"><div class="big" style="white-space:pre-line"></div><div style="font-size:12px;margin-top:4px;opacity:.92">檔案與權限狀態已更新。</div></div></div><div class="miniGrid" style="min-width:min(100%,320px)"><div class="miniStat"><div class="k">目前檔案</div><div class="v bannerCount"></div></div><div class="miniStat"><div class="k">輸出策略</div><div class="v bannerStrategy"></div></div></div>'; $('.bannerIcon',box).textContent=isError?'!':'✓'; $('.big',box).textContent=state.importBanner; $('.bannerCount',box).textContent=`${state.items.length} 個`; $('.bannerStrategy',box).textContent=state.folderWriteEnabled?'資料夾寫入優先':'壓縮檔'; }
   function setBanner(text, kind='success', visible=true){ state.importBanner = visible ? text : ''; state.importBannerKind = kind; renderBanner(); }
   function renderFormatChoices(){ const box=$('#formatChoices'); box.innerHTML=''; OUTPUT_FORMATS.forEach(opt=>{ const active=state.outputFormat===opt.value; const btn=document.createElement('button'); btn.type='button'; btn.className=`choice ${active ? 'active' : ''}`; btn.setAttribute('aria-pressed',String(active)); btn.innerHTML=`<div class="a"><span>${opt.label}</span>${active?'✓':''}</div><div class="b">${opt.desc}</div>`; btn.onclick=()=>{ state.outputFormat=opt.value; renderAll(); }; box.appendChild(btn); }); $('#bgRow')?.classList.toggle('hidden', state.outputFormat!=='image/jpeg'); }
@@ -2182,8 +2241,8 @@ var HeicTo = (() => {
   function renderQualityChips(){ const box=$('#qualityChips'); box.innerHTML=''; QUICK_BANDS.forEach(q=>{ const active=state.quality===q; const btn=document.createElement('button'); btn.type='button'; btn.className=`chip ${active ? 'active' : ''}`; btn.textContent=`${q}%`; btn.disabled=!state.compressionEnabled; btn.setAttribute('aria-pressed',String(active)); btn.onclick=()=>{ state.quality=q; renderAll(); }; box.appendChild(btn); }); }
   function renderFiles(){ const box=$('#fileList'); if (!state.items.length){ box.innerHTML=`<div class="helpCard" style="grid-column:1/-1"><div style="font-weight:900;color:#fff">尚未加入圖片</div><div class="muted" style="margin-top:4px;font-size:13px;line-height:1.7">拖曳圖片或資料夾到上方，或使用選擇按鈕。</div></div>`; return; } box.innerHTML=''; state.items.forEach(item=>{ const row=document.createElement('div'); row.className='file'; row.innerHTML=`<div class="icon" aria-hidden="true"></div><div class="main"><div class="name"></div><div class="meta"><span class="pill" style="padding:5px 9px"></span><span class="pill" style="padding:5px 9px"></span></div><div class="path"></div></div><button type="button" class="iconBtn">✕</button>`; $('.icon',row).textContent=(item.ext||'IMG').slice(0,5).toUpperCase(); $('.name',row).textContent=item.name; $$('.pill',row)[0].textContent=`.${item.ext}`; $$('.pill',row)[1].textContent=humanFileSize(item.size); $('.path',row).textContent=item.displayPath || item.relativePath || item.name; const removeBtn=$('button',row); removeBtn.title=`移除 ${item.name}`; removeBtn.setAttribute('aria-label',`移除 ${item.name}`); removeBtn.onclick=()=>{ state.items = state.items.filter(x=>x.id!==item.id); dropSuccessFixed = false; setDropStatus('', ''); setBanner(state.items.length ? `已加入 ${state.items.length} 個檔案，隨時可開始轉換。` : '', 'success', !!state.items.length); renderAll(); }; box.appendChild(row); }); }
   function renderEstimateBox(){ const box=$('#estimateBox'); if(!box) return; const readyItems=state.items.filter(i=>Number.isFinite(i.width)&&Number.isFinite(i.height)&&i.width>0&&i.height>0); if(!state.items.length){ box.innerHTML='<div class="estimateCard"><div class="estimateTitle">尚未加入圖片</div><div class="estimateMeta">加入圖片後，這裡會顯示預估輸出結果。</div></div>'; return; } if(!readyItems.length){ box.innerHTML='<div class="estimateCard"><div class="estimateTitle">尚無法預估尺寸</div><div class="estimateMeta">HEIC／TIFF 等格式會在開始轉換時使用內建解碼器讀取；若檔案損毀，結果區會列出原因。</div></div>'; return; } try{ validateConversionSettings(); const groups=new Map(); for(const item of readyItems){ const key=`${item.width}x${item.height}`; if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(item); } const entries=[...groups.entries()].slice(0,10); box.innerHTML=entries.map(([key,list],idx)=>{ const item=list[0],target=targetForDims(item.width,item.height); return `<div class="estimateCard"><div class="estimateHead"><div><div class="estimateTitle">尺寸${idx+1} — ${list.length} 張圖片</div><div class="estimateMeta">原始尺寸：${item.width}×${item.height}px</div></div><div class="tag">預估比例 ${target.ratioStr}</div></div><div class="estimateGrid"><div class="estimateItem"><div class="k">預估輸出圖片的比例</div><div class="v">${target.ratioStr}</div></div><div class="estimateItem"><div class="k">預估輸出圖片的寬度（px）</div><div class="v">${target.w}px</div></div><div class="estimateItem"><div class="k">預估輸出圖片的高度（px）</div><div class="v">${target.h}px</div></div></div></div>`; }).join(''); if(groups.size>10) box.insertAdjacentHTML('beforeend','<div class="estimateCard"><div class="estimateTitle">其餘尺寸已省略</div><div class="estimateMeta">目前只顯示前 10 組不同尺寸，避免畫面過長。</div></div>'); }catch(err){ box.innerHTML='<div class="estimateCard"><div class="estimateTitle">設定需要修正</div><div class="estimateMeta estimateError"></div></div>'; $('.estimateError',box).textContent=prettyError(err); } }
-  function renderResult(){ const box=$('#resultBox'); if(!state.result){ box.className='result hidden'; box.innerHTML=''; box.removeAttribute('role'); return; } const r=state.result,hasIssues=r.failed||r.canceled||r.warnings?.length; box.className=`result ${hasIssues?'warn':''}`; box.setAttribute('role',hasIssues?'alert':'status'); const delta=r.beforeBytes>0?Math.round(((r.afterBytes/r.beforeBytes)-1)*1000)/10:0; const sizeLabel=delta<=0?`節省 ${Math.abs(delta)}%`:`增加 ${delta}%`; const title=r.canceled?'轉換已取消':r.failed?'轉換部分完成':'轉換完成'; box.innerHTML=`<div style="display:flex;align-items:center;gap:10px;font-weight:900"><span class="resultMark" aria-hidden="true">${hasIssues?'!':'✓'}</span><span>${title}</span></div><div class="resultGrid"><div class="resultBox"><div class="k">成功</div><div class="v">${r.succeeded} 張</div></div><div class="resultBox"><div class="k">失敗</div><div class="v">${r.failed} 張</div></div><div class="resultBox"><div class="k">未處理</div><div class="v">${r.skipped||0} 張</div></div><div class="resultBox"><div class="k">輸出位置</div><div class="v">${r.outputSummary||'無'}</div></div><div class="resultBox"><div class="k">已處理原始容量</div><div class="v">${humanFileSize(r.beforeBytes)}</div></div><div class="resultBox"><div class="k">成功輸出容量</div><div class="v">${humanFileSize(r.afterBytes)}</div></div></div><div class="resultBox" style="margin-top:12px"><div class="k">容量變化</div><div class="v">${sizeLabel}</div></div>`; const messages=[...(r.warnings||[]),...(r.errors||[])]; if(messages.length){ const list=document.createElement('div'); list.className='errorList'; messages.slice(0,20).forEach(message=>{ const item=document.createElement('div'); item.className='errorItem'; item.textContent=message; list.appendChild(item); }); if(messages.length>20){ const item=document.createElement('div'); item.className='errorItem'; item.textContent=`另有 ${messages.length-20} 筆訊息未顯示。`; list.appendChild(item); } box.appendChild(list); } }
-  function renderProgress(){ const pct=state.progress.total?Math.round((state.progress.done/state.progress.total)*100):0,name=state.progress.name||'尚未開始'; $('#progressFill').style.width=`${pct}%`; $('#progressCount').textContent=`${state.progress.done} / ${state.progress.total}`; $('#progressName').textContent=name; const progressBar=$('#progressFill')?.parentElement; if(progressBar){ progressBar.setAttribute('aria-valuenow',String(pct)); progressBar.setAttribute('aria-valuetext',`${state.progress.done} / ${state.progress.total}，${name}`); } const topFill=$('#progressFillTop'),topCount=$('#progressCountTop'),topName=$('#progressNameTop'); if(topFill) topFill.style.width=`${pct}%`; if(topCount) topCount.textContent=`${state.progress.done} / ${state.progress.total}`; if(topName) topName.textContent=name; $('#stateText').textContent=state.processing?(state.cancel?'正在完成目前檔案後取消':'轉換中'):state.result?(state.result.canceled?'已取消':state.result.failed?'部分完成':'已完成'):'等待開始'; $('#startBtn').disabled=state.processing||state.importing||state.scanning||!state.items.length; $('#startBtnTop').disabled=state.processing||state.importing||state.scanning||!state.items.length; $('#cancelBtn').disabled=!state.processing||state.cancel;
+  function renderResult(){ const box=$('#resultBox'); if(!state.result){ box.className='result hidden'; box.innerHTML=''; box.removeAttribute('role'); return; } const r=state.result,hasIssues=r.failed||r.canceled||r.warnings?.length; box.className=`result ${hasIssues?'warn':''}`; box.setAttribute('role',hasIssues?'alert':'status'); const comparisonBytes=r.successfulBeforeBytes??r.beforeBytes; const delta=comparisonBytes>0?Math.round(((r.afterBytes/comparisonBytes)-1)*1000)/10:0; const sizeLabel=!r.succeeded?'無成功輸出，無法比較':delta<=0?`節省 ${Math.abs(delta)}%`:`增加 ${delta}%`; const title=r.canceled?'轉換已取消':!r.succeeded?'轉換失敗':r.failed?'轉換部分完成':'轉換完成'; box.innerHTML=`<div style="display:flex;align-items:center;gap:10px;font-weight:900"><span class="resultMark" aria-hidden="true">${hasIssues?'!':'✓'}</span><span>${title}</span></div><div class="resultGrid"><div class="resultBox"><div class="k">成功</div><div class="v">${r.succeeded} 張</div></div><div class="resultBox"><div class="k">失敗</div><div class="v">${r.failed} 張</div></div><div class="resultBox"><div class="k">未處理</div><div class="v">${r.skipped||0} 張</div></div><div class="resultBox"><div class="k">輸出位置</div><div class="v"><span class="resultOutputLocation" style="white-space:pre-line;overflow-wrap:anywhere"></span></div></div><div class="resultBox"><div class="k">已處理原始容量</div><div class="v">${humanFileSize(r.beforeBytes)}</div></div><div class="resultBox"><div class="k">成功輸出容量</div><div class="v">${humanFileSize(r.afterBytes)}</div></div></div><div class="resultBox" style="margin-top:12px"><div class="k">容量變化（成功項目）</div><div class="v">${sizeLabel}</div></div>`; $('.resultOutputLocation',box).textContent=r.outputSummary||'無'; const messages=[...(r.warnings||[]),...(r.errors||[])]; if(messages.length){ const list=document.createElement('div'); list.className='errorList'; messages.slice(0,20).forEach(message=>{ const item=document.createElement('div'); item.className='errorItem'; item.textContent=message; list.appendChild(item); }); if(messages.length>20){ const item=document.createElement('div'); item.className='errorItem'; item.textContent=`另有 ${messages.length-20} 筆訊息未顯示。`; list.appendChild(item); } box.appendChild(list); } }
+  function renderProgress(){ const pct=state.progress.total?Math.round((state.progress.done/state.progress.total)*100):0,name=state.progress.name||'尚未開始'; $('#progressFill').style.width=`${pct}%`; $('#progressCount').textContent=`${state.progress.done} / ${state.progress.total}`; $('#progressName').textContent=name; const progressBar=$('#progressFill')?.parentElement; if(progressBar){ progressBar.setAttribute('aria-valuenow',String(pct)); progressBar.setAttribute('aria-valuetext',`${state.progress.done} / ${state.progress.total}，${name}`); } const topFill=$('#progressFillTop'),topCount=$('#progressCountTop'),topName=$('#progressNameTop'); if(topFill) topFill.style.width=`${pct}%`; if(topCount) topCount.textContent=`${state.progress.done} / ${state.progress.total}`; if(topName) topName.textContent=name; $('#stateText').textContent=state.processing?(state.cancel?'正在完成目前檔案後取消':'轉換中'):state.result?(state.result.canceled?'已取消':!state.result.succeeded?'失敗':state.result.failed?'部分完成':'已完成'):'等待開始'; $('#startBtn').disabled=state.processing||state.importing||state.scanning||!state.items.length; $('#startBtnTop').disabled=state.processing||state.importing||state.scanning||!state.items.length; $('#cancelBtn').disabled=!state.processing||state.cancel;
     const busy=state.processing||state.importing||state.scanning;
     for(const el of document.querySelectorAll('button,input,select')){
       if(['startBtn','startBtnTop','cancelBtn'].includes(el.id))continue;
@@ -2193,10 +2252,24 @@ var HeicTo = (() => {
   }
   function renderSwitches(){ $('#folderSwitch')?.classList.toggle('on',state.folderWriteEnabled); $('#folderSwitch')?.setAttribute('aria-checked',String(!!state.folderWriteEnabled)); $('#resizeSwitch')?.classList.toggle('on',state.resizeEnabled); $('#resizeSwitch')?.setAttribute('aria-checked',String(!!state.resizeEnabled)); $('#qualitySwitch')?.classList.toggle('on',state.compressionEnabled); $('#qualitySwitch')?.setAttribute('aria-checked',String(!!state.compressionEnabled)); $('#recursiveSwitch')?.classList.toggle('on',state.recursiveImport); $('#recursiveSwitch')?.setAttribute('aria-checked',String(!!state.recursiveImport)); $('#standaloneSwitch')?.classList.toggle('on',!IS_EMBEDDED); $('#standaloneSwitch')?.setAttribute('aria-checked',String(!IS_EMBEDDED)); $('#qualityText').textContent=`${state.compressionEnabled?state.quality:100}%`; $('#qualityInput').disabled=!state.compressionEnabled; }
   function renderInputs(){ $('#widthInput').value = state.width; $('#heightInput').value = state.height; $('#ratioSelect').value = state.ratio === 'custom' ? 'custom' : state.ratio; $('#ratioWInput').value = state.customRatioW; $('#ratioHInput').value = state.customRatioH; $('#bgColor').value = state.bgColor; $('#customRatioWrap').style.display = state.ratio === 'custom' ? 'grid' : 'none'; const original=!state.resizeEnabled||state.resizeMode==='original'; $('#widthInput').disabled=original||state.resizeMode==='autoHeight'; $('#heightInput').disabled=original||state.resizeMode==='autoWidth'; $('#ratioSelect').disabled=!state.resizeEnabled; $('#ratioWInput').disabled=!state.resizeEnabled||state.ratio!=='custom'; $('#ratioHInput').disabled=!state.resizeEnabled||state.ratio!=='custom'; }
-  function renderAll(){ refreshTopStats(); renderFormatChoices(); renderSizeModes(); renderRatioSelect(); renderQuickPresets(); renderQualityChips(); renderFiles(); renderEstimateBox(); renderResult(); renderSwitches(); renderInputs(); renderProgress(); renderBanner(); renderImportProgress(); scheduleSaveSettings(); }
+  function renderAll(){ renderStorageLocation(); refreshTopStats(); renderFormatChoices(); renderSizeModes(); renderRatioSelect(); renderQuickPresets(); renderQualityChips(); renderFiles(); renderEstimateBox(); renderResult(); renderSwitches(); renderInputs(); renderProgress(); renderBanner(); renderImportProgress(); scheduleSaveSettings(); }
   function setDropStatus(mode='', text=''){ const el=$('#dropStatus'); const drop=$('#dropZone'); if (!el || !drop) return; drop.classList.remove('drag','success'); el.classList.remove('drag','success'); if (!mode || !text){ el.textContent=text || '尚未加入圖片'; return; } if (mode==='drag'){ drop.classList.add('drag'); el.classList.add('drag'); } else if (mode==='success'){ drop.classList.add('success'); el.classList.add('success'); } el.textContent=text; }
   function flashDropSuccess(message){ dropSuccessFixed = true; setDropStatus('success', message || '已成功拖曳並加入檔案，現在可以直接開始轉換。'); }
-  async function nativeCanvasFromFile(file){ if(typeof createImageBitmap==='function'){ try{ const bitmap=await createImageBitmap(file,{imageOrientation:'from-image'}); const size=validateOutputSize(bitmap.width,bitmap.height); const canvas=document.createElement('canvas'); canvas.width=size.width; canvas.height=size.height; const ctx=canvas.getContext('2d'); if(!ctx){ if(bitmap.close) bitmap.close(); throw new Error('無法建立 Canvas 繪圖環境。'); } ctx.drawImage(bitmap,0,0); if(bitmap.close) bitmap.close(); return {canvas,width:canvas.width,height:canvas.height}; }catch(_){} } return loadBlobToCanvas(file); }
+  async function nativeCanvasFromFile(file){
+    let bitmap;
+    if(typeof createImageBitmap==='function'){
+      try{bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});}catch(_){}
+    }
+    if(!bitmap) return loadBlobToCanvas(file);
+    try{
+      const size=validateOutputSize(bitmap.width,bitmap.height),canvas=document.createElement('canvas');
+      canvas.width=size.width;canvas.height=size.height;
+      const ctx=canvas.getContext('2d');
+      if(!ctx) throw new Error('無法建立 Canvas 繪圖環境。');
+      ctx.drawImage(bitmap,0,0);
+      return {canvas,width:canvas.width,height:canvas.height};
+    }finally{bitmap.close?.();}
+  }
   async function readTiffToCanvas(file){ try{ if(!self.UTIF) return await nativeCanvasFromFile(file); const ab=await file.arrayBuffer(); const ifds=UTIF.decode(ab); if(!ifds?.length) throw new Error('TIFF 不含可讀取的影像頁面。'); UTIF.decodeImage(ab,ifds[0]); const rgba=UTIF.toRGBA8(ifds[0]); const size=validateOutputSize(ifds[0].width,ifds[0].height); const canvas=document.createElement('canvas'); canvas.width=size.width; canvas.height=size.height; const ctx=canvas.getContext('2d'); if(!ctx) throw new Error('無法建立 Canvas 繪圖環境。'); const imgData=ctx.createImageData(size.width,size.height); imgData.data.set(rgba); ctx.putImageData(imgData,0,0); return {canvas,width:size.width,height:size.height}; }catch(err){ throw new Error(`TIFF 解碼失敗：${String(err?.message||err)}`); } }
   async function readHeicToCanvas(file){
     // 原生支援時優先使用；其他瀏覽器使用內建解碼器，不依賴 CDN。
@@ -2220,15 +2293,26 @@ var HeicTo = (() => {
   async function canvasFromFile(file){ if(isTiff(file)) return readTiffToCanvas(file); if(isHeic(file)) return readHeicToCanvas(file); return nativeCanvasFromFile(file); }
   function drawContain(sourceCanvas,targetW,targetH,fill=null){ const size=validateOutputSize(targetW,targetH); const out=document.createElement('canvas'); out.width=size.width; out.height=size.height; const ctx=out.getContext('2d'); if(!ctx) throw new Error('無法建立 Canvas 繪圖環境。'); if(fill){ ctx.fillStyle=fill; ctx.fillRect(0,0,out.width,out.height); }else{ ctx.clearRect(0,0,out.width,out.height); } const scale=Math.min(out.width/sourceCanvas.width,out.height/sourceCanvas.height,1); const w=Math.max(1,Math.round(sourceCanvas.width*scale)),h=Math.max(1,Math.round(sourceCanvas.height*scale)); const x=Math.round((out.width-w)/2),y=Math.round((out.height-h)/2); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; ctx.drawImage(sourceCanvas,x,y,w,h); return out; }
   function canvasToBlob(canvas,type='image/jpeg',quality=.7){ return new Promise((resolve,reject)=>canvas.toBlob(blob=>{ if(!blob) return reject(new Error('瀏覽器無法建立輸出圖片。')); if(blob.type&&blob.type!==type) return reject(new Error(`目前瀏覽器不支援輸出 ${type==='image/webp'?'WebP':'JPG'}。`)); resolve(blob); },type,quality)); }
-  async function collectSourceRoots(){ const roots=[],seen=new Set(); for(const item of state.items){ if(item.rootHandle&&handleIsDirectoryHandle(item.rootHandle)&&!seen.has(item.rootHandle)){ seen.add(item.rootHandle); roots.push(item.rootHandle); } } if(state.outputHandle&&handleIsDirectoryHandle(state.outputHandle)&&!seen.has(state.outputHandle)) roots.push(state.outputHandle); return roots; }
+  async function collectSourceRoots(){
+    if(state.outputHandle && handleIsDirectoryHandle(state.outputHandle)) return [state.outputHandle];
+    return [...new Set(state.items.map(item=>item.rootHandle).filter(handleIsDirectoryHandle))];
+  }
   function uniqueArchivePath(path,used){ if(!used.has(path)){ used.add(path); return path; } const slash=path.lastIndexOf('/'),dir=slash>=0?path.slice(0,slash+1):'',name=slash>=0?path.slice(slash+1):path,dot=name.lastIndexOf('.'),base=dot>0?name.slice(0,dot):name,ext=dot>0?name.slice(dot):''; for(let n=2;n<=9999;n++){ const candidate=`${dir}${base} (${n})${ext}`; if(!used.has(candidate)){ used.add(candidate); return candidate; } } throw new Error('ZIP 內同名檔案過多。'); }
-  function preferredWritableRootForItem(item){ if (item?.rootHandle && handleIsDirectoryHandle(item.rootHandle)) return item.rootHandle; if (state.outputHandle && handleIsDirectoryHandle(state.outputHandle)) return state.outputHandle; return selectedSourceWritableRoot(); }
+  function preferredWritableRootForItem(item){
+    return state.outputHandle || (handleIsDirectoryHandle(item?.rootHandle) ? item.rootHandle : null);
+  }
   async function ensureWritableHandle(handle){ if (!handle) return null; try{ if (typeof handle.queryPermission==='function'){ const queried=await handle.queryPermission({ mode:'readwrite' }); if (queried==='granted') return handle; } if (typeof handle.requestPermission==='function'){ const granted=await handle.requestPermission({ mode:'readwrite' }); if (granted==='granted') return handle; } }catch(_){} return null; }
   async function getWritableRootForItem(item){ const root=preferredWritableRootForItem(item); if (!root) return null; return await ensureWritableHandle(root); }
-  async function getRootOutputDir(root){ const outputRoot=await root.getDirectoryHandle('Output',{create:true}),folderName=window.__activeConversionFolder||'Conversion_未命名',conversionDir=await outputRoot.getDirectoryHandle(folderName,{create:true}); window.__activeConversionDirectoryHandle=conversionDir; return conversionDir; }
+  async function getRootOutputDir(root){
+    if(outputDirCache.has(root)) return outputDirCache.get(root);
+    const output=await root.getDirectoryHandle('Output',{create:true});
+    const directory=await output.getDirectoryHandle(window.__activeConversionFolder,{create:true});
+    outputDirCache.set(root,directory);
+    return directory;
+  }
   async function availableFileHandle(dir,fileName){ const dot=fileName.lastIndexOf('.'),base=dot>0?fileName.slice(0,dot):fileName,ext=dot>0?fileName.slice(dot):''; for(let n=1;n<=9999;n++){ const candidate=n===1?fileName:`${base} (${n})${ext}`; try{ await dir.getFileHandle(candidate); }catch(err){ if(err?.name==='NotFoundError') return {handle:await dir.getFileHandle(candidate,{create:true}),name:candidate}; throw err; } } throw new Error('同名輸出檔案過多，請清理 Output 資料夾後再試。'); }
-  async function writeBlobToRoot(rootHandle,relPath,fileName,blob){ if(!rootHandle) throw new Error('缺少可寫入的資料夾權限。'); const outRoot=await getRootOutputDir(rootHandle); let dir=outRoot; const safeParts=String(relPath||'').replace(/\\/g,'/').split('/').map(part=>part.trim()).filter(Boolean).filter(part=>part.toLowerCase()!=='output'); for(const part of safeParts) dir=await dir.getDirectoryHandle(part,{create:true}); const target=await availableFileHandle(dir,fileName),writable=await target.handle.createWritable(); try{ await writable.write(blob); await writable.close(); }catch(err){ try{ if(typeof writable.abort==='function') await writable.abort(); }catch(_){} throw err; } return {fileName:target.name,path:safeParts.length?`${safeParts.join('/')}/${target.name}`:target.name}; }
-  async function preflightOriginalFolders(showPrompt=false){ const roots=await collectSourceRoots(); if(!roots.length){ if(showPrompt) setBanner(`${ORIGIN_HANDLE_ERROR}\n${ORIGIN_HANDLE_FALLBACK}`,'error',true); return []; } const readyRoots=[]; for(const root of roots){ const writable=await ensureWritableHandle(root); if(writable) readyRoots.push(writable); } if(!readyRoots.length){ if(showPrompt) setBanner(`${ORIGIN_HANDLE_ERROR}\n${ORIGIN_HANDLE_FALLBACK}\n已找到資料夾，但瀏覽器尚未授予寫入權限。`,'error',true); return []; } if(!state.outputHandle) state.outputHandle=readyRoots[0]; return readyRoots; }
+  async function writeBlobToRoot(rootHandle,relPath,fileName,blob){ if(!rootHandle) throw new Error('缺少可寫入的資料夾權限。'); const outRoot=await getRootOutputDir(rootHandle); let dir=outRoot; const safeParts=String(relPath||'').replace(/\\/g,'/').split('/').filter(Boolean); if(safeParts.some(part=>part==='.'||part==='..')) throw new Error('來源子路徑不可包含 . 或 ..。'); for(const part of safeParts) dir=await dir.getDirectoryHandle(part,{create:true}); const target=await availableFileHandle(dir,fileName),writable=await target.handle.createWritable(); try{ await writable.write(blob); await writable.close(); }catch(err){ try{ if(typeof writable.abort==='function') await writable.abort(); }catch(_){} throw err; } return {fileName:target.name,path:safeParts.length?`${safeParts.join('/')}/${target.name}`:target.name}; }
+  async function preflightOriginalFolders(showPrompt=false){ const roots=await collectSourceRoots(); if(!roots.length){ if(showPrompt) setBanner(`${ORIGIN_HANDLE_ERROR}\n${ORIGIN_HANDLE_FALLBACK}`,'error',true); return []; } const readyRoots=[]; for(const root of roots){ const writable=await ensureWritableHandle(root); if(writable) readyRoots.push(writable); } if(!readyRoots.length){ if(showPrompt) setBanner(`${ORIGIN_HANDLE_ERROR}\n${ORIGIN_HANDLE_FALLBACK}\n已找到資料夾，但瀏覽器尚未授予寫入權限。`,'error',true); return []; } return readyRoots; }
   async function mapWithConcurrency(items,limit,mapper){ const results=new Array(items.length); let next=0; const workers=Array.from({length:Math.min(limit,items.length)},async()=>{ while(true){ const index=next++; if(index>=items.length) return; results[index]=await mapper(items[index],index); } }); await Promise.all(workers); return results; }
   async function addEntries(entries){
     if(state.processing || state.importing || state.scanning) return 0;
@@ -2236,12 +2320,12 @@ var HeicTo = (() => {
     for(const entry of entries){
       const file=entry.file||entry;
       if(!file||!isSupportedFile(file)){unsupported++;continue;}
-      valid.push({id:crypto.randomUUID(),file,name:file.name,ext:extOf(file.name),size:file.size,lastModified:file.lastModified||0,relativePath:entry.relativePath||file.webkitRelativePath||file.name,displayPath:entry.displayPath||entry.relativePath||file.webkitRelativePath||file.name,rootHandle:entry.rootHandle||null,rootName:entry.rootName||entry.rootHandle?.name||'',width:null,height:null});
+      valid.push({id:crypto.randomUUID(),file,name:file.name,ext:extOf(file.name),size:file.size,lastModified:file.lastModified||0,relativePath:entry.relativePath||file.webkitRelativePath||file.name,displayPath:entry.displayPath||entry.relativePath||file.webkitRelativePath||file.name,rootHandle:entry.rootHandle||null,sourceIdentity:entry.sourceIdentity||'',rootName:entry.rootName||entry.rootHandle?.name||((file.webkitRelativePath||'').split('/').length>1?file.webkitRelativePath.split('/')[0]:''),width:null,height:null});
     }
     if(!valid.length){state.importProgress={done:0,total:0,name:''};setDropStatus('','沒有找到支援的圖片，請重新選取或拖入。');setBanner('沒有找到可轉換的圖片檔案。','error',true);renderImportProgress();return 0;}
-    const seen=new Set(state.items.map(i=>i.displayPath+'|'+i.size+'|'+(i.lastModified||0))),itemsToAdd=[];
+    const seen=new Set(state.items.map(i=>sourceKey(i)+'|'+i.displayPath+'|'+i.size+'|'+(i.lastModified||0))),itemsToAdd=[];
     let duplicates=0;
-    for(const item of valid){const key=item.displayPath+'|'+item.size+'|'+item.lastModified;if(seen.has(key)){duplicates++;continue;}seen.add(key);itemsToAdd.push(item);}
+    for(const item of valid){const key=sourceKey(item)+'|'+item.displayPath+'|'+item.size+'|'+item.lastModified;if(seen.has(key)){duplicates++;continue;}seen.add(key);itemsToAdd.push(item);}
     if(!itemsToAdd.length){flashDropSuccess('清單已有 '+state.items.length+' 張圖片，重複項目已略過。');setBanner('已略過 '+duplicates+' 個重複項目。','success',true);return 0;}
     state.importing=true;state.result=null;state.progress={done:0,total:0,name:''};
     state.importProgress={done:0,total:itemsToAdd.length,name:'準備讀取圖片資訊'};
@@ -2264,12 +2348,130 @@ var HeicTo = (() => {
   function selectedSourceWritableRoot(){ return state.outputHandle || null; }
   async function makeZip(files){ const encoder=new TextEncoder(); const toBytes=s=>encoder.encode(s); const u16=n=>new Uint8Array([n & 255, n>>8 & 255]); const u32=n=>new Uint8Array([n & 255, n>>8 & 255, n>>16 & 255, n>>24 & 255]); const concat=(...parts)=>{ const len=parts.reduce((n,p)=>n+p.length,0); const out=new Uint8Array(len); let off=0; for (const p of parts){ out.set(p, off); off += p.length; } return out; }; const crc32=(data)=>{ let c=~0; for (const b of data){ c ^= b; for (let k=0;k<8;k++) c=(c>>>1) ^ (0xEDB88320 & -(c&1)); } return (~c) >>> 0; }; const dosDateTime=(d)=>{ const year=d.getFullYear(); const date=((year-1980)<<9) | ((d.getMonth()+1)<<5) | d.getDate(); const time=(d.getHours()<<11) | (d.getMinutes()<<5) | Math.floor(d.getSeconds()/2); return {date,time}; }; const localParts=[], centralParts=[]; let offset=0; const now=dosDateTime(new Date()); for (const f of files){ const nameBytes=toBytes(f.path); const data=new Uint8Array(await f.blob.arrayBuffer()); const crc=crc32(data); const localHeader = concat(u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(now.time),u16(now.date),u32(crc),u32(data.length),u32(data.length),u16(nameBytes.length),u16(0),nameBytes); localParts.push(localHeader,data); const centralHeader = concat(u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(now.time),u16(now.date),u32(crc),u32(data.length),u32(data.length),u16(nameBytes.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),nameBytes); centralParts.push(centralHeader); offset += localHeader.length + data.length; } const centralSize=centralParts.reduce((n,p)=>n+p.length,0); const centralOffset=localParts.reduce((n,p)=>n+p.length,0); const endRecord=concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(centralSize),u32(centralOffset),u16(0)); return new Blob([...localParts, ...centralParts, endRecord], { type:'application/zip' }); }
   function downloadBlob(blob, filename){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1500); }
-  async function downloadZipBatches(files){ const maxBytes=250*1024*1024,maxFiles=5000,batches=[]; let current=[],bytes=0; for(const file of files){ if(current.length&&(current.length>=maxFiles||bytes+file.blob.size>maxBytes)){ batches.push(current); current=[]; bytes=0; } current.push(file); bytes+=file.blob.size; } if(current.length) batches.push(current); for(let i=0;i<batches.length;i++){ const zip=await makeZip(batches[i]); downloadBlob(zip,batches.length===1?'輸出壓縮檔.zip':`輸出壓縮檔-${i+1}.zip`); await new Promise(resolve=>setTimeout(resolve,120)); } return batches.length; }
-  function openStandaloneMode(){ let url=''; try{ const win=window.open('about:blank','_blank'); if(!win){ setBanner('瀏覽器阻擋了新視窗。請先允許彈出視窗，再按一次「開啟獨立模式」。','error',true); return false; } const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML,blob=new Blob([html],{type:'text/html;charset=utf-8'}); url=URL.createObjectURL(blob); try{ win.opener=null; }catch(_){} win.location.replace(url); setBanner('已開啟獨立模式，請在新視窗中重新選擇資料夾並授權。','success',true); setTimeout(()=>URL.revokeObjectURL(url),60000); return true; }catch(err){ if(url) URL.revokeObjectURL(url); setBanner(prettyError(err),'error',true); return false; } }
-  async function requestWritableFolder(message='請選擇資料夾'){ if(!('showDirectoryPicker' in window)){ setBanner('目前瀏覽器不支援直接寫入資料夾；轉換完成後會自動下載 ZIP。','error',true); return null; } try{ const handle=await window.showDirectoryPicker({mode:'readwrite'}),writable=await ensureWritableHandle(handle); if(!writable){ setBanner(`已選取資料夾，但尚未成功開啟寫入權限。${IS_EMBEDDED?'請改按「開啟獨立模式」後再重新授權。':'請在權限視窗選擇允許。'}`,'error',true); return null; } state.outputHandle=writable; setBanner(`${message}已完成權限確認。轉換時會優先輸出到該資料夾內的 Output。`,'success',true); return writable; }catch(err){ if(err?.name==='AbortError') return null; if(err?.name==='SecurityError'||err?.name==='NotAllowedError'||/permission|權限/i.test(String(err?.message||err))){ setBanner(`${IS_EMBEDDED?'嵌入環境可能阻擋權限視窗。':'資料夾權限未成功開啟。'}未能寫入時會自動改為 ZIP。`,'error',true); return null; } setBanner(prettyError(err),'error',true); return null; } }
-  async function processAll(){ if(state.processing||state.importing||state.scanning)return; if(!state.items.length){ setBanner('請先匯入圖片。','error',true); return; } try{ validateConversionSettings(); }catch(err){ setBanner(prettyError(err),'error',true); return; } state.processing=true; state.cancel=false; state.result=null; state.progress={done:0,total:state.items.length,name:'準備中'}; renderAll(); let succeeded=0,failed=0,processed=0,beforeBytes=0,afterBytes=0,directWrites=0,zipDownloads=0; const errors=[],warnings=[],zipWrites=[],usedZipPaths=new Set(),writableRootCache=new WeakMap(); try{ if(state.folderWriteEnabled) await preflightOriginalFolders(false); for(let i=0;i<state.items.length;i++){ if(state.cancel) break; const item=state.items[i]; state.progress={done:i,total:state.items.length,name:item.displayPath||item.name}; renderProgress(); beforeBytes+=item.size; processed++; let src,outCanvas;try{ src=await canvasFromFile(item.file);item.width=src.width;item.height=src.height;const target=targetForDims(src.width,src.height),fill=state.outputFormat==='image/jpeg'?state.bgColor:null;outCanvas=drawContain(src.canvas,target.w,target.h,fill);const quality=state.compressionEnabled?Math.min(1,Math.max(.01,state.quality/100)):1,blob=await canvasToBlob(outCanvas,state.outputFormat,quality),ext=state.outputFormat==='image/jpeg'?'jpg':'webp',safeBase=sanitizePart(baseName(item.name))||'image',fileName=`${safeBase}(${target.w}x${target.h}).${ext}`,normalizedPath=String(item.relativePath||item.name).replace(/\\/g,'/'),relPath=normalizedPath.includes('/')?normalizedPath.split('/').slice(0,-1).join('/'):'',pathInsideOutput=relPath?`${relPath}/${fileName}`:fileName; let savedDirect=false; if(state.folderWriteEnabled){ const rootCandidate=preferredWritableRootForItem(item); let writableRoot=rootCandidate&&writableRootCache.has(rootCandidate)?writableRootCache.get(rootCandidate):null; if(rootCandidate&&!writableRoot){ writableRoot=await ensureWritableHandle(rootCandidate); writableRootCache.set(rootCandidate,writableRoot||null); } if(writableRoot){ try{ await writeBlobToRoot(writableRoot,relPath,fileName,blob); savedDirect=true; directWrites++; succeeded++; afterBytes+=blob.size; }catch(writeErr){ warnings.push(`${item.name}：無法寫入 Output，已改放入 ZIP（${prettyError(writeErr)}）`); } } } if(!savedDirect){ const archivePath=uniqueArchivePath(`Output/${pathInsideOutput}`,usedZipPaths); zipWrites.push({path:archivePath,blob,itemName:item.name}); } }catch(err){ failed++; errors.push(`${item.name}：${prettyError(err)}`); }finally{if(src?.canvas){src.canvas.width=1;src.canvas.height=1;}if(outCanvas){outCanvas.width=1;outCanvas.height=1;}} state.progress={done:i+1,total:state.items.length,name:item.displayPath||item.name}; renderProgress(); }
-      if(zipWrites.length){ state.progress={done:processed,total:state.items.length,name:'正在建立 ZIP…'}; renderProgress(); try{ zipDownloads=await downloadZipBatches(zipWrites); succeeded+=zipWrites.length; afterBytes+=zipWrites.reduce((sum,file)=>sum+file.blob.size,0); }catch(zipErr){ failed+=zipWrites.length; errors.push(`ZIP 建立失敗：${prettyError(zipErr)}`); } }
-      const skipped=Math.max(0,state.items.length-processed),canceled=state.cancel,locations=[]; if(directWrites) locations.push('Output 資料夾'); if(zipDownloads) locations.push(zipDownloads===1?'下載 ZIP':`下載 ${zipDownloads} 個 ZIP`); const outputSummary=locations.join('＋')||'沒有成功輸出'; state.result={succeeded,failed,skipped,canceled,beforeBytes,afterBytes,errors,warnings,outputSummary}; if(!succeeded){ setBanner(canceled?'已取消，尚未產生成功輸出。':'轉換失敗，請查看結果區的錯誤原因。','error',true); }else if(canceled){ setBanner(`已取消；完成 ${succeeded} 張，未處理 ${skipped} 張。`,'error',true); }else if(failed){ setBanner(`轉換完成 ${succeeded} 張、失敗 ${failed} 張；請查看結果區。`,'error',true); }else{ setBanner(`已成功輸出 ${succeeded} 張至${outputSummary}。`,'success',true); } }catch(err){ state.result={succeeded,failed:failed+1,skipped:Math.max(0,state.items.length-processed),canceled:state.cancel,beforeBytes,afterBytes,errors:[...errors,prettyError(err)],warnings,outputSummary:directWrites?'Output 資料夾':'沒有成功輸出'}; setBanner(prettyError(err),'error',true); }finally{ state.processing=false; renderAll(); } }
+  async function downloadZipBatches(files){
+    const maxBytes=250*1024*1024,maxFiles=5000,batches=[];
+    let current=[],bytes=0;
+    for(const file of files){
+      if(current.length&&(current.length>=maxFiles||bytes+file.blob.size>maxBytes)){batches.push(current);current=[];bytes=0;}
+      current.push(file);bytes+=file.blob.size;
+    }
+    if(current.length) batches.push(current);
+    const downloads=[],errors=[];
+    for(let i=0;i<batches.length;i++){
+      const name=batches.length===1?'輸出壓縮檔.zip':`輸出壓縮檔-${i+1}.zip`;
+      try{
+        const zip=await makeZip(batches[i]);
+        downloadBlob(zip,name);
+        downloads.push({name,files:batches[i]});
+      }catch(error){errors.push({name,files:batches[i],message:prettyError(error)});}
+      await new Promise(resolve=>setTimeout(resolve,120));
+    }
+    return {downloads,errors};
+  }
+  function openStandaloneMode(){
+    let url='';
+    try{
+      const win=window.open('about:blank','_blank');
+      if(!win){setBanner('瀏覽器阻擋了新視窗。請先允許彈出視窗，再按一次「開啟獨立模式」。','error',true);return false;}
+      // 複製乾淨的文件，讓新視窗重新建立自己的事件監聽與摘要元件。
+      const clone=document.documentElement.cloneNode(true);
+      clone.querySelectorAll('#conversionCompleteModal,#advancedFilesToggle,#conversionFeedbackStyles').forEach(el=>el.remove());
+      const panel=clone.querySelector('#advancedFilesPanel');
+      if(panel) panel.replaceWith(...panel.childNodes);
+      clone.querySelector('.appShell')?.removeAttribute('inert');
+      clone.querySelector('body').style.overflow='';
+      clone.querySelectorAll('[data-busy-disabled]').forEach(el=>{el.disabled=el.dataset.busyDisabled==='true';el.removeAttribute('data-busy-disabled');});
+      const blob=new Blob(['<!DOCTYPE html>\n'+clone.outerHTML],{type:'text/html;charset=utf-8'});
+      url=URL.createObjectURL(blob);
+      try{win.opener=null;}catch(_){}
+      win.location.replace(url);
+      setBanner('已開啟獨立模式，請在新視窗中重新選擇資料夾並授權。','success',true);
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+      return true;
+    }catch(err){if(url) URL.revokeObjectURL(url);setBanner(prettyError(err),'error',true);return false;}
+  }
+  async function requestWritableFolder(message='請選擇資料夾'){ if(!('showDirectoryPicker' in window)){ setBanner('目前瀏覽器不支援直接寫入資料夾；轉換完成後會自動下載 ZIP。','error',true); return null; } try{ const handle=await window.showDirectoryPicker({mode:'readwrite'}),writable=await ensureWritableHandle(handle); if(!writable){ setBanner(`已選取資料夾，但尚未成功開啟寫入權限。${IS_EMBEDDED?'請改按「開啟獨立模式」後再重新授權。':'請在權限視窗選擇允許。'}`,'error',true); return null; } state.outputHandle=writable; renderStorageLocation(); setBanner(`${message}已完成權限確認。轉換時會優先輸出到該資料夾內的 Output。`,'success',true); return writable; }catch(err){ if(err?.name==='AbortError') return null; if(err?.name==='SecurityError'||err?.name==='NotAllowedError'||/permission|權限/i.test(String(err?.message||err))){ setBanner(`${IS_EMBEDDED?'嵌入環境可能阻擋權限視窗。':'資料夾權限未成功開啟。'}未能寫入時會自動改為 ZIP。`,'error',true); return null; } setBanner(prettyError(err),'error',true); return null; } }
+  async function processAll(){
+    if(state.processing||state.importing||state.scanning) return;
+    if(!state.items.length){setBanner('請先匯入圖片。','error',true);return;}
+    try{validateConversionSettings();}catch(err){setBanner(prettyError(err),'error',true);return;}
+    state.processing=true;
+    window.__activeConversionFolder=conversionFolderName();
+    outputDirCache=new WeakMap();
+    document.dispatchEvent(new Event('conversion:start'));
+    state.cancel=false;state.result=null;
+    state.progress={done:0,total:state.items.length,name:'準備中'};
+    renderAll();
+    let succeeded=0,failed=0,processed=0,beforeBytes=0,successfulBeforeBytes=0,afterBytes=0;
+    const errors=[],warnings=[],zipWrites=[],zipNames=[],usedZipPaths=new Set(),writableRootCache=new WeakMap(),outputLocations=new Set();
+    try{
+      if(state.folderWriteEnabled){
+        const roots=await collectSourceRoots(),ready=await preflightOriginalFolders(false);
+        for(const root of roots) writableRootCache.set(root,ready.includes(root)?root:null);
+        if(roots.length>ready.length) warnings.push('部分資料夾未取得寫入權限，對應圖片改以 ZIP 下載。');
+      }
+      for(let i=0;i<state.items.length;i++){
+        if(state.cancel) break;
+        const item=state.items[i];
+        state.progress={done:i,total:state.items.length,name:item.displayPath||item.name};renderProgress();
+        beforeBytes+=item.size;processed++;
+        let src,outCanvas;
+        try{
+          src=await canvasFromFile(item.file);item.width=src.width;item.height=src.height;
+          const target=targetForDims(src.width,src.height),fill=state.outputFormat==='image/jpeg'?state.bgColor:null;
+          outCanvas=drawContain(src.canvas,target.w,target.h,fill);
+          const quality=state.compressionEnabled?state.quality/100:1;
+          const blob=await canvasToBlob(outCanvas,state.outputFormat,quality);
+          const ext=state.outputFormat==='image/jpeg'?'jpg':'webp',safeBase=sanitizePart(baseName(item.name))||'image';
+          const fileName=`${safeBase}(${target.w}x${target.h}).${ext}`;
+          const normalizedPath=String(item.relativePath||item.name).replace(/\\/g,'/');
+          const relPath=normalizedPath.includes('/')?normalizedPath.split('/').slice(0,-1).join('/'):'';
+          const pathInsideOutput=relPath?`${relPath}/${fileName}`:fileName;
+          let savedDirect=false;
+          if(state.folderWriteEnabled){
+            const root=preferredWritableRootForItem(item);
+            if(root&&!writableRootCache.has(root)) writableRootCache.set(root,await ensureWritableHandle(root));
+            const writable=root?writableRootCache.get(root):null;
+            if(writable){
+              try{
+                await writeBlobToRoot(writable,relPath,fileName,blob);
+                savedDirect=true;succeeded++;afterBytes+=blob.size;successfulBeforeBytes+=item.size;
+                outputLocations.add(`${writable.name} / Output / ${window.__activeConversionFolder}`);
+              }catch(writeErr){warnings.push(`${item.name}：無法寫入 Output，已改放入 ZIP（${prettyError(writeErr)}）`);}
+            }
+          }
+          if(!savedDirect) zipWrites.push({path:uniqueArchivePath(`Output/${pathInsideOutput}`,usedZipPaths),blob,itemName:item.name,inputBytes:item.size});
+        }catch(err){failed++;errors.push(`${item.name}：${prettyError(err)}`);}
+        finally{if(src?.canvas){src.canvas.width=1;src.canvas.height=1;}if(outCanvas){outCanvas.width=1;outCanvas.height=1;}}
+        state.progress={done:i+1,total:state.items.length,name:item.displayPath||item.name};renderProgress();
+      }
+      if(zipWrites.length){
+        state.progress={done:processed,total:state.items.length,name:'正在建立 ZIP…'};renderProgress();
+        const outcome=await downloadZipBatches(zipWrites);
+        for(const batch of outcome.downloads){
+          zipNames.push(batch.name);succeeded+=batch.files.length;
+          afterBytes+=batch.files.reduce((sum,file)=>sum+file.blob.size,0);
+          successfulBeforeBytes+=batch.files.reduce((sum,file)=>sum+file.inputBytes,0);
+        }
+        for(const batch of outcome.errors){failed+=batch.files.length;errors.push(`${batch.name} 建立失敗：${batch.message}`);}
+      }
+    }catch(err){
+      failed=Math.max(failed,processed-succeeded);
+      errors.push(prettyError(err));
+    }finally{
+      const locations=[...outputLocations];
+      for(const name of zipNames) locations.push(`瀏覽器下載：${name}（ZIP 內：Output/）`);
+      const skipped=Math.max(0,state.items.length-processed),canceled=state.cancel;
+      const outputSummary=locations.join('\n')||'沒有成功輸出';
+      state.result={succeeded,failed,skipped,canceled,beforeBytes,successfulBeforeBytes,afterBytes,errors,warnings,outputSummary};
+      if(!succeeded) setBanner(canceled?'已取消，尚未產生成功輸出。':'轉換失敗，請查看結果區的錯誤原因。','error',true);
+      else if(canceled) setBanner(`已取消；完成 ${succeeded} 張，未處理 ${skipped} 張。`,'error',true);
+      else if(failed) setBanner(`轉換完成 ${succeeded} 張、失敗 ${failed} 張；請查看結果區。`,'error',true);
+      else setBanner(`已成功輸出 ${succeeded} 張至${outputSummary}。`,'success',true);
+      state.processing=false;renderAll();
+      document.dispatchEvent(new CustomEvent('conversion:complete',{detail:state.result}));
+    }
+  }
   function renderImportProgress(){
     const box=$('#importProgress'), p=state.importProgress;
     const scanning=state.scanning, active=scanning || state.importing;
@@ -2294,19 +2496,54 @@ var HeicTo = (() => {
     document.addEventListener('click',e=>{if((state.importing||state.scanning||state.processing)&&e.target.closest('.switch')){e.preventDefault();e.stopImmediatePropagation();}},true);
     document.addEventListener('keydown',e=>{if((state.importing||state.scanning||state.processing)&&e.target.closest('.switch')){e.preventDefault();e.stopImmediatePropagation();}},true);
   }
-  function wireUI(){ $('#pickFilesBtn').onclick = () => $('#fileInput').click(); $('#pickFolderBtn').onclick = async () => { if(state.processing||state.importing||state.scanning)return; if ('showDirectoryPicker' in window){ try{ const handle = await window.showDirectoryPicker({ mode:'readwrite' }); beginImportScan(); const files = await traverseHandle(handle, handle, '', state.recursiveImport); state.scanning=false; await addEntries(files); state.outputHandle = handle; const ready = await preflightOriginalFolders(true); if (ready.length) setBanner('已成功加入資料夾。已先自動開啟並確認原資料夾權限；開始轉換時會優先輸出至原資料夾內的 Output 資料夾。', 'success', true); } catch(err){ if (err?.name === 'AbortError') return; if (err?.name === 'SecurityError' || err?.name === 'NotAllowedError') { setBanner('目前嵌入環境可能擋住資料夾權限視窗，請改按「開啟獨立模式」。', 'error', true); } else { setBanner(prettyError(err), 'error', true); } } finally {state.scanning=false;renderAll();} } else { setBanner('目前瀏覽器不支援資料夾權限功能，請改按「開啟獨立模式」。', 'error', true); } }; $('#pickOutputBtn').onclick = () => requestWritableFolder('輸出資料夾'); $('#standaloneBtn').onclick = () => openStandaloneMode(); $('#standaloneBtn2').onclick = () => openStandaloneMode(); $('#startBtn').onclick = processAll; $('#startBtnTop').onclick = processAll; $('#cancelBtn').onclick = () => { state.cancel = true; setBanner('正在取消...', 'error', true); renderProgress(); }; $('#clearBtn').onclick = () => { if (state.processing||state.importing||state.scanning) return; state.importProgress={done:0,total:0,name:''};state.progress={done:0,total:0,name:''}; state.items=[]; state.result=null; dropSuccessFixed=false; setDropStatus('', ''); setBanner('', 'success', false); renderAll(); }; $('#fileInput').onchange = async e => { const files = [...(e.target.files || [])].filter(file => state.recursiveImport || !hasNestedPath(file.webkitRelativePath || file.name)).map(file => ({ file, relativePath:file.webkitRelativePath || file.name, displayPath:file.webkitRelativePath || file.name, rootHandle:null, rootName:'' })); await addEntries(files); if (files.length && !files.some(f=>f.rootHandle)) setBanner('已加入圖片檔。提醒：若是單純圖片檔選擇器匯入，瀏覽器通常無法自動取得原資料夾 handle；請改用「選擇資料夾」或拖曳資料夾，才能自動建立原資料夾內的 Output，並請確認原資料夾和 Output 資料夾權限。', 'error', true); e.target.value=''; }; $('#folderInput').onchange = async e => { const files = [...(e.target.files || [])].filter(file => state.recursiveImport || !hasNestedPath(file.webkitRelativePath || file.name)).map(file => ({ file, relativePath:file.webkitRelativePath || file.name, displayPath:file.webkitRelativePath || file.name, rootHandle:null, rootName:'' })); await addEntries(files); if (files.length && !files.some(f=>f.rootHandle)) setBanner('已加入圖片檔。提醒：若是單純圖片檔選擇器匯入，瀏覽器通常無法自動取得原資料夾 handle；請確認原資料夾路徑是否正確，並改用「拖曳整個資料夾」或「選擇資料夾」，才能自動建立原資料夾內的 Output，並請確認原資料夾和 Output 資料夾權限。', 'error', true); e.target.value=''; }; $('#bgColor').onchange = e => { state.bgColor = e.target.value; renderAll(); }; const recursiveSwitch = $('#recursiveSwitch'); if (recursiveSwitch){ const syncRecursive = () => { state.recursiveImport = !state.recursiveImport; renderAll(); }; recursiveSwitch.onclick = syncRecursive; recursiveSwitch.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); syncRecursive(); } }; } const standaloneSwitch = $('#standaloneSwitch'); if (standaloneSwitch){ const triggerStandalone = () => openStandaloneMode(); standaloneSwitch.onclick = triggerStandalone; standaloneSwitch.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerStandalone(); } }; } $('#qualityInput').oninput = e => { state.quality = Number(e.target.value); renderAll(); }; $('#widthInput').oninput = e => { state.width = Number(e.target.value || 0); renderAll(); }; $('#heightInput').oninput = e => { state.height = Number(e.target.value || 0); renderAll(); }; $('#ratioSelect').onchange = e => { state.ratio = e.target.value; state.quickTouched = true; renderAll(); }; $('#ratioWInput').oninput = e => { state.customRatioW = Number(e.target.value || 1); renderAll(); }; $('#ratioHInput').oninput = e => { state.customRatioH = Number(e.target.value || 1); renderAll(); }; $('#resizeSwitch').onclick = () => { state.resizeEnabled = !state.resizeEnabled; renderAll(); }; $('#qualitySwitch').onclick = () => { state.compressionEnabled = !state.compressionEnabled; renderAll(); }; const drop = $('#dropZone'); const dropStatus = $('#dropStatus'); const prevent = e => { if (!e) return; if (e.cancelable) e.preventDefault(); e.stopPropagation(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; }; const showDragState = (text) => { if (!drop || !dropStatus) return; dropSuccessFixed = false; drop.classList.add('drag'); drop.classList.remove('success'); dropStatus.classList.add('drag'); dropStatus.classList.remove('success'); dropStatus.textContent = text || '放開即可加入圖片或資料夾'; }; const resetDragState = () => { dragDepth = 0; if (!drop || !dropStatus) return; drop.classList.remove('drag'); dropStatus.classList.remove('drag'); if (dropSuccessFixed){ drop.classList.add('success'); dropStatus.classList.add('success'); return; } if (!drop.classList.contains('success')) dropStatus.textContent = '拖曳圖片或資料夾進來後，這裡會變色並顯示成功提示。'; }; ['dragenter'].forEach(evt => { drop.addEventListener(evt, e => { prevent(e); dragDepth += 1; showDragState('放開即可加入圖片或資料夾'); }, false); }); ['dragover'].forEach(evt => { drop.addEventListener(evt, e => { prevent(e); showDragState('放開即可加入圖片或資料夾'); }, false); }); ['dragleave'].forEach(evt => { drop.addEventListener(evt, e => { prevent(e); dragDepth = Math.max(0, dragDepth - 1); if (dragDepth === 0) resetDragState(); }, false); }); drop.addEventListener('drop', async e=>{
+  function wireUI(){ $('#pickFilesBtn').onclick = () => $('#fileInput').click(); $('#pickFolderBtn').onclick = async () => { if(state.processing||state.importing||state.scanning)return; if ('showDirectoryPicker' in window){ try{ const handle = await canonicalSourceRoot(await window.showDirectoryPicker({ mode:'readwrite' })); beginImportScan(); const files = await traverseHandle(handle, handle, '', state.recursiveImport); state.scanning=false; await addEntries(files); const ready = await preflightOriginalFolders(true); if (ready.length) setBanner('已成功加入資料夾。已先自動開啟並確認原資料夾權限；開始轉換時會優先輸出至原資料夾內的 Output 資料夾。', 'success', true); } catch(err){ if (err?.name === 'AbortError') return; if (err?.name === 'SecurityError' || err?.name === 'NotAllowedError') { setBanner('目前嵌入環境可能擋住資料夾權限視窗，請改按「開啟獨立模式」。', 'error', true); } else { setBanner(prettyError(err), 'error', true); } } finally {state.scanning=false;renderAll();} } else { setBanner('目前瀏覽器不支援資料夾權限功能，請改按「開啟獨立模式」。', 'error', true); } }; $('#pickOutputBtn').onclick = () => requestWritableFolder('輸出資料夾'); $('#standaloneBtn').onclick = () => openStandaloneMode(); $('#standaloneBtn2').onclick = () => openStandaloneMode(); $('#startBtn').onclick = processAll; $('#startBtnTop').onclick = processAll; $('#cancelBtn').onclick = () => { state.cancel = true; setBanner('正在取消...', 'error', true); renderProgress(); }; $('#clearBtn').onclick = () => { if (state.processing||state.importing||state.scanning) return; state.importProgress={done:0,total:0,name:''};state.progress={done:0,total:0,name:''}; state.items=[]; state.outputHandle=null; state.result=null; dropSuccessFixed=false; setDropStatus('', ''); setBanner('', 'success', false); renderAll(); }; $('#fileInput').onchange = async e => { const files = [...(e.target.files || [])].filter(file => isFolderInputPathAllowed(file.webkitRelativePath || file.name)).map(file => ({ file, relativePath:file.webkitRelativePath || file.name, displayPath:file.webkitRelativePath || file.name, rootHandle:null, rootName:'' })); await addEntries(files); if (files.length && !files.some(f=>f.rootHandle)) setBanner('已加入圖片檔。提醒：若是單純圖片檔選擇器匯入，瀏覽器通常無法自動取得原資料夾 handle；請改用「選擇資料夾」或拖曳資料夾，才能自動建立原資料夾內的 Output，並請確認原資料夾和 Output 資料夾權限。', 'error', true); e.target.value=''; }; $('#folderInput').onchange = async e => { const files = [...(e.target.files || [])].filter(file => isFolderInputPathAllowed(file.webkitRelativePath || file.name)).map(file => ({ file, relativePath:file.webkitRelativePath || file.name, displayPath:file.webkitRelativePath || file.name, rootHandle:null, rootName:'' })); await addEntries(files); if (files.length && !files.some(f=>f.rootHandle)) setBanner('已加入圖片檔。提醒：若是單純圖片檔選擇器匯入，瀏覽器通常無法自動取得原資料夾 handle；請確認原資料夾路徑是否正確，並改用「拖曳整個資料夾」或「選擇資料夾」，才能自動建立原資料夾內的 Output，並請確認原資料夾和 Output 資料夾權限。', 'error', true); e.target.value=''; }; $('#bgColor').onchange = e => { state.bgColor = e.target.value; renderAll(); }; const recursiveSwitch = $('#recursiveSwitch'); if (recursiveSwitch){ const syncRecursive = () => { state.recursiveImport = !state.recursiveImport; renderAll(); }; recursiveSwitch.onclick = syncRecursive; recursiveSwitch.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); syncRecursive(); } }; } const standaloneSwitch = $('#standaloneSwitch'); if (standaloneSwitch){ const triggerStandalone = () => openStandaloneMode(); standaloneSwitch.onclick = triggerStandalone; standaloneSwitch.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerStandalone(); } }; } $('#qualityInput').oninput = e => { state.quality = Number(e.target.value); renderAll(); }; $('#widthInput').oninput = e => { state.width = Number(e.target.value || 0); renderAll(); }; $('#heightInput').oninput = e => { state.height = Number(e.target.value || 0); renderAll(); }; $('#ratioSelect').onchange = e => { state.ratio = e.target.value; state.quickTouched = true; renderAll(); }; $('#ratioWInput').oninput = e => { state.customRatioW = Number(e.target.value || 1); renderAll(); }; $('#ratioHInput').oninput = e => { state.customRatioH = Number(e.target.value || 1); renderAll(); }; $('#resizeSwitch').onclick = () => { state.resizeEnabled = !state.resizeEnabled; renderAll(); }; $('#qualitySwitch').onclick = () => { state.compressionEnabled = !state.compressionEnabled; renderAll(); }; const drop = $('#dropZone'); const dropStatus = $('#dropStatus'); const prevent = e => { if (!e) return; if (e.cancelable) e.preventDefault(); e.stopPropagation(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; }; const showDragState = (text) => { if (!drop || !dropStatus) return; dropSuccessFixed = false; drop.classList.add('drag'); drop.classList.remove('success'); dropStatus.classList.add('drag'); dropStatus.classList.remove('success'); dropStatus.textContent = text || '放開即可加入圖片或資料夾'; }; const resetDragState = () => { dragDepth = 0; if (!drop || !dropStatus) return; drop.classList.remove('drag'); dropStatus.classList.remove('drag'); if (dropSuccessFixed){ drop.classList.add('success'); dropStatus.classList.add('success'); return; } if (!drop.classList.contains('success')) dropStatus.textContent = '拖曳圖片或資料夾進來後，這裡會變色並顯示成功提示。'; }; ['dragenter'].forEach(evt => { drop.addEventListener(evt, e => { prevent(e); dragDepth += 1; showDragState('放開即可加入圖片或資料夾'); }, false); }); ['dragover'].forEach(evt => { drop.addEventListener(evt, e => { prevent(e); showDragState('放開即可加入圖片或資料夾'); }, false); }); ['dragleave'].forEach(evt => { drop.addEventListener(evt, e => { prevent(e); dragDepth = Math.max(0, dragDepth - 1); if (dragDepth === 0) resetDragState(); }, false); }); drop.addEventListener('drop', async e=>{
       prevent(e);if(state.processing||state.importing||state.scanning)return;
       dragDepth=0;drop.classList.remove('drag');beginImportScan();
       try{const files=await getDroppedFiles(e.dataTransfer);state.scanning=false;await addEntries(files);}
       catch(err){setDropStatus('','讀取失敗，請重新拖入。');setBanner(prettyError(err),'error',true);}
       finally{state.scanning=false;renderAll();}
     },false); const globalPrevent = e => { if (!e) return; if (e.cancelable) e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; }; ['dragenter','dragover','drop'].forEach(evt => { window.addEventListener(evt, globalPrevent, true); document.addEventListener(evt, globalPrevent, true); document.body.addEventListener(evt, globalPrevent, true); }); renderAll(); setBanner('拖曳圖片或資料夾後即可開始轉換。', 'success', false); }
-  async function getDroppedFiles(dt){ const out=[]; const seen=new Set(); const pushFile=(file, relativePath=file?.name || '', rootHandle=null, rootName='') => { if (!file) return; const rel = relativePath || file.webkitRelativePath || file.name; const key = `${rel}|${file.size}|${file.lastModified || 0}`; if (seen.has(key)) return; seen.add(key); out.push({ file, relativePath:rel, displayPath:rel, rootHandle, rootName }); }; if (dt?.items && dt.items.length){ const handles=[]; for (const item of dt.items){ if (item.kind !== 'file') continue; if (typeof item.getAsFileSystemHandle === 'function') handles.push(item.getAsFileSystemHandle()); }
-      if (handles.length){ try{ const resolved = await Promise.all(handles); for (const handle of resolved){ if (!handle) continue; if (handle.kind === 'directory'){ const files = await traverseHandle(handle, handle, '', state.recursiveImport); for (const entry of files) pushFile(entry.file, entry.relativePath || entry.displayPath || entry.file?.name, entry.rootHandle, entry.rootName); } else if (handle.kind === 'file'){ const file = await handle.getFile(); pushFile(file, file.name); } } }catch(_){} }
+  async function getDroppedFiles(dt){
+    // drop 資料只能在事件當下讀取；先同步保存全部入口，再等待掃描。
+    const looseFiles=[...(dt?.files||[])], snapshots=[];
+    for(const item of [...(dt?.items||[])]){
+      if(item.kind!=='file') continue;
+      let handle=null,entry=null,file=null;
+      try { handle=item.getAsFileSystemHandle?.(); } catch (_) {}
+      try { entry=item.webkitGetAsEntry?.(); } catch (_) {}
+      try { file=item.getAsFile?.(); } catch (_) {}
+      if(!entry && !file) file=looseFiles[snapshots.length]||null;
+      snapshots.push({handle:Promise.resolve(handle).catch(()=>null),entry,file});
     }
-    if (dt?.files && dt.files.length){ for (const file of dt.files){ const rel = file.webkitRelativePath || file.name; if (!state.recursiveImport && hasNestedPath(rel)) continue; pushFile(file, rel); } }
-    if (dt?.items && dt.items.length){ for (const item of dt.items){ if (item.kind !== 'file') continue; if (item.webkitGetAsEntry){ const entry = item.webkitGetAsEntry(); if (entry){ const files = await traverseEntry(entry, '', null, state.recursiveImport); for (const entryFile of files) pushFile(entryFile.file, entryFile.relativePath || entryFile.displayPath || entryFile.file?.name, entryFile.rootHandle, entryFile.rootName); continue; } } const file = item.getAsFile(); if (file){ const rel = file.webkitRelativePath || file.name; if (!state.recursiveImport && hasNestedPath(rel)) continue; pushFile(file, rel); } } }
-    return out; }
+    const handles=await Promise.all(snapshots.map(item=>item.handle)),out=[],pendingRoots=[],legacyRoots=new Map();
+    for(let i=0;i<snapshots.length;i++){
+      const {entry,file}=snapshots[i],handle=handles[i];
+      if(handle?.kind==='directory'){
+        const root=await canonicalSourceRoot(handle,pendingRoots);
+        pendingRoots.push(root);
+        out.push(...await traverseHandle(root,root,'',state.recursiveImport));
+      }else if(handle?.kind==='file'){
+        const current=await handle.getFile();
+        out.push({file:current,relativePath:current.name});
+      }else if(entry){
+        const entries=await traverseEntry(entry,'',null,state.recursiveImport);
+        if(entry.isDirectory){
+          if(!legacyRoots.has(entry)) legacyRoots.set(entry,crypto.randomUUID());
+          for(const child of entries){
+            child.sourceIdentity=legacyRoots.get(entry);child.rootName=entry.name||'';
+            if(entry.name){child.relativePath=`${entry.name}/${child.relativePath}`;child.displayPath=child.relativePath;}
+          }
+        }
+        out.push(...entries);
+      }else if(file){ const relativePath=file.webkitRelativePath||file.name;if(isFolderInputPathAllowed(relativePath)) out.push({file,relativePath}); }
+    }
+    // 已成功處理 item 時，避免再從 files 或舊版 entry 重複匯入同一份內容。
+    if(!snapshots.length) for(const file of looseFiles){
+      const relativePath=file.webkitRelativePath||file.name;
+      if(isFolderInputPathAllowed(relativePath)) out.push({file,relativePath});
+    }
+    return out;
+  }
   async function traverseHandle(handle,rootHandle,path='',recursive=true){ if(handle.kind==='file'){ const file=await handle.getFile(); return [{file,relativePath:path?`${path}/${file.name}`:file.name,displayPath:path?`${path}/${file.name}`:file.name,rootHandle,rootName:rootHandle?rootHandle.name:''}]; } if(handle.kind==='directory'){ const out=[]; for await(const [name,child] of handle.entries()){ if(child.kind==='directory'&&name.toLowerCase()==='output') continue; if(child.kind==='directory'&&!recursive) continue; const childPath=child.kind==='directory'?(path?`${path}/${name}`:name):path; out.push(...await traverseHandle(child,rootHandle,childPath,recursive)); } return out; } return []; }
   async function traverseEntry(entry,path='',rootHandle=null,recursive=true){ if(entry.isFile){ return await new Promise((resolve,reject)=>entry.file(file=>resolve([{file,relativePath:path?`${path}/${file.name}`:file.name,displayPath:path?`${path}/${file.name}`:file.name,rootHandle,rootName:rootHandle?rootHandle.name:''}]),reject)); } if(entry.isDirectory){ const reader=entry.createReader(),all=[]; while(true){ const batch=await new Promise((resolve,reject)=>reader.readEntries(resolve,reject)); if(!batch.length) break; all.push(...batch); } const nested=await Promise.all(all.flatMap(child=>{ if(child.isDirectory&&child.name.toLowerCase()==='output') return []; if(child.isDirectory&&!recursive) return []; const childPath=child.isDirectory?(path?`${path}/${child.name}`:child.name):path; return [traverseEntry(child,childPath,rootHandle,recursive)]; })); return nested.flat(); } return []; }
   function installAccessibleControls(){ ['resizeSwitch','qualitySwitch'].forEach(id=>{ const control=$(`#${id}`); if(!control) return; control.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); control.click(); } }; }); const ratio=$('#ratioSelect'); if(ratio){ ratio.onchange=e=>{ state.ratio=e.target.value; state.quickTouched=true; state.resizeMode='ratio'; renderAll(); }; } }
@@ -2320,14 +2557,9 @@ var HeicTo = (() => {
 (() => {
   'use strict';
 
-  const pad = value => String(value).padStart(2, '0');
-  const conversionFolderName = () => {
-    const now = new Date();
-    return `Conversion_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}--T${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-  };
-
   const addStyle = () => {
     const style = document.createElement('style');
+    style.id='conversionFeedbackStyles';
     style.textContent = `
       .advancedFilesToggle{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 15px;border:1px solid rgba(96,165,250,.38);border-radius:12px;background:rgba(15,32,53,.78);color:#dbeafe;font:inherit;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease}
       .advancedFilesToggle:hover{background:rgba(30,64,110,.72);border-color:rgba(125,211,252,.75)}
@@ -2337,10 +2569,10 @@ var HeicTo = (() => {
       .advancedFilesPanel{margin-top:14px}.advancedFilesPanel[hidden]{display:none!important}
       .folderReadProgress{margin-top:13px;padding:13px 15px;border:1px solid rgba(56,189,248,.35);border-radius:13px;background:rgba(8,47,73,.48);color:#e0f2fe;text-align:left}.folderReadProgress[hidden]{display:none!important}.folderReadProgressText{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;font-weight:800}.folderReadProgressText small{color:#a5f3fc;font-weight:700;white-space:nowrap}.folderReadTrack{height:8px;margin-top:10px;border-radius:999px;background:#07111d;overflow:hidden}.folderReadTrack::after{content:"";display:block;width:38%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#22d3ee,#38bdf8,#6366f1);animation:folderReadMove 1.1s ease-in-out infinite}@keyframes folderReadMove{0%{transform:translateX(-105%)}100%{transform:translateX(365%)}}
       .conversionModal{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:rgba(1,8,20,.68);backdrop-filter:blur(8px)}
-      .conversionModal[hidden]{display:none!important}.conversionModalCard{position:relative;width:min(700px,100%);padding:30px;border:1px solid rgba(167,243,208,.8);border-radius:25px;background:linear-gradient(135deg,#17683e,#087f7d);box-shadow:0 25px 80px rgba(0,0,0,.48);color:#f0fdf4}
+      .conversionModal[hidden]{display:none!important}.conversionModalCard{position:relative;width:min(700px,100%);max-height:calc(100dvh - 48px);overflow-y:auto;padding:30px;border:1px solid rgba(167,243,208,.8);border-radius:25px;background:linear-gradient(135deg,#17683e,#087f7d);box-shadow:0 25px 80px rgba(0,0,0,.48);color:#f0fdf4}
       .conversionModalClose{position:absolute;right:22px;top:22px;width:48px;height:48px;border:1px solid rgba(255,255,255,.42);border-radius:13px;background:rgba(255,255,255,.12);color:white;font-size:30px;line-height:1;cursor:pointer}
       .conversionModalTitle{display:flex;align-items:center;gap:15px;margin:0 64px 6px 0;font-size:27px;font-weight:900}.conversionModalMark{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:linear-gradient(145deg,#b8ff55,#22c55e);color:#073b1c;font-size:42px;line-height:1}
-      .conversionModalText{margin:0 64px 22px 73px;font-size:16px;line-height:1.65;color:#e4fff0}.conversionCompleteLine{display:block}.conversionCompleteLine+.conversionCompleteLine{margin-top:5px}.conversionCompleteSavings{color:#fde047;font-weight:900}.conversionPath{display:flex;align-items:center;gap:12px;width:calc(100% - 73px);margin-left:73px;padding:17px 19px;border:1px solid rgba(236,253,245,.85);border-radius:15px;background:rgba(0,50,54,.56);color:#fff;font:inherit;font-size:16px;font-weight:800;line-height:1.45;text-align:left;word-break:break-word;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease}.conversionPath:hover{background:rgba(3,75,78,.82);border-color:#fff}.conversionPath:active{transform:translateY(1px)}.conversionPath small{display:block;margin-bottom:3px;color:#bbf7d0;font-weight:700}
+      .conversionModalText{margin:0 64px 22px 73px;font-size:16px;line-height:1.65;color:#e4fff0}.conversionCompleteLine{display:block}.conversionCompleteLine+.conversionCompleteLine{margin-top:5px}.conversionCompleteSavings{color:#fde047;font-weight:900}.conversionPath{display:flex;align-items:center;gap:12px;width:calc(100% - 73px);margin-left:73px;padding:17px 19px;border:1px solid rgba(236,253,245,.85);border-radius:15px;background:rgba(0,50,54,.56);color:#fff;font:inherit;font-size:16px;font-weight:800;line-height:1.6;text-align:left;overflow-wrap:anywhere;white-space:pre-line;cursor:default}.conversionPath small{display:block;margin-bottom:3px;color:#bbf7d0;font-weight:700}
       @media (max-width:640px){.conversionModal{padding:14px}.conversionModalCard{padding:23px 18px;border-radius:19px}.conversionModalTitle{font-size:23px}.conversionModalText,.conversionPath{margin-left:0}.conversionPath{width:100%}.conversionModalText{margin-right:44px}.conversionModalClose{right:14px;top:14px;width:42px;height:42px}}
     `;
     document.head.append(style);
@@ -2372,126 +2604,58 @@ var HeicTo = (() => {
     });
   };
 
-  const createModal = () => {
-    const modal = document.createElement('div');
-    modal.id = 'conversionCompleteModal';
-    modal.className = 'conversionModal';
-    modal.hidden = true;
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-labelledby', 'conversionCompleteTitle');
-    modal.innerHTML = `<div class="conversionModalCard"><button class="conversionModalClose" type="button" aria-label="關閉">×</button><h2 class="conversionModalTitle" id="conversionCompleteTitle"><span class="conversionModalMark" aria-hidden="true">✓</span>處理完成</h2><p class="conversionModalText" id="conversionCompleteText"></p><button class="conversionPath" id="conversionOpenFolder" type="button" aria-label="在系統視窗查看輸出檔案"><span aria-hidden="true">▱</span><div><small>查看輸出檔案</small><span id="conversionCompletePath"></span></div></button></div>`;
-    document.body.append(modal);
-    const close = () => { modal.hidden = true; };
-    modal.querySelector('.conversionModalClose').addEventListener('click', close);
-    modal.addEventListener('click', event => { if (event.target === modal) close(); });
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
-    return modal;
-  };
-
-  const installOutputFolderWrapper = () => {
-    if (!('showDirectoryPicker' in window) || window.__conversionFolderWrapperInstalled) return;
-    const nativePicker = window.showDirectoryPicker.bind(window);
-    const wrappers = new WeakMap();
-    const wrap = (handle, insideOutput = false) => {
-      if (!handle || handle.kind !== 'directory') return handle;
-      const cacheKey = insideOutput ? 'conversion' : 'root';
-      const cached = wrappers.get(handle);
-      if (cached?.[cacheKey]) return cached[cacheKey];
-      const proxy = new Proxy(handle, {
-        get(target, property) {
-          if (property === 'getDirectoryHandle') return async (name, options) => {
-            const directory = await target.getDirectoryHandle(name, options);
-            if (!insideOutput && String(name).toLowerCase() === 'output') {
-              const folderName = window.__activeConversionFolder || (window.__activeConversionFolder = conversionFolderName());
-              return wrap(await directory.getDirectoryHandle(folderName, { create: true }), true);
-            }
-            return wrap(directory, insideOutput);
-          };
-          const value = Reflect.get(target, property, target);
-          return typeof value === 'function' ? value.bind(target) : value;
-        }
-      });
-      const entry = cached || {};
-      entry[cacheKey] = proxy;
-      wrappers.set(handle, entry);
-      return proxy;
-    };
-    window.showDirectoryPicker = async options => wrap(await nativePicker(options));
-    window.__conversionFolderWrapperInstalled = true;
-  };
-
-  // 直接擴充原生資料夾控制代碼，不以 Proxy 包裝控制代碼；如此拖放匯入可保留
-  // 瀏覽器原本的 File System Access API 行為。
-  const installOutputFolderPrototype = () => {
-    const proto = window.FileSystemDirectoryHandle?.prototype;
-    if (!proto || proto.__conversionFolderPatched) return;
-    const nativeGetDirectoryHandle = proto.getDirectoryHandle;
-    if (typeof nativeGetDirectoryHandle !== 'function') return;
-    Object.defineProperty(proto, '__conversionFolderPatched', { value: true });
-    proto.getDirectoryHandle = async function(name, options) {
-      const directory = await nativeGetDirectoryHandle.call(this, name, options);
-      if (String(name).toLowerCase() !== 'output') return directory;
-      const folderName = window.__activeConversionFolder || (window.__activeConversionFolder = conversionFolderName());
-      const conversionDirectory = await nativeGetDirectoryHandle.call(directory, folderName, { create: true });
-      window.__activeConversionDirectoryHandle = conversionDirectory;
-      return conversionDirectory;
-    };
-  };
-
   const installStartAndCompletionFeedback = () => {
-    const start = document.getElementById('startBtn');
-    const result = document.getElementById('resultBox');
-    if (!start || !result) return;
-    const modal = createModal();
-    const openFolderButton = modal.querySelector('#conversionOpenFolder');
-    openFolderButton.addEventListener('click', async () => {
-      const directoryHandle = window.__activeConversionDirectoryHandle;
-      const displayPath = document.getElementById('conversionCompletePath').textContent;
-      try {
-        if (directoryHandle && 'showOpenFilePicker' in window) {
-          const selectedFiles = await window.showOpenFilePicker({
-            startIn: directoryHandle,
-            multiple: true
-          });
-          if (selectedFiles.length) {
-            document.getElementById('conversionCompleteText').textContent = `已在系統視窗選取 ${selectedFiles.length} 個輸出檔案。`;
-          }
-          return;
-        }
-        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(displayPath);
-        document.getElementById('conversionCompleteText').textContent = '目前瀏覽器無法直接顯示輸出資料夾，已複製輸出位置。';
-      } catch (error) {
-        if (error?.name !== 'AbortError') {
-          document.getElementById('conversionCompleteText').textContent = `無法開啟輸出資料夾：${error?.message || error}`;
-        }
-      }
+    const modal=document.createElement('div');
+    modal.id='conversionCompleteModal';
+    modal.className='conversionModal';
+    modal.hidden=true;
+    modal.setAttribute('role','dialog');
+    modal.setAttribute('aria-modal','true');
+    modal.setAttribute('aria-labelledby','conversionCompleteTitle');
+    modal.setAttribute('aria-describedby','conversionCompleteText');
+    modal.innerHTML='<div class="conversionModalCard"><button class="conversionModalClose" type="button" aria-label="關閉">×</button><h2 class="conversionModalTitle"><span class="conversionModalMark" aria-hidden="true">✓</span><span id="conversionCompleteTitle">處理完成</span></h2><p class="conversionModalText" id="conversionCompleteText"></p><div class="conversionPath" id="conversionOutputLocation"><span aria-hidden="true">▱</span><div><small>輸出位置</small><span id="conversionCompletePath"></span></div></div></div>';
+    document.body.append(modal);
+    const closeButton=modal.querySelector('button'),app=document.querySelector('.appShell');
+    let previousFocus=null,previousOverflow='',previousInert=false;
+    const close=()=>{
+      if(modal.hidden) return;
+      modal.hidden=true;
+      app.inert=previousInert;
+      document.body.style.overflow=previousOverflow;
+      if(previousFocus?.isConnected && !previousFocus.disabled) previousFocus.focus({preventScroll:true});
+    };
+    closeButton.addEventListener('click',close);
+    modal.addEventListener('click',event=>{if(event.target===modal) close();});
+    document.addEventListener('keydown',event=>{
+      if(modal.hidden) return;
+      if(event.key==='Escape'){event.preventDefault();close();}
+      if(event.key==='Tab'){event.preventDefault();closeButton.focus();}
     });
-    start.addEventListener('click', () => {
-      window.__activeConversionFolder = conversionFolderName();
-      window.__activeConversionDirectoryHandle = null;
-    }, true);
-    let lastResult = '';
-    new MutationObserver(() => {
-      const text = result.textContent.replace(/\s+/g, ' ').trim();
-      const hasActualFailure = /轉換部分完成|轉換已取消|失敗\s*[1-9]\d*\s*張|沒有成功/.test(text);
-      if (!text || text === lastResult || hasActualFailure || !/轉換完成/.test(text) || !/Output/.test(text)) return;
-      lastResult = text;
-      const folder = window.__activeConversionFolder;
-      if (!folder) return;
-      const resultValues = Object.fromEntries([...result.querySelectorAll('.resultBox')].map(box => [box.querySelector('.k')?.textContent.trim(), box.querySelector('.v')?.textContent.trim()]));
-      const success = resultValues['成功'] || '0 張';
-      const failed = resultValues['失敗'] || '0 張';
-      const skipped = resultValues['未處理'] || '0 張';
-      const output = resultValues['輸出位置'] || 'Output 資料夾';
-      const before = resultValues['已處理原始容量'] || '0 B';
-      const after = resultValues['成功輸出容量'] || '0 B';
-      const savings = resultValues['容量變化'] || '';
-      document.getElementById('conversionCompleteText').innerHTML = `<span class="conversionCompleteLine">✓ 轉換完成：成功${success}、失敗${failed}、未處理${skipped}</span><span class="conversionCompleteLine">輸出位置：${output}</span><span class="conversionCompleteLine conversionCompleteSavings">已處理：原始容量${before}、成功輸出容量${after}、容量變化${savings}</span>`;
-      document.getElementById('conversionCompletePath').textContent = `Output / ${folder}`;
-      modal.hidden = false;
-      openFolderButton.focus();
-    }).observe(result, { childList: true, subtree: true, characterData: true });
+    document.addEventListener('conversion:start',()=>{close();previousFocus=document.activeElement;});
+    document.addEventListener('conversion:complete',event=>{
+      const result=event.detail;
+      if(!result) return;
+      const title=result.canceled?'轉換已取消':!result.succeeded?'轉換失敗':result.failed?'轉換部分完成':'處理完成';
+      document.getElementById('conversionCompleteTitle').textContent=title;
+      modal.querySelector('.conversionModalMark').textContent=(result.canceled||result.failed||result.warnings?.length)?'!':'✓';
+      const text=document.getElementById('conversionCompleteText');
+      text.replaceChildren();
+      const comparisonBytes=result.successfulBeforeBytes??result.beforeBytes;
+      const delta=comparisonBytes>0?Math.round((result.afterBytes/comparisonBytes-1)*1000)/10:0;
+      const size=n=>n>=1048576?`${(n/1048576).toFixed(1)} MB`:n>=1024?`${(n/1024).toFixed(1)} KB`:`${n} B`;
+      const lines=[`成功 ${result.succeeded} 張、失敗 ${result.failed} 張、未處理 ${result.skipped||0} 張`,
+        `已處理原始容量 ${size(result.beforeBytes)}；成功輸出容量 ${size(result.afterBytes)}`];
+      if(result.succeeded) lines.push(`容量變化（成功項目）：${delta<=0?'節省':'增加'} ${Math.abs(delta)}%`);
+      if(result.errors?.length||result.warnings?.length) lines.push('錯誤與備援原因請關閉摘要後查看結果區。');
+      for(const line of lines){const span=document.createElement('span');span.className='conversionCompleteLine';span.textContent=line;text.append(span);}
+      document.getElementById('conversionCompletePath').textContent=result.outputSummary||'沒有成功輸出';
+      previousOverflow=document.body.style.overflow;
+      previousInert=app.inert;
+      app.inert=true;
+      document.body.style.overflow='hidden';
+      modal.hidden=false;
+      closeButton.focus({preventScroll:true});
+    });
   };
 
   addStyle();
