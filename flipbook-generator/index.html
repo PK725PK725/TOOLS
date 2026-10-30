@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>簡單版 PDF 轉翻頁電子書</title>
   <style>
-:root{--ink:#1c1917;--paper:#fff;--orange:#ea580c;--blue:#2563eb}*{box-sizing:border-box}body{min-height:100vh;margin:0;background:radial-gradient(60rem 38rem at -10% -8%,#293f76 0%,transparent 58%),radial-gradient(48rem 34rem at 108% 26%,#533224 0%,transparent 62%),radial-gradient(42rem 32rem at 48% 105%,#172d4d 0%,transparent 65%),linear-gradient(135deg,#080d18 0%,#111827 48%,#0b1220 100%);background-attachment:fixed;color:var(--ink);font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif}.app-shell{width:min(760px,calc(100% - 32px));margin:0 auto;padding:56px 0 24px}header{color:#fff;margin-bottom:28px}.eyebrow{margin:0 0 8px;color:#fdba74;font-weight:700;letter-spacing:.08em}h1{margin:0;font-size:clamp(2.2rem,8vw,4rem);line-height:1.08;letter-spacing:-.035em;background:linear-gradient(100deg,#fed7aa 0%,#fb923c 42%,#fbbf24 78%,#fde68a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}.subtitle{max-width:40rem;line-height:1.7;color:#e7e5e4}.card{margin:16px 0;padding:24px;border:1px solid rgb(255 255 255/.12);border-radius:16px;background:var(--paper);box-shadow:0 12px 30px rgb(0 0 0/.24)}h2{margin:0 0 16px;font-size:1.18rem}.drop-zone{display:grid;width:100%;min-height:180px;place-items:center;padding:24px;border:2px dashed #fb923c;border-radius:12px;background:#fff7ed;color:var(--ink);cursor:pointer;transition:.2s}.drop-zone:hover,.drop-zone:focus-visible,.drop-zone.dragover{border-color:var(--blue);background:#eff6ff;outline:3px solid #bfdbfe;outline-offset:2px}.drop-zone strong{font-size:1.2rem}.drop-zone span,.drop-zone small,.hint{color:#57534e}.file-status,.progress-text{min-height:1.5em;margin:12px 0 0}.file-status{color:#9a3412;font-weight:800;background:#fff7ed;border-left:4px solid #ea580c;padding:8px 10px;border-radius:4px}.fields{display:grid;gap:16px}.fields h2{margin-bottom:0}label,.logo-upload-wrap{display:grid;gap:8px;font-weight:700}input{min-height:46px;padding:10px;border:1px solid #a8a29e;border-radius:8px;font:inherit}.field-label{font-weight:700}.logo-drop-zone{display:grid;min-height:96px;place-items:center;padding:14px;border:2px dashed #a8a29e;border-radius:10px;background:#fafaf9;color:var(--ink);cursor:pointer;transition:.2s}.logo-drop-zone:hover,.logo-drop-zone:focus-visible,.logo-drop-zone.dragover{border-color:var(--blue);background:#eff6ff;outline:3px solid #bfdbfe;outline-offset:2px}.logo-drop-zone strong{font-size:1rem}.logo-drop-zone span,.logo-upload-wrap small{color:#57534e;font-weight:400}.hint{margin:0;font-size:.9rem;line-height:1.6}.action-card p{line-height:1.6}.primary{min-height:48px;padding:0 20px;border:0;border-radius:8px;background:var(--orange);color:#fff;font:inherit;font-weight:700;cursor:pointer}.primary:hover,.primary:focus-visible{background:#c2410c;outline:3px solid #fed7aa;outline-offset:2px}.primary:disabled{opacity:.5;cursor:not-allowed}progress{display:block;width:100%;height:12px;margin-top:18px;accent-color:var(--blue)}.result{margin-top:16px;padding:14px;border-radius:8px;background:#ecfdf5;color:#14532d;line-height:1.7}.result.error{background:#fef2f2;color:#991b1b}.credit{margin:28px 0 0;color:#d6d3d1;text-align:center;font-weight:700}@media(max-width:560px){.app-shell{width:min(100% - 24px,760px);padding-top:32px}.card{padding:18px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+:root{--ink:#1c1917;--paper:#fff;--orange:#ea580c;--blue:#2563eb}*{box-sizing:border-box}body{min-height:100vh;margin:0;background:radial-gradient(60rem 38rem at -10% -8%,#293f76 0%,transparent 58%),radial-gradient(48rem 34rem at 108% 26%,#533224 0%,transparent 62%),radial-gradient(42rem 32rem at 48% 105%,#172d4d 0%,transparent 65%),linear-gradient(135deg,#080d18 0%,#111827 48%,#0b1220 100%);background-attachment:fixed;color:var(--ink);font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif}.app-shell{width:min(760px,calc(100% - 32px));margin:0 auto;padding:56px 0 24px}header{color:#fff;margin-bottom:28px}.eyebrow{margin:0 0 8px;color:#fdba74;font-weight:700;letter-spacing:.08em}h1{margin:0;font-size:clamp(2.2rem,8vw,4rem);line-height:1.08;letter-spacing:-.035em;background:linear-gradient(100deg,#fed7aa 0%,#fb923c 42%,#fbbf24 78%,#fde68a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}.subtitle{max-width:40rem;line-height:1.7;color:#e7e5e4}.card{margin:16px 0;padding:24px;border:1px solid rgb(255 255 255/.12);border-radius:16px;background:var(--paper);box-shadow:0 12px 30px rgb(0 0 0/.24)}h2{margin:0 0 16px;font-size:1.18rem}.drop-zone{display:grid;width:100%;min-height:180px;place-items:center;padding:24px;border:2px dashed #fb923c;border-radius:12px;background:#fff7ed;color:var(--ink);cursor:pointer;transition:.2s}.drop-zone:hover,.drop-zone:focus-visible,.drop-zone.dragover{border-color:var(--blue);background:#eff6ff;outline:3px solid #bfdbfe;outline-offset:2px}.drop-zone strong{font-size:1.2rem}.drop-zone span,.drop-zone small,.hint{color:#57534e}.file-status,.progress-text{min-height:1.5em;margin:12px 0 0}.file-status{color:#9a3412;font-weight:800;background:#fff7ed;border-left:4px solid #ea580c;padding:8px 10px;border-radius:4px}.fields{display:grid;gap:16px}.fields h2{margin-bottom:0}label,.logo-upload-wrap{display:grid;gap:8px;font-weight:700}input{min-height:46px;padding:10px;border:1px solid #a8a29e;border-radius:8px;font:inherit}.field-label{font-weight:700}.logo-drop-zone{display:grid;min-height:96px;place-items:center;padding:14px;border:2px dashed #a8a29e;border-radius:10px;background:#fafaf9;color:var(--ink);cursor:pointer;transition:.2s}.logo-drop-zone:hover,.logo-drop-zone:focus-visible,.logo-drop-zone.dragover{border-color:var(--blue);background:#eff6ff;outline:3px solid #bfdbfe;outline-offset:2px}.logo-drop-zone strong{font-size:1rem}.logo-drop-zone span,.logo-upload-wrap small{color:#57534e;font-weight:400}.hint{margin:0;font-size:.9rem;line-height:1.6}.action-card p{line-height:1.6}.primary{min-height:48px;padding:0 20px;border:0;border-radius:8px;background:var(--orange);color:#fff;font:inherit;font-weight:700;cursor:pointer}.primary:hover,.primary:focus-visible{background:#c2410c;outline:3px solid #fed7aa;outline-offset:2px}.primary:disabled{opacity:.5;cursor:not-allowed}progress{--progress-fill:linear-gradient(90deg,#8b5cf6 0%,#3b82f6 50%,#06b6d4 100%);appearance:none;-webkit-appearance:none;display:block;width:100%;height:36px;margin-top:18px;border:0;border-radius:999px;overflow:hidden;background:#e2e8f0;color:#3b82f6}
+progress[hidden]{display:none}
+progress::-webkit-progress-bar{background:#e2e8f0;border-radius:999px;box-shadow:inset 0 1px 3px #0f172a1a}
+progress::-webkit-progress-value{background:var(--progress-fill);border-radius:999px}
+progress::-moz-progress-bar{background:var(--progress-fill);border-radius:999px}.result{margin-top:16px;padding:14px;border-radius:8px;background:#ecfdf5;color:#14532d;line-height:1.7}.result.error{background:#fef2f2;color:#991b1b}.credit{margin:28px 0 0;color:#d6d3d1;text-align:center;font-weight:700}@media(max-width:560px){.app-shell{width:min(100% - 24px,760px);padding-top:32px}.card{padding:18px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}
 
   </style>
   <style>
@@ -95,7 +99,6 @@
     </form>
     <footer class="credit">彭榮生 製作</footer>
   </main>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
 /* 內嵌自 default-page-turn.js */
@@ -103,130 +106,499 @@ window.DEFAULT_PAGE_TURN_MP3 = "//PkZAAfXfBYBT3rngYAGAAA/8AAH4412IWhSaVZPCEMpcJo
 
 </script>
   <script>
-/* 內嵌自 web-generator.js */
+/* PDF 轉翻頁書產生器與離線閱讀器 */
 (() => {
   const $ = (id) => document.getElementById(id);
-  const form = $("generator-form"), pdfInput = $("pdf-input"), logoInput = $("logo-input"), backgroundInput = $("background-image-input"), dropZone = $("drop-zone"), logoDropZone = $("logo-drop-zone"), backgroundDropZone = $("background-drop-zone"), status = $("pdf-status"), logoStatus = $("logo-status"), backgroundStatus = $("background-status"), progress = $("progress"), progressText = $("progress-text"), result = $("result"), start = $("start-button");
+  const form = $("generator-form"), start = $("start-button");
+  const progress = $("progress"), progressText = $("progress-text"), result = $("result");
+  const PDF_BASE = "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.4.299/";
+  const PDF_LOAD_ERROR = "PDF 引擎載入失敗。請確認網路連線，並使用最新版 Chrome、Edge 或 Firefox 重新整理頁面。";
   let selectedPdf = null, selectedLogo = null, selectedBackground = null;
-  const gradientEnabled = $("gradient-enabled-input"), gradientPanel = $("gradient-panel"), gradientStart = $("gradient-color-start-input"), gradientEnd = $("gradient-color-end-input"), gradientAngle = $("gradient-angle-input"), gradientPreview = $("gradient-preview");
-  const updateGradientPreview = () => { gradientPreview.style.background = `linear-gradient(${gradientAngle.value}deg, ${gradientStart.value}, ${gradientEnd.value})`; };
-  gradientEnabled.addEventListener("change", () => { gradientPanel.hidden = !gradientEnabled.checked; if (gradientEnabled.checked) updateGradientPreview(); });
-  [gradientStart, gradientEnd, gradientAngle].forEach((input) => input.addEventListener("input", updateGradientPreview));
-  updateGradientPreview();
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-  const setResult = (message, error = false) => { result.hidden = false; result.className = error ? "result error" : "result"; result.replaceChildren(document.createTextNode(message)); };
-  const safeName = (name) => name.replace(/[\\/:*?"<>|]+/g, "-").trim().replace(/[. ]+$/g, "") || "未命名翻頁書";
-  const pageName = (number, digits) => String(number).padStart(digits, "0");
-  function setPdf(file) {
+  let pdfLibrary = null, converting = false;
+
+  function setResult(message, error = false) {
+    result.hidden = false;
+    result.className = error ? "result error" : "result";
+    result.textContent = message;
+  }
+
+  // 元件載入失敗也必須保留表單事件，避免表單直接重新載入頁面。
+  async function loadPdfLibrary() {
+    start.disabled = true;
+    progressText.textContent = "正在載入 PDF 引擎…";
+    try {
+      pdfLibrary = await import(PDF_BASE + "build/pdf.min.mjs");
+      pdfLibrary.GlobalWorkerOptions.workerSrc = PDF_BASE + "build/pdf.worker.min.mjs";
+    } catch (error) {
+      console.error("PDF 引擎載入失敗", error);
+      setResult(PDF_LOAD_ERROR, true);
+    } finally {
+      start.disabled = false;
+      progressText.textContent = "";
+    }
+  }
+
+  function bindUpload(inputId, zoneId, accept) {
+    const input = $(inputId), zone = $(zoneId);
+    zone.addEventListener("click", () => input.click());
+    input.addEventListener("change", () => accept(input.files[0]));
+    ["dragenter", "dragover"].forEach((event) => zone.addEventListener(event, (e) => {
+      e.preventDefault();
+      zone.classList.add("dragover");
+    }));
+    ["dragleave", "drop"].forEach((event) => zone.addEventListener(event, (e) => {
+      e.preventDefault();
+      zone.classList.remove("dragover");
+    }));
+    zone.addEventListener("drop", (e) => accept(e.dataTransfer.files[0]));
+  }
+
+  bindUpload("pdf-input", "drop-zone", (file) => {
     if (!file) return;
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) return setResult("請選擇 PDF 檔案。", true);
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      return setResult("請選擇 PDF 檔案。", true);
+    }
     if (file.size > 500 * 1024 * 1024) return setResult("PDF 超過 500 MB 上限。", true);
-    selectedPdf = file; dropZone.classList.add("has-file"); status.textContent = `已選擇：${file.name}（${(file.size / 1024 / 1024).toFixed(1)} MB）`; result.hidden = true;
-  }
-  dropZone.addEventListener("click", () => pdfInput.click()); pdfInput.addEventListener("change", () => setPdf(pdfInput.files[0]));
-  ["dragenter", "dragover"].forEach((event) => dropZone.addEventListener(event, (e) => { e.preventDefault(); dropZone.classList.add("dragover"); }));
-  ["dragleave", "drop"].forEach((event) => dropZone.addEventListener(event, (e) => { e.preventDefault(); dropZone.classList.remove("dragover"); }));
-  dropZone.addEventListener("drop", (event) => setPdf(event.dataTransfer.files[0]));
-  function setLogo(file) {
+    selectedPdf = file;
+    $("drop-zone").classList.add("has-file");
+    $("pdf-status").textContent = `已選擇：${file.name}（${(file.size / 1024 / 1024).toFixed(1)} MB）`;
+    result.hidden = true;
+  });
+
+  function acceptImage(file, zoneId, statusId, label, save) {
     if (!file) return;
-    if (!/^image\/(png|jpeg|webp|gif)$/i.test(file.type)) return setResult("Logo 必須是 PNG、JPG、WebP 或 GIF 圖檔。", true);
-    selectedLogo = file; logoDropZone.classList.add("has-file");
-    logoStatus.textContent = `已選擇：${file.name}（${(file.size / 1024).toFixed(0)} KB）`;
+    if (!/^image\/(png|jpeg|webp|gif)$/i.test(file.type)) {
+      return setResult(`${label}必須是 PNG、JPG、WebP 或 GIF 圖檔。`, true);
+    }
+    save(file);
+    $(zoneId).classList.add("has-file");
+    $(statusId).textContent = `已選擇：${file.name}（${(file.size / 1024).toFixed(0)} KB）`;
     result.hidden = true;
   }
-  logoDropZone.addEventListener("click", () => logoInput.click());
-  logoInput.addEventListener("change", () => setLogo(logoInput.files[0]));
-  ["dragenter", "dragover"].forEach((event) => logoDropZone.addEventListener(event, (e) => { e.preventDefault(); logoDropZone.classList.add("dragover"); }));
-  ["dragleave", "drop"].forEach((event) => logoDropZone.addEventListener(event, (e) => { e.preventDefault(); logoDropZone.classList.remove("dragover"); }));
-  logoDropZone.addEventListener("drop", (event) => setLogo(event.dataTransfer.files[0]));
-  function setBackground(file) {
-    if (!file) return;
-    if (!/^image\/(png|jpeg|webp|gif)$/i.test(file.type)) return setResult("背景圖檔必須是 PNG、JPG、WebP 或 GIF 圖檔。", true);
-    selectedBackground = file; window.flipbookBackgroundFile = file; backgroundDropZone.classList.add("has-file");
-    backgroundStatus.textContent = `已選擇：${file.name}（${(file.size / 1024).toFixed(0)} KB）`;
-    result.hidden = true;
+  bindUpload("logo-input", "logo-drop-zone", (file) =>
+    acceptImage(file, "logo-drop-zone", "logo-status", "Logo ", (image) => { selectedLogo = image; }));
+  bindUpload("background-image-input", "background-drop-zone", (file) =>
+    acceptImage(file, "background-drop-zone", "background-status", "背景圖檔", (image) => { selectedBackground = image; }));
+
+  const gradientEnabled = $("gradient-enabled-input");
+  function updateGradientPreview() {
+    $("gradient-panel").hidden = !gradientEnabled.checked;
+    $("gradient-preview").style.background = `linear-gradient(${$("gradient-angle-input").value}deg, ${$("gradient-color-start-input").value}, ${$("gradient-color-end-input").value})`;
   }
-  backgroundDropZone.addEventListener("click", () => backgroundInput.click());
-  backgroundInput.addEventListener("change", () => setBackground(backgroundInput.files[0]));
-  ["dragenter", "dragover"].forEach((event) => backgroundDropZone.addEventListener(event, (e) => { e.preventDefault(); backgroundDropZone.classList.add("dragover"); }));
-  ["dragleave", "drop"].forEach((event) => backgroundDropZone.addEventListener(event, (e) => { e.preventDefault(); backgroundDropZone.classList.remove("dragover"); }));
-  backgroundDropZone.addEventListener("drop", (event) => setBackground(event.dataTransfer.files[0]));
-  const blobFromCanvas = (canvas, quality) => new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("無法產生 WebP 圖片。")), "image/webp", quality));
+  gradientEnabled.addEventListener("change", updateGradientPreview);
+  ["gradient-color-start-input", "gradient-color-end-input", "gradient-angle-input"].forEach((id) =>
+    $(id).addEventListener("input", updateGradientPreview));
+  updateGradientPreview();
+
+  const safeName = (name) => name.replace(/[\\/:*?"<>|]+/g, "-").trim().replace(/[. ]+$/g, "") || "未命名翻頁書";
+  const imageExtension = (file) => ({ "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif" })[file.type.toLowerCase()];
+  const pageName = (number, digits) => String(number).padStart(digits, "0");
+  const blobFromCanvas = (canvas, quality) => new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("無法產生 WebP 圖片。")), "image/webp", quality);
+  });
+
   async function pageBlobs(pdf) {
     if (pdf.numPages > 250) throw new Error(`PDF 共 ${pdf.numPages} 頁，超過 250 頁上限。`);
     const digits = Math.max(3, String(pdf.numPages).length), output = new Map(), pageWidth = 1240;
     let firstSize;
     for (let number = 1; number <= pdf.numPages; number += 1) {
-      const page = await pdf.getPage(number), base = page.getViewport({ scale: 1 }), viewport = page.getViewport({ scale: pageWidth / base.width });
-      const canvas = document.createElement("canvas"); canvas.width = Math.round(viewport.width); canvas.height = Math.round(viewport.height);
-      await page.render({ canvasContext: canvas.getContext("2d", { alpha: false }), viewport }).promise;
-      const image = await blobFromCanvas(canvas, .82); const thumb = document.createElement("canvas"); thumb.width = 240; thumb.height = Math.round(canvas.height * 240 / canvas.width);
-      thumb.getContext("2d").drawImage(canvas, 0, 0, thumb.width, thumb.height); const thumbnail = await blobFromCanvas(thumb, .72); const stem = pageName(number, digits);
-      output.set(`pages/${stem}.webp`, image); output.set(`thumbs/${stem}.webp`, thumbnail); if (!firstSize) firstSize = { width: canvas.width, height: canvas.height };
-      progress.value = Math.round(number / pdf.numPages * 100); progressText.textContent = `正在轉換第 ${number}／${pdf.numPages} 頁…`;
+      const page = await pdf.getPage(number), base = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: pageWidth / base.width });
+      const canvas = document.createElement("canvas"), thumb = document.createElement("canvas");
+      try {
+        canvas.width = Math.round(viewport.width);
+        canvas.height = Math.round(viewport.height);
+        await page.render({ canvas, canvasContext: canvas.getContext("2d", { alpha: false }), viewport }).promise;
+        const image = await blobFromCanvas(canvas, .82);
+        thumb.width = 240;
+        thumb.height = Math.max(1, Math.round(canvas.height * 240 / canvas.width));
+        thumb.getContext("2d").drawImage(canvas, 0, 0, thumb.width, thumb.height);
+        const thumbnail = await blobFromCanvas(thumb, .72), stem = pageName(number, digits);
+        output.set(`pages/${stem}.webp`, image);
+        output.set(`thumbs/${stem}.webp`, thumbnail);
+        if (!firstSize) firstSize = { width: canvas.width, height: canvas.height };
+      } finally {
+        canvas.width = canvas.height = thumb.width = thumb.height = 0;
+        page.cleanup();
+      }
+      progress.value = Math.round(number / pdf.numPages * 100);
+      progressText.textContent = `正在轉換第 ${number}／${pdf.numPages} 頁…`;
     }
     return { output, digits, firstSize };
   }
-  const viewerCss = `body{margin:0;background:#1f2937;color:#171717;font-family:system-ui,"Microsoft JhengHei",sans-serif}.toolbar,.footer{display:flex;gap:12px;align-items:center;padding:10px 3vw;background:#171717;color:white}.toolbar h1{margin:0;font-size:1.1rem;flex:1}.logo{width:44px;height:44px;object-fit:contain;background:white;border-radius:6px}.book-area{min-height:calc(100vh - 124px);display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:18px}.stage{display:grid;place-items:center;height:100%;outline:none}.pages{display:flex;max-width:100%;max-height:calc(100vh - 160px);filter:drop-shadow(0 16px 25px #0008);animation:turn .26s ease}.page{overflow:hidden;background:white}.page img{display:block;width:100%;height:100%;object-fit:contain}.left{box-shadow:inset -12px 0 16px #0002}.right{box-shadow:inset 12px 0 16px #0002}button,input{min-height:44px;border-radius:7px;border:1px solid #bbb;padding:0 .8rem;font:inherit}button{cursor:pointer;font-weight:700}.footer{justify-content:center}.thumbs{position:fixed;z-index:2;inset:0 auto 0 0;width:min(340px,88vw);overflow:auto;padding:16px;background:white;box-shadow:4px 0 20px #0005}.thumbs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.thumbs button{height:auto;padding:5px}.thumbs img{width:100%;display:block}.hidden{display:none}@keyframes turn{from{opacity:.5;transform:perspective(900px) rotateY(-5deg)}to{opacity:1;transform:none}}@media(max-width:780px),(orientation:portrait){.book-area{grid-template-columns:1fr}.book-area>button{position:fixed;bottom:66px;z-index:1}.prev{left:12px}.next{right:12px}.pages{max-height:calc(100vh - 180px)}}@media(prefers-reduced-motion:reduce){*{animation:none!important}}`;
-  const viewerJs = `(()=>{const d=window.BOOK_DATA,$=x=>document.getElementById(x);let p=1;const single=()=>innerWidth<780||matchMedia('(orientation:portrait)').matches,n=n=>String(n).padStart(d.pageDigits,'0'),src=(p,t)=>t+'/'+n(p)+'.webp',shown=()=>single()||p===1||p===d.pageCount?[p]:p%2?[p-1,p]:[p,Math.min(p+1,d.pageCount)],render=()=>{let a=shown(),box=$('pages');box.innerHTML='';a.forEach((x,i)=>{let q=document.createElement('div'),im=new Image();q.className='page '+(i?'right':'left');im.src=src(x,'pages');im.alt='第 '+x+' 頁';q.append(im);box.append(q)});let r=box.parentElement.getBoundingClientRect(),s=Math.min((r.width-8)/(d.pageWidth*a.length),(r.height-8)/d.pageHeight);box.style.width=Math.floor(d.pageWidth*a.length*s)+'px';box.style.height=Math.floor(d.pageHeight*s)+'px';$('status').textContent='第 '+a.join('–')+' 頁／共 '+d.pageCount+' 頁';$('go').value=p},go=x=>{if(x>=1&&x<=d.pageCount){p=+x;render()}},next=()=>go(p===1?2:Math.min(d.pageCount,p+2)),prev=()=>go(p<=2?1:p-2);$('title').textContent=d.title;document.title=d.title;if(d.logo){let l=$('logo-link'),i=$('logo');i.src=d.logo.src;i.alt=d.logo.alt;l.classList.remove('hidden');if(d.logo.href)l.href=d.logo.href;else l.removeAttribute('href')}for(let x=1;x<=d.pageCount;x++){let b=document.createElement('button'),i=new Image();i.src=src(x,'thumbs');i.loading='lazy';i.alt='第 '+x+' 頁縮圖';b.append(i);b.onclick=()=>{go(x);$('thumbs').classList.add('hidden')};$('thumb-grid').append(b)}$('next').onclick=next;$('prev').onclick=prev;$('goto').onclick=()=>go($('go').value);$('thumb-button').onclick=()=>$('thumbs').classList.toggle('hidden');$('close').onclick=()=>$('thumbs').classList.add('hidden');$('stage').onclick=e=>e.clientX-$('stage').getBoundingClientRect().left<$('stage').clientWidth/2?prev():next();let t;$('stage').ontouchstart=e=>t=e.changedTouches[0].clientX;$('stage').ontouchend=e=>{let z=e.changedTouches[0].clientX-t;if(Math.abs(z)>45)z<0?next():prev()};onkeydown=e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev()};onresize=render;render()})();`;
-  const viewerHtml = `<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>翻頁書</title><link rel="stylesheet" href="assets/css/viewer.css"><body><header class="toolbar"><a id="logo-link" class="hidden" target="_blank" rel="noopener"><img id="logo" class="logo"></a><h1 id="title"></h1><button id="thumb-button">縮圖</button></header><main class="book-area"><button id="prev" class="prev">上一頁</button><section id="stage" class="stage" tabindex="0"><div id="pages" class="pages"></div></section><button id="next" class="next">下一頁</button></main><footer class="footer"><span id="status"></span><input id="go" type="number" min="1"><button id="goto">前往</button></footer><aside id="thumbs" class="thumbs hidden"><p><button id="close">關閉縮圖</button></p><div id="thumb-grid" class="thumbs-grid"></div></aside><script src="book-data.js"><\/script><script src="assets/js/viewer.js"><\/script></body></html>`;
-  async function writeDirectory(handle, files) { for (const [path, value] of files) { const parts = path.split("/"); const name = parts.pop(); let folder = handle; for (const part of parts) folder = await folder.getDirectoryHandle(part, { create: true }); const file = await folder.getFileHandle(name, { create: true }); const writable = await file.createWritable(); await writable.write(value); await writable.close(); } }
-  async function exportFiles(name, files) { if (window.showDirectoryPicker) { try { const parent = await window.showDirectoryPicker({ mode: "readwrite" }); const folder = await parent.getDirectoryHandle(name, { create: true }); await writeDirectory(folder, files); return `已在您選擇的位置建立「${name}」資料夾。請開啟其中的 index.html。`; } catch (error) { if (error.name === "AbortError") throw error; } } const zip = new JSZip(); for (const [path, value] of files) zip.file(path, value); const blob = await zip.generateAsync({ type: "blob" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${name}.zip`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 1000); return `瀏覽器不支援直接建立資料夾，已下載 ${name}.zip；解壓縮後開啟 index.html。`; }
-  form.addEventListener("submit", async (event) => { event.preventDefault(); result.hidden = true; const title = $("title-input").value.trim(), logo = selectedLogo, logoUrl = $("logo-url-input").value.trim(); if (!selectedPdf) return setResult("請先拖入或選擇 PDF 檔案。", true); if (!title) return setResult("請填寫書籍名稱。", true); if (logoUrl && !/^https?:\/\/\S+/i.test(logoUrl)) return setResult("Logo 連結必須是 http:// 或 https:// 網址。", true); start.disabled = true; progress.hidden = false; progress.value = 0; try { progressText.textContent = "正在讀取 PDF…"; const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await selectedPdf.arrayBuffer()) }).promise; const rendered = await pageBlobs(pdf), files = rendered.output, logoData = logo ? { src: `assets/images/logo.${(logo.name.split('.').pop() || 'png').toLowerCase()}`, href: logoUrl, alt: `${title} Logo` } : null; if (logo) files.set(logoData.src, logo); const data = { title, pageCount: pdf.numPages, pageWidth: rendered.firstSize.width, pageHeight: rendered.firstSize.height, pageDigits: rendered.digits, logo: logoData }; files.set("book.json", JSON.stringify(data, null, 2)); files.set("book-data.js", `window.BOOK_DATA=${JSON.stringify(data)};`); files.set("assets/css/viewer.css", viewerCss); files.set("assets/js/viewer.js", viewerJs); files.set("README.md", "直接雙擊 index.html 開啟翻頁書。請保留整個資料夾結構。"); files.set("index.html", viewerHtml); progressText.textContent = "正在寫入翻頁書資料夾…"; setResult(await exportFiles(safeName(title), files)); } catch (error) { console.error(error); setResult(`轉換失敗：${error.message || error}`, true); } finally { start.disabled = false; progress.hidden = true; progressText.textContent = ""; } });
-})();
 
-</script>
-  <script>
-/* 內嵌自 enhance-output.js */
-(() => {
-  const baseSet = Map.prototype.set;
-  const css = `html,body{margin:0;height:100%;overflow:hidden;background:#1f2937;font-family:"Microsoft JhengHei",system-ui}body{background-color:var(--book-bg,#1f2937);background-image:var(--book-bg-image,none);background-size:cover;background-position:center}.toolbar,.footer{display:flex;align-items:center;gap:7px;min-height:48px;padding:4px 10px;background:#111827;color:white}.toolbar h1{margin:0;flex:1;font-size:1rem}.logo{width:38px;height:38px;object-fit:contain;background:#fff;border-radius:5px}.book-area{height:calc(100vh - 96px);display:grid;grid-template-columns:52px 1fr 52px;align-items:center;padding:0;gap:0}.stage{height:100%;display:grid;place-items:center;overflow:auto}.pages{display:flex;filter:drop-shadow(0 10px 18px #0008);transform-origin:center;animation:flip .48s cubic-bezier(.2,.75,.25,1)}.page{overflow:hidden;background:white}.page img{display:block;width:100%;height:100%;object-fit:contain}.side{border:0;background:#ffffffcc;color:#111827;font-size:42px;height:100%;cursor:pointer}.footer{justify-content:center;flex-wrap:wrap}.footer button,.footer input{min-height:38px;border-radius:6px;border:1px solid #9ca3af;padding:0 .55rem;font:inherit;font-weight:700}.footer .symbol{font-size:20px}.status{font-weight:800}.credit{margin-left:8px;color:#d1d5db;font-size:.85rem}@keyframes flip{0%{opacity:.25;transform:perspective(850px) rotateY(-23deg) scale(.94)}100%{opacity:1;transform:none}}@media(max-width:780px),(orientation:portrait){.book-area{grid-template-columns:48px 1fr 48px}.footer{gap:4px}.credit{display:none}}@media(prefers-reduced-motion:reduce){.pages{animation:none}}`;
-  const html = `<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>翻頁書</title><link rel="stylesheet" href="assets/css/viewer.css"><body><header class="toolbar"><a id="logo-link" hidden target="_blank" rel="noopener"><img id="logo" class="logo"></a><h1 id="title"></h1><button id="thumb">縮圖</button></header><main class="book-area"><button id="side-prev" class="side" aria-label="上一頁">❰</button><section id="stage" class="stage"><div id="pages" class="pages"></div></section><button id="side-next" class="side" aria-label="下一頁">❱</button></main><footer class="footer"><button id="first" class="symbol" aria-label="最前頁">⇇</button><button id="prev" class="symbol" aria-label="前一頁">◀︎</button><button id="zoom">放大</button><span id="status" class="status"></span><input id="go" type="number" min="1"><button id="goto">前往</button><button id="full">全螢幕</button><button id="next" class="symbol" aria-label="後一頁">▶︎</button><button id="last" class="symbol" aria-label="最後頁">⇉</button></footer><aside id="thumbs" hidden style="position:fixed;inset:0 auto 0 0;width:320px;overflow:auto;background:white;padding:12px"><button id="close">關閉縮圖</button><div id="thumbgrid"></div></aside><script src="book-data.js"><\/script><script src="assets/js/viewer.js"><\/script></body></html>`;
-  const js = `(()=>{const d=window.BOOK_DATA,$=x=>document.getElementById(x);let p=1,z=1,tx;const n=x=>String(x).padStart(d.pageDigits,'0'),src=(x,k)=>k+'/'+n(x)+'.webp',single=()=>innerWidth<780||matchMedia('(orientation:portrait)').matches,show=()=>single()||p===1||p===d.pageCount?[p]:p%2?[p-1,p]:[p,Math.min(p+1,d.pageCount)],render=()=>{let a=show(),b=$('pages');b.innerHTML='';a.forEach(x=>{let q=document.createElement('div'),i=new Image();q.className='page';i.src=src(x,'pages');i.alt='第 '+x+' 頁';q.append(i);b.append(q)});let r=$('stage').getBoundingClientRect(),s=Math.min((r.width-4)/(d.pageWidth*a.length),(r.height-4)/d.pageHeight)*z;b.style.width=Math.floor(d.pageWidth*a.length*s)+'px';b.style.height=Math.floor(d.pageHeight*s)+'px';$('status').textContent='第 '+a.join('–')+' 頁／共 '+d.pageCount+' 頁'},go=x=>{if(x>=1&&x<=d.pageCount){p=+x;render()}},next=()=>go(p===1?2:Math.min(d.pageCount,p+2)),prev=()=>go(p<=2?1:p-2);document.body.style.setProperty('--book-bg',d.background?.color||'#1f2937');if(d.background?.image)document.body.style.setProperty('--book-bg-image','url('+d.background.image+')');$('title').textContent=d.title;if(d.logo){$('logo').src=d.logo.src;$('logo-link').hidden=false;if(d.logo.href)$('logo-link').href=d.logo.href}for(let x=1;x<=d.pageCount;x++){let b=document.createElement('button'),i=new Image();i.src=src(x,'thumbs');i.style.width='140px';b.append(i);b.onclick=()=>{go(x);$('thumbs').hidden=true};$('thumbgrid').append(b)}$('first').onclick=()=>go(1);$('last').onclick=()=>go(d.pageCount);$('prev').onclick=$('side-prev').onclick=prev;$('next').onclick=$('side-next').onclick=next;$('goto').onclick=()=>go($('go').value);$('zoom').onclick=()=>{z=z===1?1.6:1;$('zoom').textContent=z===1?'放大':'縮小';render()};$('full').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();$('thumb').onclick=()=>$('thumbs').hidden=false;$('close').onclick=()=>$('thumbs').hidden=true;$('stage').onclick=e=>e.clientX-$('stage').getBoundingClientRect().left<$('stage').clientWidth/2?prev():next();$('stage').ontouchstart=e=>tx=e.changedTouches[0].clientX;$('stage').ontouchend=e=>{let q=e.changedTouches[0].clientX-tx;if(Math.abs(q)>40)q<0?next():prev()};onkeydown=e=>{if(e.key==='ArrowLeft')prev();if(e.key==='ArrowRight')next()};onresize=render;render()})();`;
-  Map.prototype.set = function(key, value) {
-    if (key === "book.json" || key === "book-data.js") {
-      const raw = key === "book.json" ? JSON.parse(value) : JSON.parse(value.replace(/^window.BOOK_DATA=/, "").replace(/;$/, ""));
-      const image = window.flipbookBackgroundFile || document.getElementById("background-image-input").files[0];
-      raw.background = {
-        color: document.getElementById("background-color-input").value,
-        image: image ? `assets/images/background.${(image.name.split('.').pop() || 'png').toLowerCase()}` : "",
-        gradient: {
-          enabled: document.getElementById("gradient-enabled-input").checked,
-          start: document.getElementById("gradient-color-start-input").value,
-          end: document.getElementById("gradient-color-end-input").value,
-          angle: Number(document.getElementById("gradient-angle-input").value) || 0
-        }
-      };
-      raw.effect = "A";
-      raw.audio = "assets/audio/page-turn.mp3";
-      if (window.DEFAULT_PAGE_TURN_MP3) {
-        const binary = atob(window.DEFAULT_PAGE_TURN_MP3), bytes = new Uint8Array(binary.length);
-        for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-        baseSet.call(this, raw.audio, new Blob([bytes], { type: "audio/mpeg" }));
-      }
-      if (image) baseSet.call(this, raw.background.image, image);
-      value = key === "book.json" ? JSON.stringify(raw, null, 2) : `window.BOOK_DATA=${JSON.stringify(raw)};`;
+  const viewerCss = `
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Microsoft JhengHei",system-ui,sans-serif}
+body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;height:100dvh;background:#1f2937;background-size:cover;background-position:center;background-repeat:no-repeat}
+.toolbar,.footer{display:flex;align-items:center;gap:7px;min-width:0;padding:4px 10px;background:#111827;color:white}
+.toolbar{min-height:42px}.toolbar h1{margin:0;flex:1;min-width:0;font-size:.96rem;overflow-wrap:anywhere}
+.logo{display:block;width:34px;height:34px;object-fit:contain;background:white;border-radius:5px}
+.book-area{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;min-width:0;min-height:0;gap:0}
+.stage{display:grid;align-items:safe center;justify-items:safe center;min-width:0;min-height:0;overflow:auto;touch-action:pan-y pinch-zoom}
+.pages{position:relative;display:flex;perspective:2400px;filter:drop-shadow(0 10px 18px #0008)}
+.page{flex:1 1 0;min-width:0;height:100%;overflow:hidden;background:white}
+.page img{display:block;width:100%;height:100%;object-fit:contain}
+.left{box-shadow:inset -12px 0 16px #0002}.right{box-shadow:inset 12px 0 16px #0002}
+button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}
+.side{border:0;background:#ffffffcc;color:#111827;font-size:42px;min-height:0;cursor:pointer}
+.footer{justify-content:center;flex-wrap:wrap;min-height:48px;padding-bottom:max(4px,env(safe-area-inset-bottom))}
+.footer button,.footer input{min-height:38px;border-radius:6px;border:1px solid #9ca3af;padding:0 .55rem;font-weight:700}
+.footer input{width:5rem;min-width:0}.footer .symbol{font-size:20px}.status{font-weight:800}
+.thumbs{position:fixed;z-index:50;inset:0 auto 0 0;width:320px;max-width:100vw;overflow:auto;background:white;padding:12px;box-shadow:4px 0 20px #0005}
+.thumbgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.thumbgrid button{padding:4px}.thumbgrid img{display:block;width:100%}
+.turn-sheet{position:absolute;top:0;height:100%;width:50%;z-index:30;pointer-events:none;transform-style:preserve-3d;will-change:transform}
+.turn-face{position:absolute;inset:0;overflow:hidden;background:white;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 10px 22px #0007}
+.turn-reverse{transform:rotateY(180deg)}
+.turn-sheet img,.turn-stationary img{display:block;width:100%;height:100%;object-fit:contain;background:white}
+.turn-stationary{position:absolute;top:0;height:100%;width:50%;z-index:20;overflow:hidden;background:white;pointer-events:none}
+.turn-stationary-forward{left:0}.turn-stationary-back{left:50%}
+.turn-face::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#0006,transparent 35%,#fff3 75%);animation:sheetShade var(--page-turn-duration,1200ms) linear both}
+.turn-reverse::after{background:linear-gradient(270deg,#0006,transparent 35%,#fff3 75%)}
+.turn-forward{left:50%;transform-origin:left center;animation:realForward var(--page-turn-duration,1200ms) cubic-bezier(.45,0,.3,1) both}
+.turn-back{left:0;transform-origin:right center;animation:realBack var(--page-turn-duration,1200ms) cubic-bezier(.45,0,.3,1) both}
+.turn-single{left:0;width:100%;transform-origin:center center}
+@keyframes realForward{from{transform:rotateY(0)}to{transform:rotateY(-180deg)}}
+@keyframes realBack{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
+@keyframes sheetShade{0%,100%{opacity:.08}50%{opacity:.8}}
+@media(max-width:780px),(orientation:portrait){.book-area{grid-template-columns:40px minmax(0,1fr) 40px}.footer{gap:4px}.turn-sheet{width:100%}.turn-forward,.turn-back{left:0;transform-origin:center center}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+`;
+
+  const viewerHtml = `<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>翻頁書</title><link rel="stylesheet" href="assets/css/viewer.css"></head>
+<body><header class="toolbar"><a id="logo-link" hidden target="_blank" rel="noopener"><img id="logo" class="logo" alt=""></a><h1 id="title"></h1><button id="thumb">縮圖</button></header>
+<main class="book-area"><button id="side-prev" class="side" aria-label="上一頁">❰</button><section id="stage" class="stage" tabindex="0" aria-label="書頁"><div id="pages" class="pages"></div></section><button id="side-next" class="side" aria-label="下一頁">❱</button></main>
+<footer class="footer"><button id="first" class="symbol" aria-label="最前頁">⇇</button><button id="prev" class="symbol" aria-label="前一頁">◀︎</button><button id="zoom">放大</button><span id="status" class="status" aria-live="polite"></span><input id="go" type="number" min="1" step="1" required aria-label="頁碼"><button id="goto">前往</button><button id="full">全螢幕</button><button id="next" class="symbol" aria-label="後一頁">▶︎</button><button id="last" class="symbol" aria-label="最後頁">⇉</button></footer>
+<aside id="thumbs" class="thumbs" hidden><button id="close">關閉縮圖</button><div id="thumbgrid" class="thumbgrid"></div></aside>
+<script src="book-data.js"><\/script><script src="assets/js/viewer.js"><\/script></body></html>`;
+
+  // 整個閱讀器共用同一個頁碼狀態；輸出的程式不依賴外部套件。
+  function runReader() {
+    const d = window.BOOK_DATA, $ = (id) => document.getElementById(id);
+    const book = $("pages"), stage = $("stage"), go = $("go"), status = $("status");
+    const TURN_DURATION = 1200;
+    book.style.setProperty("--page-turn-duration", TURN_DURATION + "ms");
+    let p = 1, zoom = 1, touchX = 0, lastSwipe = 0, turning = false, renderedPages = "";
+    const audio = d.audio ? new Audio(d.audio) : null;
+    if (audio) { audio.preload = "auto"; audio.volume = .82; }
+    const src = (number, kind) => `${kind}/${String(number).padStart(d.pageDigits, "0")}.webp`;
+    const single = () => matchMedia("(max-width:780px), (orientation:portrait)").matches;
+    function shown(pageNumber = p) {
+      if (single() || pageNumber === 1) return [pageNumber];
+      const left = pageNumber % 2 ? pageNumber - 1 : pageNumber;
+      return left < d.pageCount ? [left, left + 1] : [left];
     }
-    if (key === "assets/css/viewer.css") value = css + `.toolbar{min-height:42px;padding:2px 10px}.logo{width:34px;height:34px}.toolbar h1{font-size:.96rem}.book-area{height:calc(100vh - 90px)}`;
-    if (key === "assets/js/viewer.js") value = js + `;(()=>{const d=window.BOOK_DATA;if(d.background&&d.background.image){const u=d.background.image,i=new Image();i.onload=()=>{document.body.style.backgroundImage='url("'+u+'")';document.body.style.backgroundColor=d.background.color||'#1f2937';document.body.style.backgroundSize='cover';document.body.style.backgroundPosition='center';document.body.style.backgroundRepeat='no-repeat'};i.onerror=()=>console.warn('背景圖檔載入失敗：'+u);i.src=u}else if(d.background&&d.background.color){document.body.style.backgroundColor=d.background.color}})();`;
-    if (key === "index.html") value = html;
-    return baseSet.call(this, key, value);
-  };
-  const flipEffects = `;(()=>{const style=document.createElement('style');style.textContent='@keyframes pageTurn{0%{opacity:.05;transform:perspective(850px) rotateY(-52deg) scale(.9)}55%{opacity:.85;transform:perspective(850px) rotateY(12deg) scale(.98)}100%{opacity:1;transform:none}}';document.head.append(style);const book=document.getElementById('pages');let timer;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(()=>{book.style.animation='none';void book.offsetWidth;book.style.animation='pageTurn .7s cubic-bezier(.18,.72,.2,1)'},0)}).observe(book,{childList:true});let context;function sound(){try{context=context||new (window.AudioContext||window.webkitAudioContext)();const gain=context.createGain(),osc=context.createOscillator(),now=context.currentTime;osc.type='triangle';osc.frequency.setValueAtTime(180,now);osc.frequency.exponentialRampToValueAtTime(70,now+.12);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.1,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+.15);osc.connect(gain).connect(context.destination);osc.start(now);osc.stop(now+.16)}catch(e){}}document.addEventListener('click',e=>{if(e.target.closest('#side-prev,#side-next,#first,#prev,#next,#last'))sound()});document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight')sound()})})();`;
-  const strongerSound = `;(()=>{let ac;function pageSound(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const len=Math.floor(ac.sampleRate*.22),buf=ac.createBuffer(1,len,ac.sampleRate),data=buf.getChannelData(0);for(let i=0;i<len;i++)data[i]=(Math.random()*2-1)*(1-i/len);const src=ac.createBufferSource(),filter=ac.createBiquadFilter(),gain=ac.createGain(),now=ac.currentTime;src.buffer=buf;filter.type='bandpass';filter.frequency.value=1250;filter.Q.value=.7;gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.32,now+.018);gain.gain.exponentialRampToValueAtTime(.0001,now+.22);src.connect(filter).connect(gain).connect(ac.destination);src.start(now)}catch(e){}}document.addEventListener('click',e=>{if(e.target.closest('#side-prev,#side-next,#first,#prev,#next,#last,#stage'))pageSound()});document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight')pageSound()})})();`;
-  const pageTurnSound = `;(()=>{const d=window.BOOK_DATA,clip=d.audio?new Audio(d.audio):null;if(clip){clip.preload='auto';clip.volume=.82}function play(){if(!clip)return;clip.pause();clip.currentTime=0;clip.play().catch(()=>{})}document.addEventListener('click',e=>{if(e.target.closest('#side-prev,#side-next,#first,#prev,#next,#last,#stage'))play()});document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight')play()})})();`;
-  const cardEffects = `;(()=>{const d=window.BOOK_DATA,book=document.getElementById('pages'),style=document.createElement('style'),name=d.effect==='B'?'cardTurnB':d.effect==='C'?'cardTurnC':'cardTurnA';style.textContent='@keyframes cardTurnA{0%{opacity:0;transform:perspective(900px) rotateY(-65deg) scale(.88)}100%{opacity:1;transform:none}}@keyframes cardTurnB{0%{opacity:0;transform:translateX(18%) rotateY(55deg)}100%{opacity:1;transform:none}}@keyframes cardTurnC{0%{opacity:0;transform:scale(.72)}100%{opacity:1;transform:scale(1)}}';document.head.append(style);let t;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>{book.style.animation='none';void book.offsetWidth;book.style.animation=name+' .72s cubic-bezier(.17,.72,.2,1)'},1)}).observe(book,{childList:true});let ac;function cards(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const now=ac.currentTime;for(let n=0;n<3;n++){const len=Math.floor(ac.sampleRate*.055),b=ac.createBuffer(1,len,ac.sampleRate),a=b.getChannelData(0);for(let i=0;i<len;i++)a[i]=(Math.random()*2-1)*(1-i/len);const s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();s.buffer=b;f.type='highpass';f.frequency.value=650;g.gain.setValueAtTime(.0001,now+n*.055);g.gain.exponentialRampToValueAtTime(.22,now+n*.055+.006);g.gain.exponentialRampToValueAtTime(.0001,now+n*.055+.052);s.connect(f).connect(g).connect(ac.destination);s.start(now+n*.055)}}catch(e){}}document.addEventListener('click',e=>{if(e.target.closest('#side-prev,#side-next,#first,#prev,#next,#last,#stage'))cards()});document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight')cards()})})();`;
-  const effectPicker = `;(()=>{const bar=document.querySelector('.toolbar'),title=document.getElementById('title'),book=document.getElementById('pages');if(!bar||!book)return;const style=document.createElement('style');style.textContent='.toolbar{position:relative}.effect-picker{position:absolute;left:50%;transform:translateX(-50%);min-height:32px;padding:3px 9px;border:1px solid #94a3b8;border-radius:6px;background:#fff;color:#111827;font:700 14px "Microsoft JhengHei",sans-serif;cursor:pointer;box-shadow:0 2px 5px #0006}.pages{position:relative;transform-style:preserve-3d;will-change:transform,filter}.pages::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0}.pages.turning[data-effect="A"]{transform-origin:left center}.pages.turning[data-effect="A"]::after{background:linear-gradient(90deg,#0009 0%,#0002 20%,#ffffff66 49%,transparent 67%);animation:pageGlowA .9s ease-out}.pages.turning[data-effect="B"]{transform-origin:center bottom}.pages.turning[data-effect="B"]::after{background:linear-gradient(160deg,transparent 18%,#ffffff99 43%,#0007 74%,transparent 88%);animation:pageGlowB .76s ease-out}.pages.turning[data-effect="C"]::after{background:radial-gradient(ellipse at center,#fff9 0%,#fff4 20%,#90c8ff55 43%,transparent 69%);animation:pageGlowC .95s ease-out}@keyframes selectedTurnA{0%{opacity:.08;filter:brightness(.45);transform:perspective(1150px) rotateY(-88deg) rotateZ(-1.2deg) scale(.86)}48%{opacity:.9;filter:brightness(.9);transform:perspective(1150px) rotateY(13deg) rotateZ(.35deg) scale(1.01)}72%{filter:brightness(1.18);transform:perspective(1150px) rotateY(-4deg)}100%{opacity:1;filter:none;transform:none}}@keyframes selectedTurnB{0%{opacity:.04;filter:brightness(.5);transform:perspective(1050px) translateY(-22px) rotateX(68deg) scale(.9)}46%{opacity:1;filter:brightness(1.2);transform:perspective(1050px) translateY(5px) rotateX(-10deg) scale(1.015)}72%{transform:perspective(1050px) rotateX(4deg) scale(.997)}100%{filter:none;transform:none}}@keyframes selectedTurnC{0%{opacity:0;filter:brightness(.7) saturate(1.35);transform:perspective(1200px) scaleX(.16) rotateY(-48deg)}38%{opacity:1;filter:brightness(1.28) saturate(1.2);transform:perspective(1200px) scaleX(1.06) rotateY(12deg)}64%{transform:perspective(1200px) scale(1.025) rotateY(-5deg)}100%{filter:none;transform:none}}@keyframes pageGlowA{0%{opacity:0;transform:translateX(-48%)}42%{opacity:.95}100%{opacity:0;transform:translateX(55%)}}@keyframes pageGlowB{0%{opacity:0;transform:translateY(-35%)}50%{opacity:.8}100%{opacity:0;transform:translateY(36%)}}@keyframes pageGlowC{0%{opacity:0;transform:scale(.35)}48%{opacity:.9}100%{opacity:0;transform:scale(1.4)}}@media(max-width:760px){.effect-picker{position:static;transform:none;margin-left:auto;font-size:12px;max-width:108px}.toolbar h1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}';document.head.append(style);const select=document.createElement('select');select.className='effect-picker';select.setAttribute('aria-label','選擇翻頁特效');[['A','翻頁特效 A｜立體翻頁'],['B','翻頁特效 B｜掀頁動態'],['C','翻頁特效 C｜華麗展開']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;select.append(o)});bar.insertBefore(select,title.nextSibling);let current='A',timer;const play=()=>{const animation=current==='B'?'selectedTurnB':current==='C'?'selectedTurnC':'selectedTurnA';book.dataset.effect=current;book.classList.remove('turning');book.style.animation='none';void book.offsetWidth;book.classList.add('turning');book.style.animation=animation+' .9s cubic-bezier(.16,.76,.16,1)';setTimeout(()=>book.classList.remove('turning'),930)};select.addEventListener('change',()=>{current=select.value;play()});new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(play,12)}).observe(book,{childList:true})})();`;
-  const directionalTurns = `;(()=>{const book=document.getElementById('pages'),stage=document.getElementById('stage');if(!book||!stage)return;const style=document.createElement('style');style.textContent='@keyframes turnAFwd{0%{opacity:.06;filter:brightness(.45);transform-origin:left center;transform:perspective(1250px) rotateY(88deg) scale(.92)}55%{filter:brightness(1.16);transform:perspective(1250px) rotateY(-8deg) scale(1.01)}100%{opacity:1;filter:none;transform:none}}@keyframes turnABack{0%{opacity:.06;filter:brightness(.45);transform-origin:right center;transform:perspective(1250px) rotateY(-88deg) scale(.92)}55%{filter:brightness(1.16);transform:perspective(1250px) rotateY(8deg) scale(1.01)}100%{opacity:1;filter:none;transform:none}}@keyframes turnBFwd{0%{opacity:.04;transform:perspective(1100px) translateX(30%) rotateY(58deg) skewY(-2deg)}56%{transform:perspective(1100px) translateX(-3%) rotateY(-7deg)}100%{opacity:1;transform:none}}@keyframes turnBBack{0%{opacity:.04;transform:perspective(1100px) translateX(-30%) rotateY(-58deg) skewY(2deg)}56%{transform:perspective(1100px) translateX(3%) rotateY(7deg)}100%{opacity:1;transform:none}}@keyframes turnCFwd{0%{opacity:.05;filter:brightness(.55);transform:perspective(1000px) rotateX(48deg) translateX(16%) scale(.9)}55%{filter:brightness(1.2);transform:perspective(1000px) rotateX(-7deg) translateX(-2%) scale(1.015)}100%{opacity:1;filter:none;transform:none}}@keyframes turnCBack{0%{opacity:.05;filter:brightness(.55);transform:perspective(1000px) rotateX(-48deg) translateX(-16%) scale(.9)}55%{filter:brightness(1.2);transform:perspective(1000px) rotateX(7deg) translateX(2%) scale(1.015)}100%{opacity:1;filter:none;transform:none}}';document.head.append(style);let direction='forward',touchX=0,timer;const set=d=>direction=d;document.addEventListener('click',e=>{const b=e.target.closest('#side-prev,#first,#prev,#side-next,#last,#next,#stage');if(!b)return;if(b.id==='stage')set(e.clientX-b.getBoundingClientRect().left<b.clientWidth/2?'back':'forward');else set(b.matches('#side-prev,#first,#prev')?'back':'forward')},true);document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')set('back');if(e.key==='ArrowRight')set('forward')},true);stage.addEventListener('touchstart',e=>touchX=e.changedTouches[0].clientX,true);stage.addEventListener('touchend',e=>{if(Math.abs(e.changedTouches[0].clientX-touchX)>35)set(e.changedTouches[0].clientX<touchX?'forward':'back')},true);new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(()=>{const kind=document.querySelector('.effect-picker')?.value||'A',name='turn'+kind+(direction==='back'?'Back':'Fwd');book.dataset.direction=direction;book.style.transformOrigin=direction==='back'?'right center':'left center';book.style.animation='none';void book.offsetWidth;book.style.animation=name+' .88s cubic-bezier(.14,.77,.16,1)'},32)}).observe(book,{childList:true})})();`;
-  const physicalSheets = `;(()=>{const d=window.BOOK_DATA,book=document.getElementById('pages'),stage=document.getElementById('stage'),go=document.getElementById('go');if(!book||!stage||!go)return;const style=document.createElement('style');style.textContent='.pages{perspective:2600px;overflow:visible}.turn-sheet{position:absolute!important;top:0!important;height:100%!important;width:50%!important;margin:0!important;z-index:30!important;display:block!important;overflow:hidden!important;background:#fff;pointer-events:none;transform-style:preserve-3d;backface-visibility:visible;box-shadow:0 8px 20px #0008;will-change:transform,filter}.turn-sheet img{width:100%!important;height:100%!important;object-fit:contain;background:#fff;backface-visibility:visible}.turn-sheet::after{content:"";position:absolute;inset:0;pointer-events:none}.turn-forward{left:50%!important;transform-origin:left center;animation:sheetForward .82s cubic-bezier(.33,1,.68,1) forwards}.turn-back{left:0!important;transform-origin:right center;animation:sheetBack .82s cubic-bezier(.33,1,.68,1) forwards}.turn-forward::after{background:linear-gradient(90deg,#0009,transparent 29%,#fff6 51%,transparent 76%);animation:shadeForward .82s ease-out}.turn-back::after{background:linear-gradient(270deg,#0009,transparent 29%,#fff6 51%,transparent 76%);animation:shadeBack .82s ease-out}@keyframes sheetForward{0%{filter:brightness(1);transform:rotateY(0)}18%{filter:brightness(.9);transform:rotateY(-18deg)}52%{filter:brightness(.6);transform:rotateY(-96deg)}78%{filter:brightness(1.18);transform:rotateY(-158deg)}100%{filter:brightness(.94);transform:rotateY(-180deg)}}@keyframes sheetBack{0%{filter:brightness(1);transform:rotateY(0)}18%{filter:brightness(.9);transform:rotateY(18deg)}52%{filter:brightness(.6);transform:rotateY(96deg)}78%{filter:brightness(1.18);transform:rotateY(158deg)}100%{filter:brightness(.94);transform:rotateY(180deg)}}@keyframes shadeForward{0%{opacity:.12;transform:translateX(-8%)}48%{opacity:.82;transform:translateX(12%)}100%{opacity:0;transform:translateX(42%)}}@keyframes shadeBack{0%{opacity:.12;transform:translateX(8%)}48%{opacity:.82;transform:translateX(-12%)}100%{opacity:0;transform:translateX(-42%)}}@media(max-width:780px),(orientation:portrait){.turn-sheet{width:100%!important}.turn-forward,.turn-back{left:0!important;transform-origin:center center}}';document.head.append(style);let template=null,direction='forward',touchX=0,timer;const visiblePage=()=>{const nums=Array.from(book.querySelectorAll(':scope > .page img')).map(img=>Number((img.src.match(/(\d+)\.webp(?:$|[?#])/i)||[])[1])).filter(Boolean);return nums.length===1?nums[0]:(nums.length?Math.min(...nums):Number(go.dataset.current)||1)};const allowed=dir=>{const current=Number(go.dataset.current)||visiblePage();return dir==='back'?current>1:current<d.pageCount};const prepare=(dir,event)=>{if(!allowed(dir)){template=null;if(event){event.preventDefault();event.stopImmediatePropagation()}return false}const pages=book.querySelectorAll('.page');if(!pages.length)return false;direction=dir;template=(dir==='back'?pages[0]:pages[pages.length-1]).cloneNode(true);return true};document.addEventListener('click',e=>{const target=e.target.closest('#side-prev,#first,#prev,#side-next,#last,#next,#stage');if(!target)return;if(target.id==='stage')prepare(e.clientX-target.getBoundingClientRect().left<target.clientWidth/2?'back':'forward',e);else prepare(target.matches('#side-prev,#first,#prev')?'back':'forward',e)},true);document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')prepare('back',e);if(e.key==='ArrowRight')prepare('forward',e)},true);stage.addEventListener('touchstart',e=>touchX=e.changedTouches[0].clientX,true);stage.addEventListener('touchend',e=>{const x=e.changedTouches[0].clientX;if(Math.abs(x-touchX)>35)prepare(x<touchX?'forward':'back',e)},true);new MutationObserver(()=>{const current=visiblePage();go.dataset.current=String(current);clearTimeout(timer);const oldPage=template;if(!oldPage)return;timer=setTimeout(()=>{book.style.animation='none';const sheet=oldPage;sheet.className='turn-sheet turn-'+direction;sheet.style.animation='none';book.append(sheet);void sheet.offsetWidth;sheet.style.animation='';setTimeout(()=>sheet.remove(),980);template=null},32)}).observe(book,{childList:true})})();`;
-  const readerFix = `;(()=>{const d=window.BOOK_DATA,$=id=>document.getElementById(id),book=$('pages'),stage=$('stage'),go=$('go'),status=$('status');if(!book||!stage||!go)return;const style=document.createElement('style');style.textContent='.pages{position:relative;perspective:2400px;overflow:visible}.turn-sheet{position:absolute!important;top:0!important;height:100%!important;width:50%!important;margin:0!important;z-index:30!important;display:block!important;overflow:hidden!important;background:#fff;pointer-events:none;transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,filter;box-shadow:0 10px 22px #0009}.turn-sheet img{width:100%!important;height:100%!important;object-fit:contain;background:#fff;backface-visibility:hidden}.turn-sheet::after{content:"";position:absolute;inset:0;pointer-events:none;backface-visibility:hidden}.turn-forward{left:50%!important;transform-origin:left center;animation:realForward .58s cubic-bezier(.2,.75,.26,1) forwards}.turn-back{left:0!important;transform-origin:right center;animation:realBack .58s cubic-bezier(.2,.75,.26,1) forwards}.turn-forward::after{background:linear-gradient(90deg,#0008,transparent 31%,#fff4 60%,transparent 82%);animation:sheetShade .58s ease-out}.turn-back::after{background:linear-gradient(270deg,#0008,transparent 31%,#fff4 60%,transparent 82%);animation:sheetShade .58s ease-out}@keyframes realForward{0%{filter:brightness(1);transform:rotateY(0)}34%{filter:brightness(.76);transform:rotateY(-46deg)}71%{filter:brightness(.96);transform:rotateY(-128deg)}100%{filter:brightness(1.08);transform:rotateY(-180deg)}}@keyframes realBack{0%{filter:brightness(1);transform:rotateY(0)}34%{filter:brightness(.76);transform:rotateY(46deg)}71%{filter:brightness(.96);transform:rotateY(128deg)}100%{filter:brightness(1.08);transform:rotateY(180deg)}}@keyframes sheetShade{0%{opacity:.14}48%{opacity:.84}100%{opacity:0}}@media(max-width:780px),(orientation:portrait){.turn-sheet{width:100%!important}.turn-forward,.turn-back{left:0!important;transform-origin:center center}}';document.head.append(style);let p=1,zoom=1,touchX=0,audio=d.audio?new Audio(d.audio):null;if(audio){audio.preload='auto';audio.volume=.82}const pad=x=>String(x).padStart(d.pageDigits,'0'),src=(x,kind)=>kind+'/'+pad(x)+'.webp',single=()=>innerWidth<780||matchMedia('(orientation:portrait)').matches,shown=()=>single()||p===1||p===d.pageCount?[p]:p%2?[p-1,p]:[p,Math.min(p+1,d.pageCount)],playSound=()=>{if(!audio)return;audio.pause();audio.currentTime=0;audio.play().catch(()=>{})},sheet=(old,dir)=>{if(!old)return;old.className='turn-sheet turn-'+dir;old.style.animation='none';book.append(old);void old.offsetWidth;old.style.animation='';setTimeout(()=>old.remove(),650)},render=(old,dir)=>{const pages=shown();book.innerHTML='';pages.forEach((number,index)=>{const page=document.createElement('div'),image=new Image();page.className='page '+(index?'right':'left');image.src=src(number,'pages');image.alt='第 '+number+' 頁';page.append(image);book.append(page)});const box=stage.getBoundingClientRect(),scale=Math.min((box.width-4)/(d.pageWidth*pages.length),(box.height-4)/d.pageHeight)*zoom;book.style.width=Math.floor(d.pageWidth*pages.length*scale)+'px';book.style.height=Math.floor(d.pageHeight*scale)+'px';status.textContent='第 '+pages.join('–')+' 頁／共 '+d.pageCount+' 頁';go.value=p;go.dataset.current=p;if(old)requestAnimationFrame(()=>sheet(old,dir))},move=(target,dir)=>{target=Math.max(1,Math.min(d.pageCount,Number(target)||p));if(target===p)return false;const oldPages=book.querySelectorAll(':scope > .page'),old=(dir==='back'?oldPages[0]:oldPages[oldPages.length-1])?.cloneNode(true);p=target;render(old,dir);playSound();return true},back=()=>move(p<=2?1:p-2,'back'),forward=()=>move(p===1?Math.min(2,d.pageCount):Math.min(d.pageCount,p+2),'forward'),first=()=>move(1,'back'),last=()=>move(d.pageCount,'forward');$('first').onclick=e=>{e.preventDefault();first()};$('prev').onclick=e=>{e.preventDefault();back()};$('side-prev').onclick=e=>{e.preventDefault();back()};$('next').onclick=e=>{e.preventDefault();forward()};$('side-next').onclick=e=>{e.preventDefault();forward()};$('last').onclick=e=>{e.preventDefault();last()};$('goto').onclick=e=>{e.preventDefault();const target=Number(go.value);move(target,target<p?'back':'forward')};$('zoom').onclick=()=>{zoom=zoom===1?1.6:1;$('zoom').textContent=zoom===1?'放大':'縮小';render()};stage.onclick=e=>e.clientX-stage.getBoundingClientRect().left<stage.clientWidth/2?back():forward();stage.ontouchstart=e=>touchX=e.changedTouches[0].clientX;stage.ontouchend=e=>{const x=e.changedTouches[0].clientX;if(Math.abs(x-touchX)>40)x<touchX?forward():back()};document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();e.stopImmediatePropagation();back()}if(e.key==='ArrowRight'){e.preventDefault();e.stopImmediatePropagation();forward()}},true);Array.from($('thumbgrid')?.querySelectorAll('button')||[]).forEach((button,index)=>button.onclick=()=>{const target=index+1;move(target,target<p?'back':'forward');$('thumbs').hidden=true});window.onresize=()=>render();render()})();`;
-  const gradientBackground = `;(()=>{const b=window.BOOK_DATA.background||{};if(!b.image&&b.gradient&&b.gradient.enabled){document.body.style.backgroundColor=b.gradient.start||b.color||'#1f2937';document.body.style.backgroundImage='linear-gradient('+b.gradient.angle+'deg,'+b.gradient.start+','+b.gradient.end+')';document.body.style.backgroundSize='cover';document.body.style.backgroundRepeat='no-repeat'}})();`;
-  const backgroundMapSet = Map.prototype.set;
-  Map.prototype.set = function(key, value) {
-    const returned = backgroundMapSet.call(this, key, value);
-    if (key === "assets/js/viewer.js") { const script = this.get(key); baseSet.call(this, key, script + readerFix + gradientBackground); }
-    return returned;
-  };
+    function updateControls(pages = shown()) {
+      for (const id of ["first", "prev", "side-prev"]) $(id).disabled = turning || pages[0] === 1;
+      for (const id of ["last", "next", "side-next"]) $(id).disabled = turning || pages[pages.length - 1] === d.pageCount;
+      $("goto").disabled = turning;
+    }
+    function updateLayout() {
+      const pages = shown(), key = pages.join(",");
+      // 尺寸變更只調整版面；保留正在旋轉的紙張及其動畫進度。
+      if (key !== renderedPages) {
+        book.querySelectorAll(":scope > .page").forEach((page) => page.remove());
+        const fragment = document.createDocumentFragment();
+        for (const [index, number] of pages.entries()) {
+          const page = document.createElement("div"), image = new Image();
+          page.className = "page " + (index ? "right" : "left");
+          image.src = src(number, "pages");
+          image.alt = `第 ${number} 頁`;
+          image.draggable = false;
+          page.append(image);
+          fragment.append(page);
+        }
+        book.prepend(fragment);
+        renderedPages = key;
+        status.textContent = `第 ${pages.join("–")} 頁／共 ${d.pageCount} 頁`;
+      }
+      const box = stage.getBoundingClientRect();
+      const scale = Math.max(0, Math.min((box.width - 4) / (d.pageWidth * pages.length), (box.height - 4) / d.pageHeight)) * zoom;
+      book.style.width = Math.floor(d.pageWidth * pages.length * scale) + "px";
+      book.style.height = Math.floor(d.pageHeight * scale) + "px";
+      updateControls(pages);
+    }
+    function render() {
+      updateLayout();
+      go.value = p;
+      go.dataset.current = p;
+      go.setCustomValidity("");
+    }
+    async function move(target) {
+      if (turning || !Number.isInteger(target) || target < 1 || target > d.pageCount || target === p) return false;
+      const direction = target < p ? "back" : "forward";
+      const targetPages = shown(target);
+      if (targetPages.join(",") === shown().join(",")) { p = target; render(); return true; }
+      const pages = book.querySelectorAll(":scope > .page");
+      const oldImage = (direction === "back" ? pages[0] : pages[pages.length - 1])?.querySelector("img");
+      const frontImage = oldImage?.cloneNode(true);
+      const stationaryImage = !single() && pages.length === 2 && targetPages.length === 2
+        ? (direction === "forward" ? pages[0] : pages[1]).querySelector("img")?.cloneNode(true) : null;
+      turning = true;
+      updateControls();
+      // 先備妥新書頁，避免紙張轉到背面時出現空白。
+      await Promise.all(targetPages.map((number) => {
+        const image = new Image();
+        image.src = src(number, "pages");
+        return image.decode().catch(() => {});
+      }));
+      p = target;
+      render();
+      if (!frontImage || matchMedia("(prefers-reduced-motion:reduce)").matches) {
+        turning = false;
+        updateControls();
+      } else {
+        const sheet = document.createElement("div"), front = document.createElement("div"), reverse = document.createElement("div");
+        const reverseImage = new Image();
+        sheet.className = "turn-sheet turn-" + direction + (targetPages.length === 1 ? " turn-single" : "");
+        sheet.setAttribute("aria-hidden", "true");
+        front.className = "turn-face turn-front";
+        reverse.className = "turn-face turn-reverse";
+        reverseImage.src = src(direction === "forward" ? targetPages[0] : targetPages[targetPages.length - 1], "pages");
+        reverseImage.alt = "";
+        front.append(frontImage);
+        reverse.append(reverseImage);
+        sheet.append(front, reverse);
+        const stationary = stationaryImage ? document.createElement("div") : null;
+        if (stationary) {
+          stationary.className = "turn-stationary turn-stationary-" + direction;
+          stationary.setAttribute("aria-hidden", "true");
+          stationary.append(stationaryImage);
+          book.append(stationary);
+        }
+        let fallback, finished = false;
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(fallback);
+          sheet.remove();
+          stationary?.remove();
+          turning = false;
+          updateControls();
+        };
+        sheet.addEventListener("animationend", (event) => { if (event.target === sheet) finish(); });
+        sheet.addEventListener("animationcancel", (event) => { if (event.target === sheet) finish(); });
+        book.append(sheet);
+        // 正常由 animationend 收尾；備援計時器只處理未送出事件的瀏覽器。
+        fallback = setTimeout(finish, TURN_DURATION + 300);
+      }
+      if (audio) { audio.pause(); audio.currentTime = 0; audio.play().catch(() => {}); }
+      return true;
+    }
+    function back() {
+      const first = shown()[0];
+      if (first > 1) move(single() ? p - 1 : Math.max(1, first - 2));
+    }
+    function forward() {
+      const pages = shown(), last = pages[pages.length - 1];
+      if (last < d.pageCount) move(last + 1);
+    }
+    function gotoPage() {
+      const target = go.valueAsNumber;
+      if (!Number.isInteger(target) || target < 1 || target > d.pageCount) {
+        go.setCustomValidity(`請輸入 1 到 ${d.pageCount} 之間的整數頁碼。`);
+        go.reportValidity();
+        return;
+      }
+      go.setCustomValidity("");
+      move(target);
+    }
+    $("first").onclick = () => move(1);
+    $("last").onclick = () => move(d.pageCount);
+    $("prev").onclick = $("side-prev").onclick = back;
+    $("next").onclick = $("side-next").onclick = forward;
+    $("goto").onclick = gotoPage;
+    go.max = d.pageCount;
+    go.addEventListener("input", () => go.setCustomValidity(""));
+    go.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") { event.preventDefault(); gotoPage(); }
+    });
+    $("zoom").onclick = () => {
+      zoom = zoom === 1 ? 1.6 : 1;
+      $("zoom").textContent = zoom === 1 ? "放大" : "縮小";
+      updateLayout();
+    };
+    stage.addEventListener("click", (event) => {
+      if (Date.now() - lastSwipe < 500) return;
+      event.clientX - stage.getBoundingClientRect().left < stage.clientWidth / 2 ? back() : forward();
+    });
+    stage.addEventListener("touchstart", (event) => { touchX = event.changedTouches[0].clientX; }, { passive: true });
+    stage.addEventListener("touchend", (event) => {
+      const delta = event.changedTouches[0].clientX - touchX;
+      if (Math.abs(delta) > 40) { lastSwipe = Date.now(); delta < 0 ? forward() : back(); }
+    }, { passive: true });
+    document.addEventListener("keydown", (event) => {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target instanceof Element && event.target.closest("input,textarea,select,[contenteditable]")) return;
+      if (!$("thumbs").hidden) return;
+      if (event.key === "ArrowLeft") { event.preventDefault(); back(); }
+      if (event.key === "ArrowRight") { event.preventDefault(); forward(); }
+    });
+    $("title").textContent = document.title = d.title;
+    if (d.logo) {
+      $("logo").src = d.logo.src;
+      $("logo").alt = d.logo.alt || `${d.title} Logo`;
+      $("logo-link").hidden = false;
+      if (d.logo.href) $("logo-link").href = d.logo.href;
+    }
+    const background = d.background || {};
+    document.body.style.backgroundColor = background.color || "#1f2937";
+    if (background.image) {
+      document.body.style.backgroundImage = "url(" + JSON.stringify(background.image) + ")";
+    } else if (background.gradient?.enabled) {
+      const g = background.gradient;
+      document.body.style.backgroundImage = `linear-gradient(${g.angle}deg,${g.start},${g.end})`;
+    }
+    for (let number = 1; number <= d.pageCount; number += 1) {
+      const button = document.createElement("button"), image = new Image();
+      image.src = src(number, "thumbs");
+      image.alt = `第 ${number} 頁縮圖`;
+      image.loading = "lazy";
+      button.append(image);
+      button.onclick = () => { move(number); $("thumbs").hidden = true; };
+      $("thumbgrid").append(button);
+    }
+    $("thumb").onclick = () => { $("thumbs").hidden = false; };
+    $("close").onclick = () => { $("thumbs").hidden = true; };
+    $("full").disabled = !document.documentElement.requestFullscreen;
+    $("full").onclick = async () => {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen();
+      } catch (error) { console.warn("無法切換全螢幕", error); }
+    };
+    window.addEventListener("resize", updateLayout);
+    if (typeof ResizeObserver !== "undefined") new ResizeObserver(updateLayout).observe(stage);
+    render();
+  }
+  const viewerJs = `(${runReader.toString()})();`;
+
+  async function writeDirectory(handle, files) {
+    for (const [path, value] of files) {
+      const parts = path.split("/"), name = parts.pop();
+      let folder = handle;
+      for (const part of parts) folder = await folder.getDirectoryHandle(part, { create: true });
+      const file = await folder.getFileHandle(name, { create: true }), writable = await file.createWritable();
+      try { await writable.write(value); await writable.close(); }
+      catch (error) { await writable.abort().catch(() => {}); throw error; }
+    }
+  }
+
+  async function exportFiles(name, files, parent, fallbackReason) {
+    if (parent) {
+      try {
+        const folder = await parent.getDirectoryHandle(name, { create: true });
+        await writeDirectory(folder, files);
+        return `已在您選擇的位置建立「${name}」資料夾。請開啟其中的 index.html。`;
+      } catch (error) {
+        console.warn("資料夾寫入失敗，改用 ZIP", error);
+        fallbackReason = "資料夾寫入失敗，已改用 ZIP 下載。";
+      }
+    }
+    if (typeof JSZip === "undefined") {
+      throw new Error("ZIP 元件載入失敗，無法下載壓縮檔。請確認網路連線後重新整理；或使用 Chrome／Edge 選擇輸出資料夾。");
+    }
+    const zip = new JSZip();
+    for (const [path, value] of files) zip.file(path, value);
+    const blob = await zip.generateAsync({ type: "blob" }), link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `${name}.zip`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    return `${fallbackReason || "此瀏覽器無法直接選擇輸出資料夾。"}已下載 ${name}.zip；解壓縮後開啟 index.html。`;
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (converting) return;
+    result.hidden = true;
+    const title = $("title-input").value.trim(), pdfFile = selectedPdf, logo = selectedLogo, backgroundImage = selectedBackground;
+    const logoUrl = $("logo-url-input").value.trim();
+    if (!pdfLibrary) return setResult(PDF_LOAD_ERROR, true);
+    if (!pdfFile) return setResult("請先拖入或選擇 PDF 檔案。", true);
+    if (!title) return setResult("請填寫書籍名稱。", true);
+    if (logoUrl) {
+      try {
+        if (!["http:", "https:"].includes(new URL(logoUrl).protocol)) throw new Error();
+      } catch { return setResult("Logo 連結必須是有效的 http:// 或 https:// 網址。", true); }
+    }
+    const background = {
+      color: $("background-color-input").value,
+      image: backgroundImage ? `assets/images/background.${imageExtension(backgroundImage)}` : "",
+      gradient: {
+        enabled: gradientEnabled.checked,
+        start: $("gradient-color-start-input").value,
+        end: $("gradient-color-end-input").value,
+        angle: Number($("gradient-angle-input").value) || 0
+      }
+    };
+    converting = true;
+    start.disabled = true;
+    progress.hidden = false;
+    progress.value = 0;
+    let loadingTask = null;
+    try {
+      let parent = null, fallbackReason = "";
+      // 必須在首次 await 及耗時轉檔之前呼叫，保留使用者啟用狀態。
+      if (typeof window.showDirectoryPicker === "function") {
+        progressText.textContent = "請選擇輸出資料夾…";
+        try { parent = await window.showDirectoryPicker({ mode: "readwrite" }); }
+        catch (error) {
+          if (error.name === "AbortError") throw error;
+          console.warn("無法選擇資料夾，改用 ZIP", error);
+          fallbackReason = "無法開啟資料夾選擇器，已改用 ZIP 下載。";
+        }
+      }
+      if (!parent && typeof JSZip === "undefined") {
+        throw new Error("ZIP 元件載入失敗，請確認網路連線後重新整理頁面。");
+      }
+      progressText.textContent = "正在讀取 PDF…";
+      loadingTask = pdfLibrary.getDocument({
+        data: new Uint8Array(await pdfFile.arrayBuffer()),
+        isEvalSupported: false,
+        cMapUrl: PDF_BASE + "cmaps/", cMapPacked: true,
+        standardFontDataUrl: PDF_BASE + "standard_fonts/",
+        wasmUrl: PDF_BASE + "wasm/"
+      });
+      const pdf = await loadingTask.promise, rendered = await pageBlobs(pdf), files = rendered.output;
+      const logoData = logo ? { src: `assets/images/logo.${imageExtension(logo)}`, href: logoUrl, alt: `${title} Logo` } : null;
+      if (logo) files.set(logoData.src, logo);
+      if (backgroundImage) files.set(background.image, backgroundImage);
+      const audio = window.DEFAULT_PAGE_TURN_MP3 ? "assets/audio/page-turn.mp3" : "";
+      if (audio) {
+        const binary = atob(window.DEFAULT_PAGE_TURN_MP3), bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        files.set(audio, new Blob([bytes], { type: "audio/mpeg" }));
+      }
+      const data = {
+        title, pageCount: pdf.numPages, pageWidth: rendered.firstSize.width, pageHeight: rendered.firstSize.height,
+        pageDigits: rendered.digits, logo: logoData, background, effect: "A", audio
+      };
+      files.set("book.json", JSON.stringify(data, null, 2));
+      files.set("book-data.js", `window.BOOK_DATA=${JSON.stringify(data)};`);
+      files.set("assets/css/viewer.css", viewerCss);
+      files.set("assets/js/viewer.js", viewerJs);
+      files.set("README.md", "直接雙擊 index.html 開啟翻頁書。請保留整個資料夾結構。");
+      files.set("index.html", viewerHtml);
+      progressText.textContent = "正在匯出翻頁書…";
+      setResult(await exportFiles(safeName(title), files, parent, fallbackReason));
+    } catch (error) {
+      if (error.name === "AbortError") setResult("已取消轉換。您可以重新按「開始轉換」。");
+      else { console.error(error); setResult(`轉換失敗：${error.message || error}`, true); }
+    } finally {
+      try { if (loadingTask) await loadingTask.destroy(); }
+      catch (error) { console.warn("PDF 資源釋放失敗", error); }
+      converting = false;
+      start.disabled = false;
+      progress.hidden = true;
+      progressText.textContent = "";
+    }
+  });
+
+  loadPdfLibrary();
 })();
 
 </script>
