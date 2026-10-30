@@ -1073,55 +1073,26 @@ function normalizeFeedbackText(value){
     .trim();
 }
 
+const copyButtonStates = new WeakMap();
 async function copyListText(listId,button){
-
-  const list = document.getElementById(listId);
-
-  const text = [...list.querySelectorAll("li")]
-    .map(item=>item.dataset.copyText || item.textContent.trim())
-    .filter(Boolean)
-    .join("\n");
-
-  if(!text){
-
-    alert("目前沒有可複製的分析文字。");
-
-    return;
-  }
-
-  try{
-
-    await navigator.clipboard.writeText(text);
-
-  }
-  catch(error){
-
-    const textarea = document.createElement("textarea");
-
-    textarea.value = text;
-
-    textarea.style.position = "fixed";
-
-    textarea.style.opacity = "0";
-
-    document.body.appendChild(textarea);
-
-    textarea.select();
-
-    document.execCommand("copy");
-
-    textarea.remove();
-  }
-
-  const originalHtml = button.innerHTML;
-
-  button.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i> 已複製';
-
-  setTimeout(()=>{
-
-    button.innerHTML = originalHtml;
-
-  },1400);
+ const text=[...document.getElementById(listId).querySelectorAll('li')].map(item=>item.dataset.copyText||'').filter(Boolean).join('\n');
+ if(!text){alert('目前沒有可複製的分析項目。');return;}
+ const previous=copyButtonStates.get(button);
+ if(previous?.timer)clearTimeout(previous.timer);
+ const state={html:previous?.html||button.innerHTML,timer:null};
+ copyButtonStates.set(button,state);button.disabled=true;
+ let copied=false;
+ try{await navigator.clipboard.writeText(text);copied=true;}
+ catch(error){
+  const textarea=document.createElement('textarea'),focused=document.activeElement;
+  textarea.value=text;textarea.readOnly=true;textarea.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(textarea);
+  try{textarea.select();copied=document.execCommand('copy')===true;}catch(fallbackError){copied=false;}
+  finally{textarea.remove();focused?.focus({preventScroll:true});}
+ }
+ // 清除或換檔後，不讓尚未完成的舊複製動作更新按鈕。
+ if(copyButtonStates.get(button)!==state)return;
+ button.disabled=false;button.textContent=copied?'✓ 已複製':'複製失敗，請重試';
+ state.timer=setTimeout(()=>{button.innerHTML=state.html;copyButtonStates.delete(button);},1800);
 }
 
 /* =====================================================
@@ -1325,12 +1296,15 @@ const levels = ['非常滿意','滿意','尚可','不滿意','非常不滿意'];
 const $ = id => document.getElementById(id);
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function isEmptyOpinion(text){return /^(?:無|無意見|無建議|沒有|沒|否|不需要|無其他|無其他意見|同上|n\/?a|no|none|[-—.。\s]*)$/i.test(text.trim());}
-function isCourtesy(text){return /^(?:(?:非常|很|太|超級|超)?(?:好|棒|讚|感謝|謝謝|辛苦)(?:您|你|了|們)?[！!。\s👍🙏😊🥹]*)+$/u.test(text.trim()) || (/^(謝謝|感謝|辛苦)/.test(text)&&!/(學|實用|收穫|收獲|受益|獲益|內容|清楚|手把手|操作|希望|建議|但|唯)/.test(text));}
-function splitFeedback(text){return text.normalize('NFKC').split(/[，,。！!？?；;\n\r]+|(?:但是|不過|然而|但|唯)/).map(s=>s.trim()).filter(Boolean);}
+function isCourtesy(text){return /^(?:(?:非常|很|太|超級|超)?(?:好|棒|讚|感謝|謝謝|辛苦)(?:您|你|了|們)?[！!。\s👍🙏😊🥹]*)+$/u.test(text.trim()) || /^(?:謝謝|感謝|辛苦)(?:您|你|老師|講師|校長|工作人員|承辦(?:人|單位)|團隊|主辦單位|助教|所有|各位|們|的|分享|付出|教導|協助|教學|授課|用心|認真|無私|辛苦|了|大家|與|及|和|[！!。\s🙏👍😊🥹])+$/u.test(text.trim());}
+function splitFeedback(text){return text.normalize('NFKC').split(/[，,。！!？?；;\n\r]+|(?:但是|不過|然而|但|唯(?!一))/).map(s=>s.trim()).filter(Boolean);}
 function negated(text,pattern){const re=new RegExp(pattern.source,pattern.flags.replace('g',''));const m=re.exec(text);if(!m)return false;return /(?:不|沒|未|無|並非|不是|不用|不必|無須|不要|不需要|無需)(?:太|很|再|更|特別|覺得|感到|增加|開設|提供|有|需要|任何|什麼){0,3}$/.test(text.slice(Math.max(0,m.index-14),m.index));}
 function ruleMatches(text,rule){
  if(!text || isEmptyOpinion(text) || isCourtesy(text))return false;
  if((rule.exclude||[]).some(p=>p.test(text)))return false;
+ if(rule.title==='建議放慢課程進行速度'&&/(?:速度|進度|節奏|講解).{0,3}(?:不|沒)(?:太|很|算|會)?快|(?:不|沒)(?:會)?跟不上/.test(text))return false;
+ if(/操作支援/.test(rule.title)&&/操作.{0,4}(?:沒有|無|不)(?:任何|什麼)?困難/.test(text))return false;
+ if(rule.title==='課程內容豐富且具啟發性'&&/(?:內容.{0,3}(?:不|沒)(?:夠|太|很)?豐富|不(?:夠|太|很)?精彩|沒有.{0,3}(?:收穫|收獲|啟發))/.test(text))return false;
  if(effectRules.includes(rule)&&/實用(?:性)?(?:不高|不足|不夠)|沒有.{0,4}(?:實用|好用|幫助)|不(?:太|夠|很)?好用/.test(text))return false;
  if(suggestRules.includes(rule)&&/^(?:不需要|無需|不用|無須|不必|不要)|(?:沒有|無)(?:任何|什麼)?(?:問題|建議|需求)|(?:進階|設備|網路|連線).{0,4}(?:不需要|無需|沒有問題|無問題)/.test(text))return false;
  if(effectRules.includes(rule)&&(/^(希望|期待|建議)|(?:希望|期待|建議).{0,12}(學會|了解|提升|學到|清楚|操作)/.test(text)))return false;
@@ -1370,7 +1344,7 @@ function getSegments(data){
  const segments=[];
  data.forEach((row,index)=>{for(const [field,column] of Object.entries(textColumns)){
  const original=String(row[column]||'').trim();
- if(!original||isEmptyOpinion(original)||isCourtesy(original))continue;
+ if(!original||isEmptyOpinion(original))continue;
  for(const text of splitFeedback(original)){
  if(isEmptyOpinion(text)||isCourtesy(text))continue;
  segments.push({id:row.__id||String(index),rowNumber:row.__sourceRow||index+2,file:row.__file||'',sheet:row.__sheet||'',field,column,text,original,normalized:normalizeFeedbackText(text)});
@@ -1408,12 +1382,21 @@ function analyzeFeedback(data){
  for(const [pattern,action] of actions){const hits=suggestions.filter(s=>pattern.test(s.title));if(!hits.length)continue;const d=node('details');d.append(node('summary',action),node('p','依據主題：'+hits.map(h=>h.title).join('、')));const unique=new Map();hits.forEach(h=>h.evidence.forEach(e=>unique.set(e.id,e)));d.append(evidenceList([...unique.values()]));actionBox.append(d);}
  if(!actionBox.children.length)actionBox.append(node('p','目前沒有可依據已辨識問題提出的改善措施。'));
 }
-function clearResults(){currentRows=[];$('resultArea').classList.add('hidden');}
+function clearResults(){
+ currentRows=[];$('resultArea').classList.add('hidden');
+ for(const id of ['effectList','suggestList','tableBody','actionList','unmatchedBody'])$(id).replaceChildren();
+ $('unmatchedCount').textContent='尚未歸類的文字片段';$('paceNotice').textContent='';
+ for(const prefix of ['goal','content','teacher'])updateSatisfactionUI(prefix+'Score',prefix+'Bar',0);
+ updateOverallSatisfaction({percent:0,validResponses:0},{percent:0,validResponses:0},{percent:0,validResponses:0});
+ for(const button of document.querySelectorAll('.copy-text-btn')){const state=copyButtonStates.get(button);if(state){clearTimeout(state.timer);button.innerHTML=state.html;copyButtonStates.delete(button);}button.disabled=false;}
+}
 // 檔案選取與拖放皆檢查數量；多檔一律拒絕，不偷偷合併或只取第一個。
 function setSelectedFiles(files){
  if($('runAnalysis').disabled)return;
  analysisVersion++;clearResults();selectedFile=null;
  const chosen=[...files];
+ // 保留 File 物件後清空選取器，避免拖放換檔後無法重選先前同名檔案。
+ $('excelFile').value='';
  if(chosen.length!==1){
   $('excelFile').value='';fileDropZone.classList.remove('is-ready');
   $('dropZoneTitle').textContent='每次只能讀入一個檔案';
@@ -1435,9 +1418,10 @@ function getSheetRows(session){
  const offset=XLSX.utils.decode_range(ws['!ref']||'A1').s.r;
  let headerIndex=0,best=0;
  matrix.slice(0,20).forEach((row,index)=>{const hits=row.filter(v=>Object.values(importedColumnAliases).flat().some(a=>normalizeHeaderName(a)===normalizeHeaderName(v))).length;if(hits>best){best=hits;headerIndex=index;}});
+ if(best===0)throw Error('前 20 列找不到可辨識的問卷欄位');
  const headers=(matrix[headerIndex]||[]).map((v,i)=>String(v).trim()||`未命名欄位 ${i+1}`);
  const unique=headers.map((v,i)=>headers.indexOf(v)===i?v:v+'（欄'+(i+1)+'）');
- return matrix.slice(headerIndex+1).map((cells,i)=>({__sourceRow:headerIndex+i+2+offset,...Object.fromEntries(unique.map((h,j)=>[h,cells[j]??'']))})).filter(row=>unique.some(h=>String(row[h]).trim()));
+ return matrix.slice(headerIndex+1).map((cells,i)=>({...Object.fromEntries(unique.map((h,j)=>[h,cells[j]??''])),__sourceRow:headerIndex+i+2+offset})).filter(row=>unique.some(h=>String(row[h]).trim()));
 }
 async function analyzeData(){
  if(!selectedFile){$('importStatusInfo').textContent='請先選取一個 Excel 檔案。';return;}
